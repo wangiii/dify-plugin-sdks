@@ -5,6 +5,8 @@ from pydantic_settings import SettingsConfigDict
 class DifyPluginConfig(BaseModel):
     MAX_REQUEST_TIMEOUT: int = 300
 
+    MAX_WORKER: int = 10
+
     model_config = SettingsConfigDict(
         # read from dotenv format config file
         env_file='.env',
