@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import AsyncGenerator
+from collections.abc import Generator
 
 from dify_plugin.core.runtime.entities.tool import ToolInvokeMessage, ToolInvokeTextMessage
 from dify_plugin.core.runtime.request import RequestInterface
@@ -27,5 +27,5 @@ class Tool(RequestInterface, ABC):
         return ToolInvokeTextMessage(message=ToolInvokeMessage.TextMessage(text=text))
 
     @abstractmethod
-    async def _invoke(self, user_id: str, tool_parameter: dict) -> AsyncGenerator[ToolInvokeMessage, None]:
+    def _invoke(self, user_id: str, tool_parameter: dict) -> Generator[ToolInvokeMessage, None]:
         pass

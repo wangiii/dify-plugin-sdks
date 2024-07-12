@@ -1,11 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import SettingsConfigDict
 
 
 class DifyPluginConfig(BaseModel):
-    MAX_REQUEST_TIMEOUT: int = 300
-
-    MAX_WORKER: int = 10
+    MAX_REQUEST_TIMEOUT: int = Field(default=300, description='Maximum request timeout in seconds')
+    MAX_WORKER: int = Field(default=10, description='Maximum worker count')
 
     model_config = SettingsConfigDict(
         # read from dotenv format config file
@@ -16,5 +15,3 @@ class DifyPluginConfig(BaseModel):
         # ignore extra attributes
         extra='ignore',
     )
-
-dify_plugin_config = DifyPluginConfig()

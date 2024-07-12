@@ -1,42 +1,54 @@
 from enum import Enum
-import json
 from typing import Optional
 
-from ..core.runtime.entities.message import InvokeMessage, SessionMessage
+from pydantic import BaseModel
 
-class PluginOutputStream:
-    class Event(Enum):
+from ..core.runtime.entities.message import SessionMessage
+
+class Event(Enum):
         LOG = 'log'
         ERROR = 'error'
         SESSION = 'session'
 
+class StreamOutputMessage(BaseModel):
+    event: Event
+    session_id: Optional[str]
+    data: Optional[dict | BaseModel]
+
+class PluginOutputStream:
     @classmethod
-    def put(cls, event: Event, session_id: Optional[str] = None, data: Optional[dict] = None) -> str:
+    def put(cls, event: Event, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
         """
         serialize the output to the daemon
         """
-        print(json.dumps({
-            'event': event.value,
-            'session_id': session_id,
-            'data': data
-        }))
+        if isinstance(data, BaseModel):
+            data = data.model_dump()
+        
+        print(StreamOutputMessage(
+            event=event,
+            session_id=session_id,
+            data=data
+        ).model_dump_json())
     
     @classmethod
-    def error(cls, session_id: Optional[str] = None, data: Optional[dict] = None) -> str:
-        return cls.put(cls.Event.ERROR, session_id, data)
+    def error(cls, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
+        return cls.put(Event.ERROR, session_id, data)
     
     @classmethod
-    def log(cls, data: Optional[dict] = None) -> str:
-        return cls.put(cls.Event.LOG, None, data)
+    def log(cls, data: Optional[dict] = None):
+        return cls.put(Event.LOG, None, data)
     
     @classmethod
-    def session_message(cls, session_id: Optional[str] = None, data: Optional[dict] = None) -> str:
-        return cls.put(cls.Event.SESSION, 
+    def session_message(cls, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
+        return cls.put(Event.SESSION, 
                        session_id, 
                        data)
     
     @classmethod
-    def stream_object(cls, data: dict) -> SessionMessage:
+    def stream_object(cls, data: dict | BaseModel) -> SessionMessage:
+        if isinstance(data, BaseModel):
+            data = data.model_dump()
+
         return SessionMessage(
             type=SessionMessage.Type.STREAM,
             data=data
@@ -50,7 +62,10 @@ class PluginOutputStream:
         )
     
     @classmethod
-    def stream_invoke_object(cls, data: dict) -> InvokeMessage:
+    def stream_invoke_object(cls, data: dict | BaseModel) -> SessionMessage:
+        if isinstance(data, BaseModel):
+            data = data.model_dump()
+
         return SessionMessage(
             type=SessionMessage.Type.INVOKE,
             data=data

@@ -4,10 +4,15 @@ from typing import Type
 
 from pydantic import BaseModel
 
+from dify_plugin.config.config import DifyPluginConfig
+from dify_plugin.core.runtime.entities.request import PluginInvokeType, ToolInvokeRequest
+from dify_plugin.core.runtime.session import Session
 from dify_plugin.core.server.io_server import IOServer
 from dify_plugin.logger_format import DifyPluginLoggerFormatter
 from dify_plugin.model.model import Model, ModelProvider
+from dify_plugin.tool.entities import ToolRuntime
 from dify_plugin.tool.tool import Tool, ToolProvider
+from dify_plugin.utils.io_writer import PluginOutputStream
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,11 +31,11 @@ class Plugin(IOServer):
     tools: list[ToolRegistration]
     models: list[Type[ModelProvider]]
 
-    def __init__(self) -> None:
+    def __init__(self, config: DifyPluginConfig) -> None:
         self.tools = []
         self.models = []
 
-        super().__init__()
+        super().__init__(config)
 
     def register_model_provider(self, provider: Type[ModelProvider]):
         pass
@@ -76,7 +81,37 @@ class Plugin(IOServer):
                         return tool_cls
         return None
 
-    async def _execute_request(self, data: dict):
-        print(data)
+    async def _execute_request(self, session_id: str, data: dict):
+        session = Session(session_id=session_id, executor=self.executer)
+        if data.get('type') == PluginInvokeType.Tool.value:
+            request = ToolInvokeRequest(**data)
+            
+            provider_cls = self.get_tool_provider_cls(request.provider)
+            if provider_cls is None:
+                raise ValueError(f'Provider {request.provider} not found')
+            
+            tool_cls = self.get_tool_cls(provider_cls, request.tool)
+            if tool_cls is None:
+                raise ValueError(f'Tool {request.tool} not found for provider {request.provider}')
 
-    
+            provider = provider_cls()
+            tool = tool_cls(runtime=ToolRuntime(
+                credentials=request.credentials,
+                user_id=request.user_id
+            ))
+
+            response = session.run_tool(action=request.action, 
+                                        provider=provider, 
+                                        tool=tool, 
+                                        parameters=request.parameters)
+
+            async for message in response:
+                PluginOutputStream.session_message(
+                    session_id=session_id,
+                    data=PluginOutputStream.stream_object(
+                        data=message
+                    )
+                )
+
+        elif data.get('type') == PluginInvokeType.Model.value:
+            request = ToolInvokeRequest(**data)

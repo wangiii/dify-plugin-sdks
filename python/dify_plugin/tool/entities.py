@@ -8,3 +8,4 @@ class ToolProviderConfiguration(BaseModel):
 
 class ToolRuntime(BaseModel):
     credentials: dict
+    user_id: str

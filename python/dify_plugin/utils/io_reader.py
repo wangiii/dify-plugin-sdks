@@ -8,7 +8,7 @@ from dify_plugin.utils.io_writer import PluginOutputStream
 
 class PluginReader:
     filter: Callable[[PluginInStream], bool]
-    queue: asyncio.Queue[dict | None]
+    queue: asyncio.Queue[PluginInStream | None]
     close_callback: Optional[Callable[[], Coroutine[Any, Any, None]]]
 
     def __init__(self, filter: Callable[[PluginInStream], bool],
@@ -17,7 +17,7 @@ class PluginReader:
         self.queue = asyncio.Queue()
         self.close_callback = close_callback
 
-    async def read(self) -> AsyncGenerator[dict]:
+    async def read(self) -> AsyncGenerator[PluginInStream]:
         """
         read data asynchronously from plugin
         """
@@ -37,7 +37,7 @@ class PluginReader:
 
         await self.queue.put(None)
 
-    async def write(self, data: dict):
+    async def write(self, data: PluginInStream):
         await self.queue.put(data)
 
 class PluginInputStream:
@@ -67,7 +67,7 @@ class PluginInputStream:
                         if reader.filter(data):
                             readers.append(reader)
                 for reader in readers:
-                    await reader.write(data.data)
+                    await reader.write(data)
             except Exception as e:
                 PluginOutputStream.error(session_id=session_id, data={'error': str(e)})
 
