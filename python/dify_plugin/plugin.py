@@ -3,7 +3,8 @@ from typing import Type
 
 from pydantic import BaseModel
 
-from dify_plugin.config.config import DifyPluginConfig
+from dify_plugin.config.config import DifyPluginEnv
+from dify_plugin.core.runtime.entities.plugin import PluginConfiguration
 from dify_plugin.core.runtime.entities.request import (
     PluginInvokeType,
     ToolInvokeRequest,
@@ -15,12 +16,15 @@ from dify_plugin.model.model import Model, ModelProvider
 from dify_plugin.tool.entities import ToolRuntime
 from dify_plugin.tool.tool import Tool, ToolProvider
 from dify_plugin.utils.io_writer import PluginOutputStream
+from dify_plugin.utils.yaml_loader import load_yaml_file
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(plugin_logger_handler)
 
 class Plugin(IOServer):
+    configuration: PluginConfiguration
+
     class ToolRegistration(BaseModel):
         cls: Type[ToolProvider]
         tools: list[Type[Tool]]
@@ -28,11 +32,17 @@ class Plugin(IOServer):
     tools: list[ToolRegistration]
     models: list[Type[ModelProvider]]
 
-    def __init__(self, config: DifyPluginConfig) -> None:
+    def __init__(self, config: DifyPluginEnv) -> None:
         self.tools = []
         self.models = []
-
         super().__init__(config)
+
+        # load plugin configuration
+        try:
+            file = load_yaml_file('manifest.yaml')
+            self.configuration = PluginConfiguration(**file)
+        except Exception as e:
+            raise ValueError(f"Error loading plugin configuration: {str(e)}")
 
     def register_model_provider(self, provider: Type[ModelProvider], configuration: str):
         pass

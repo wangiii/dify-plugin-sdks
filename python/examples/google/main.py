@@ -5,7 +5,6 @@ import sys
 sys.path.append('../..')
 
 from plugin import plugin
-
 from provider.google import GoogleProvider
 
 if __name__ == '__main__':

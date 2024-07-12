@@ -2,7 +2,6 @@ version: 0.0.1
 author: "Yeuoly"
 name: "Google"
 created_at: "2024-07-12T08:03:44.658609186Z"
-entrypoint: "main"
 resource:
   memory: 1048576
   storage: 1048576
@@ -22,3 +21,4 @@ meta:
   runner:
     language: "python"
     version: "3.12"
+    entrypoint: "main"

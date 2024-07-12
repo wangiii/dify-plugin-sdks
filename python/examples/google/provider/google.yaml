@@ -31,4 +31,4 @@ credentials_for_provider:
       pt_BR: Get your SerpApi API key from SerpApi
     url: https://serpapi.com/manage-api-key
 tools:
-  - "tools/google_search.yaml"
+  - "tools/google_search"

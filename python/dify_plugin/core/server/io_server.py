@@ -4,7 +4,7 @@ import collections
 from concurrent.futures import ThreadPoolExecutor
 import signal
 import time
-from dify_plugin.config.config import DifyPluginConfig
+from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.runtime.entities.io import PluginInStream
 from dify_plugin.utils.io_reader import PluginInputStream
 from dify_plugin.utils.io_writer import PluginOutputStream
@@ -34,7 +34,7 @@ class IOServer(ABC):
     gc_task: asyncio.Task
     task_queue: PeekableQueue[TaskEntity]
 
-    def __init__(self, config: DifyPluginConfig) -> None:
+    def __init__(self, config: DifyPluginEnv) -> None:
         self.config = config
         self.executer = ThreadPoolExecutor(max_workers=self.config.MAX_WORKER)
         self.task_queue = PeekableQueue()

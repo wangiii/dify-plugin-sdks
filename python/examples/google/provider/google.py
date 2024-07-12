@@ -2,7 +2,11 @@ from typing import Any
 
 from dify_plugin.tool.errors import ToolProviderCredentialValidationError
 from dify_plugin.tool.tool import ToolProvider
+
+### Import all your tools below
 from tools.google_search import GoogleSearchTool
+### Import all your tools above
+
 from plugin import plugin
 
 @plugin.register_tool_provider('google.yaml')
