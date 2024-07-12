@@ -33,7 +33,6 @@ class IOServer(ABC):
     eventloop_task: asyncio.Task
     gc_task: asyncio.Task
     task_queue: PeekableQueue[TaskEntity]
-    
 
     def __init__(self, config: DifyPluginConfig) -> None:
         self.config = config

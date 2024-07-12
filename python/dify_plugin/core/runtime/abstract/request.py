@@ -4,8 +4,8 @@ from typing import Any
 
 from dify_plugin.core.runtime.entities.dify import ToolProviderType
 from dify_plugin.core.runtime.entities.model import LLMResultChunk, RerankResult, TextEmbeddingResult
-from dify_plugin.core.runtime.entities.tool import ToolInvokeMessage
 from dify_plugin.core.runtime.entities.workflow import KnowledgeRetrievalNodeData, NodeResponse, ParameterExtractorNodeData, QuestionClassifierNodeData
+from dify_plugin.tool.entities import ToolInvokeMessage
 
 class AbstractRequestInterface(ABC):
     @abstractmethod
