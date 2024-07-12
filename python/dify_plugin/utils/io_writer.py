@@ -1,4 +1,5 @@
 from enum import Enum
+import sys
 from typing import Optional
 
 from pydantic import BaseModel
@@ -24,12 +25,15 @@ class PluginOutputStream:
         if isinstance(data, BaseModel):
             data = data.model_dump()
         
-        print(StreamOutputMessage(
+        sys.stdout.write(StreamOutputMessage(
             event=event,
             session_id=session_id,
             data=data
         ).model_dump_json())
-    
+        
+        sys.stdout.write('\n\n')
+        sys.stdout.flush()
+
     @classmethod
     def error(cls, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
         return cls.put(Event.ERROR, session_id, data)

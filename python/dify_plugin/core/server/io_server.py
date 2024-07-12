@@ -114,7 +114,7 @@ class IOServer(ABC):
         except Exception as e:
             PluginOutputStream.error(session_id=session_id, data={'error': str(e)})
 
-        print('Task done')
+        PluginOutputStream.log(data={'message': 'Task finished', 'session_id': session_id})
 
     def _remove_task(self, task: TaskEntity):
         try:

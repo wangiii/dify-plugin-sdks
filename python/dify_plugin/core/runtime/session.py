@@ -1,4 +1,3 @@
-import asyncio
 from collections.abc import AsyncGenerator, Generator
 from concurrent.futures import ThreadPoolExecutor
 
@@ -6,6 +5,8 @@ from dify_plugin.core.runtime.entities.model import LLMResultChunk
 from dify_plugin.core.runtime.entities.request import ToolActions
 from dify_plugin.model.model import Model, ModelProvider
 from dify_plugin.tool.tool import Tool, ToolProvider
+
+from asgiref.sync import sync_to_async
 
 class Session:
     _session_pool = set['Session']()
@@ -18,30 +19,16 @@ class Session:
         self.executor = executor
 
     async def to_async_generator[T](self, generator: Generator[T, None, None]):
-        loop = asyncio.get_event_loop()
-
-        def _next(iterator):
-            try:
-                return next(iterator)
-            except StopIteration:
-                return None
-            except Exception as e:
-                return e
-
-        iterator = iter(generator)
+        @sync_to_async(thread_sensitive=False, executor=self.executor)
+        def wrapper():
+            return generator
         
-        while True:
-            result = await loop.run_in_executor(self.executor, _next, iterator)
-            if isinstance(result, Exception):
-                raise result
-            if result is not None:
-                yield result
-            else:
-                break
+        for item in await wrapper():
+            yield item
 
     async def run_tool(self, action: ToolActions, provider: ToolProvider, tool: Tool, parameters: dict):
         if action == ToolActions.Invoke:
-            async for message in self.to_async_generator(tool._invoke(tool.runtime.user_id, parameters)):
+            async for message in self.to_async_generator(tool._invoke(parameters)):
                 yield message
 
     async def run_model(self, provider: ModelProvider, model: Model, parameters: dict) -> AsyncGenerator[LLMResultChunk, None]:

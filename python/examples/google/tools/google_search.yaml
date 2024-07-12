@@ -25,3 +25,6 @@ parameters:
       pt_BR: used for searching
     llm_description: key words for searching
     form: llm
+extra:
+  python:
+    source: tools/google_search.py

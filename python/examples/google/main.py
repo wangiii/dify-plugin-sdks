@@ -4,8 +4,10 @@
 import sys
 sys.path.append('../..')
 
-from plugin import plugin
-from provider.google import GoogleProvider
+from dify_plugin.config.config import DifyPluginEnv
+from dify_plugin.plugin import Plugin
+
+plugin = Plugin(DifyPluginEnv(MAX_REQUEST_TIMEOUT=30))
 
 if __name__ == '__main__':
     plugin.run()

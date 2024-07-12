@@ -1,15 +1,14 @@
 from collections.abc import Generator
+import json
 from typing import Any
 
 import requests
 
 from dify_plugin.tool.entities import ToolInvokeMessage
 from dify_plugin.tool.tool import Tool
-from plugin import plugin
 
 SERP_API_URL = "https://serpapi.com/search"
 
-@plugin.register_tool('google_search.yaml')
 class GoogleSearchTool(Tool):
     def _parse_response(self, response: dict) -> dict:
         result = {}
@@ -37,8 +36,8 @@ class GoogleSearchTool(Tool):
             "hl": "en",
         }
 
-        response = requests.get(url=SERP_API_URL, params=params)
+        response = requests.get(url=SERP_API_URL, params=params, timeout=5)
         response.raise_for_status()
         valuable_res = self._parse_response(response.json())
-
+        
         yield self.create_json_message(valuable_res)

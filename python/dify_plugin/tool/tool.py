@@ -2,14 +2,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 
 from dify_plugin.core.runtime.request import RequestInterface
-from dify_plugin.tool.entities import ToolConfiguration, ToolInvokeMessage, ToolProviderConfiguration, ToolRuntime
+from dify_plugin.tool.entities import ToolInvokeMessage, ToolRuntime
 
 
 class ToolProvider(ABC):
-    @classmethod
-    def configuration(cls) -> ToolProviderConfiguration:
-        return ToolProviderConfiguration(name='google')
-    
     def validate_credentials(self, credentials: dict):
         return self._validate_credentials(credentials)
 
@@ -26,11 +22,6 @@ class Tool(RequestInterface, ABC):
     @classmethod
     def from_credentials(cls, credentials: dict) -> 'Tool':
         return cls(ToolRuntime(credentials=credentials, user_id=''))
-
-    @classmethod
-    @abstractmethod
-    def configuration(cls) -> ToolConfiguration:
-        return
 
     def create_text_message(self, text: str) -> ToolInvokeMessage:
         return ToolInvokeMessage(
