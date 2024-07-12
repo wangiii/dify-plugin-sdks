@@ -1,4 +1,4 @@
-from collections.abc import AsyncGenerator
+from collections.abc import Generator
 from typing import Any
 import uuid
 
@@ -19,8 +19,8 @@ class RequestInterface(AbstractRequestInterface):
     def _generate_request_id(self):
         return uuid.uuid4().hex
 
-    async def invoke_tool(self, provider_type: ToolProviderType, provider: str, tool_name: str,
-                    parameters: dict[str, Any]) -> AsyncGenerator[ToolInvokeMessage, None]:
+    def invoke_tool(self, provider_type: ToolProviderType, provider: str, tool_name: str,
+                    parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
         """
         Invoke tool
         """
@@ -45,56 +45,56 @@ class RequestInterface(AbstractRequestInterface):
             message=ToolInvokeMessage.TextMessage(text='123')
         )
 
-    async def invoke_builtin_tool(self, provider: str, tool_name: str, parameters: dict[str, Any]) -> AsyncGenerator[ToolInvokeMessage, None]:
+    def invoke_builtin_tool(self, provider: str, tool_name: str, parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
         """
         Invoke builtin tool
         """
-        return await super().invoke_builtin_tool(provider, tool_name, parameters)
+        return super().invoke_builtin_tool(provider, tool_name, parameters)
 
-    async def invoke_workflow_tool(self, provider: str, tool_name: str, parameters: dict[str, Any]) -> AsyncGenerator[ToolInvokeMessage, None]:
+    def invoke_workflow_tool(self, provider: str, tool_name: str, parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
         """
         Invoke workflow tool
         """
-        return await super().invoke_workflow_tool(provider, tool_name, parameters)
+        return super().invoke_workflow_tool(provider, tool_name, parameters)
 
-    async def invoke_api_tool(self, provider: str, tool_name: str, parameters: dict[str, Any]) -> AsyncGenerator[ToolInvokeMessage, None]:
+    def invoke_api_tool(self, provider: str, tool_name: str, parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
         """
         Invoke api tool
         """
-        return await super().invoke_api_tool(provider, tool_name, parameters)
+        return super().invoke_api_tool(provider, tool_name, parameters)
 
-    async def invoke_llm(self, provider: str, model_name: str, parameters: dict[str, Any]) -> AsyncGenerator[LLMResultChunk, None]:
+    def invoke_llm(self, provider: str, model_name: str, parameters: dict[str, Any]) -> Generator[LLMResultChunk, None, None]:
         """
         Invoke llm
         """
-        return await super().invoke_llm(provider, model_name, parameters)
+        return super().invoke_llm(provider, model_name, parameters)
 
-    async def invoke_text_embedding(self, provider: str, model_name: str, parameters: dict[str, Any]) -> TextEmbeddingResult:
+    def invoke_text_embedding(self, provider: str, model_name: str, parameters: dict[str, Any]) -> TextEmbeddingResult:
         """
         Invoke text embedding
         """
-        return await super().invoke_text_embedding(provider, model_name, parameters)
+        return super().invoke_text_embedding(provider, model_name, parameters)
 
-    async def invoke_rerank(self, provider: str, model_name: str, parameters: dict[str, Any]) -> RerankResult:
+    def invoke_rerank(self, provider: str, model_name: str, parameters: dict[str, Any]) -> RerankResult:
         """
         Invoke rerank
         """
-        return await super().invoke_rerank(provider, model_name, parameters)
+        return super().invoke_rerank(provider, model_name, parameters)
 
-    async def invoke_question_classifier(self, node_data: QuestionClassifierNodeData, inputs: dict) -> NodeResponse:
+    def invoke_question_classifier(self, node_data: QuestionClassifierNodeData, inputs: dict) -> NodeResponse:
         """
         Invoke question classifier
         """
-        return await super().invoke_question_classifier(node_data, inputs)
+        return super().invoke_question_classifier(node_data, inputs)
 
-    async def invoke_parameter_extractor(self, node_data: ParameterExtractorNodeData, inputs: dict) -> NodeResponse:
+    def invoke_parameter_extractor(self, node_data: ParameterExtractorNodeData, inputs: dict) -> NodeResponse:
         """
         Invoke parameter extractor
         """
-        return await super().invoke_parameter_extractor(node_data, inputs)
+        return super().invoke_parameter_extractor(node_data, inputs)
 
-    async def invoke_knowledge_retrieval(self, node_data: KnowledgeRetrievalNodeData, inputs: dict) -> NodeResponse:
+    def invoke_knowledge_retrieval(self, node_data: KnowledgeRetrievalNodeData, inputs: dict) -> NodeResponse:
         """
         Invoke knowledge retrieval
         """
-        return await super().invoke_knowledge_retrieval(node_data, inputs)
+        return super().invoke_knowledge_retrieval(node_data, inputs)

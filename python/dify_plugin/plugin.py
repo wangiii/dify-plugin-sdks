@@ -124,7 +124,7 @@ class Plugin(IOServer):
                 if registration:
                     return registration[1]
 
-    async def _execute_request(self, session_id: str, data: dict):
+    def _execute_request(self, session_id: str, data: dict):
         session = Session(session_id=session_id, executor=self.executer)
         if data.get("type") == PluginInvokeType.Tool.value:
             request = ToolInvokeRequest(**data)
@@ -153,7 +153,7 @@ class Plugin(IOServer):
                 parameters=request.parameters,
             )
 
-            async for message in response:
+            for message in response:
                 PluginOutputStream.session_message(
                     session_id=session_id,
                     data=PluginOutputStream.stream_object(data=message),

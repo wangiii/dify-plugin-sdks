@@ -1,12 +1,10 @@
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 
 from dify_plugin.core.runtime.entities.model import LLMResultChunk
 from dify_plugin.core.runtime.entities.request import ToolActions
 from dify_plugin.model.model import Model, ModelProvider
 from dify_plugin.tool.tool import Tool, ToolProvider
-
-from asgiref.sync import sync_to_async
 
 class Session:
     _session_pool = set['Session']()
@@ -18,21 +16,12 @@ class Session:
         self._session_pool.add(self)
         self.executor = executor
 
-    async def to_async_generator[T](self, generator: Generator[T, None, None]):
-        @sync_to_async(thread_sensitive=False, executor=self.executor)
-        def wrapper():
-            return generator
-        
-        for item in await wrapper():
-            yield item
-
-    async def run_tool(self, action: ToolActions, provider: ToolProvider, tool: Tool, parameters: dict):
+    def run_tool(self, action: ToolActions, provider: ToolProvider, tool: Tool, parameters: dict):
         if action == ToolActions.Invoke:
-            async for message in self.to_async_generator(tool._invoke(parameters)):
-                yield message
-
-    async def run_model(self, provider: ModelProvider, model: Model, parameters: dict) -> AsyncGenerator[LLMResultChunk, None]:
-        return await self.run_model(provider, model, parameters)
+            yield from tool.invoke(parameters)
+        
+    def run_model(self, provider: ModelProvider, model: Model, parameters: dict) -> Generator[LLMResultChunk, None, None]:
+        return self.run_model(provider, model, parameters)
         
     def __del__(self):
         self._session_pool.remove(self)

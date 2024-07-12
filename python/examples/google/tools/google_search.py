@@ -1,5 +1,5 @@
 from collections.abc import Generator
-import json
+import time
 from typing import Any
 
 import requests
