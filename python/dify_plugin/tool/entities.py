@@ -44,6 +44,7 @@ class ToolParameterOption(BaseModel):
     value: str = Field(..., description="The value of the option")
     label: I18nObject = Field(..., description="The label of the option")
 
+
     @field_validator('value', mode='before')
     @classmethod
     def transform_id_to_str(cls, value) -> str:

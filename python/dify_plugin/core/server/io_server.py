@@ -1,4 +1,3 @@
-import signal
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
