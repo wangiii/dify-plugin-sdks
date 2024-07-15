@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Any, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from dify_plugin.core.runtime.entities.model_runtime.message import PromptMessage, PromptMessageTool
 from dify_plugin.model.model_entities import ModelType
@@ -22,7 +22,7 @@ class PluginInvokeRequest(BaseModel):
     type: PluginInvokeType
     user_id: str
 
-class ToolInvokeRequest(BaseModel):
+class ToolInvokeRequest(PluginInvokeRequest):
     type: PluginInvokeType = PluginInvokeType.Tool
     action: ToolActions = ToolActions.Invoke
     provider: str
@@ -30,7 +30,7 @@ class ToolInvokeRequest(BaseModel):
     credentials: dict
     parameters: dict[str, Any]
 
-class ToolValidateCredentialsRequest(BaseModel):
+class ToolValidateCredentialsRequest(PluginInvokeRequest):
     type: PluginInvokeType = PluginInvokeType.Tool
     action: ToolActions = ToolActions.ValidateCredentials
     provider: str
@@ -40,7 +40,7 @@ class PluginAccessToolRequest(PluginInvokeRequest):
     type: PluginInvokeType = PluginInvokeType.Tool
     data: ToolInvokeRequest | ToolValidateCredentialsRequest
 
-class ModelInvokeRequest(BaseModel):
+class ModelInvokeRequest(PluginAccessToolRequest):
     action: ModelActions = ModelActions.Invoke
     provider: str
     model_type: ModelType
@@ -51,7 +51,9 @@ class ModelInvokeRequest(BaseModel):
     tools: Optional[list[PromptMessageTool]]
     stream: bool = True
 
-class ModelValidateProviderCredentialsRequest(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
+class ModelValidateProviderCredentialsRequest(PluginAccessToolRequest):
     action: ModelActions = ModelActions.ValidateProviderCredentials
     provider: str
     credentials: dict
