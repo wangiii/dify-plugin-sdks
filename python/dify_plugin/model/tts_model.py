@@ -1,4 +1,6 @@
 import hashlib
+import logging
+import re
 import subprocess
 import uuid
 from abc import abstractmethod
@@ -11,17 +13,28 @@ from dify_plugin.model.errors import InvokeBadRequestError
 from dify_plugin.model.model_entities import ModelPropertyKey, ModelType
 
 
+logger = logging.getLogger(__name__)
+
+
 class TTSModel(AIModel):
     """
-    Model class for tts text model.
+    Model class for ttstext model.
     """
+
     model_type: ModelType = ModelType.TTS
 
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def invoke(self, model: str, tenant_id: str, credentials: dict, content_text: str, voice: str, streaming: bool,
-               user: Optional[str] = None):
+    def invoke(
+        self,
+        model: str,
+        tenant_id: str,
+        credentials: dict,
+        content_text: str,
+        voice: str,
+        user: Optional[str] = None,
+    ):
         """
         Invoke large language model
 
@@ -35,15 +48,29 @@ class TTSModel(AIModel):
         :return: translated audio file
         """
         try:
+            logger.info(f"Invoke TTS model: {model} , invoke content : {content_text}")
             self._is_ffmpeg_installed()
-            return self._invoke(model=model, credentials=credentials, user=user, streaming=streaming,
-                                content_text=content_text, voice=voice, tenant_id=tenant_id)
+            return self._invoke(
+                model=model,
+                credentials=credentials,
+                user=user,
+                content_text=content_text,
+                voice=voice,
+                tenant_id=tenant_id,
+            )
         except Exception as e:
             raise self._transform_invoke_error(e)
 
     @abstractmethod
-    def _invoke(self, model: str, tenant_id: str, credentials: dict, content_text: str, voice: str, streaming: bool,
-                user: Optional[str] = None):
+    def _invoke(
+        self,
+        model: str,
+        tenant_id: str,
+        credentials: dict,
+        content_text: str,
+        voice: str,
+        user: Optional[str] = None,
+    ):
         """
         Invoke large language model
 
@@ -58,7 +85,9 @@ class TTSModel(AIModel):
         """
         raise NotImplementedError
 
-    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> list:
+    def get_tts_model_voices(
+        self, model: str, credentials: dict, language: Optional[str] = None
+    ) -> Optional[list]:
         """
         Get voice for given tts model voices
 
@@ -72,11 +101,13 @@ class TTSModel(AIModel):
         if model_schema and ModelPropertyKey.VOICES in model_schema.model_properties:
             voices = model_schema.model_properties[ModelPropertyKey.VOICES]
             if language:
-                return [{'name': d['name'], 'value': d['mode']} for d in voices if language and language in d.get('language')]
+                return [
+                    {"name": d["name"], "value": d["mode"]}
+                    for d in voices
+                    if language and language in d.get("language")
+                ]
             else:
-                return [{'name': d['name'], 'value': d['mode']} for d in voices]
-        else:
-            return []
+                return [{"name": d["name"], "value": d["mode"]} for d in voices]
 
     def _get_model_default_voice(self, model: str, credentials: dict) -> Any:
         """
@@ -88,7 +119,10 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.DEFAULT_VOICE]
 
     def _get_model_audio_type(self, model: str, credentials: dict) -> Optional[str]:
@@ -101,7 +135,10 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.AUDIO_TYPE]
 
     def _get_model_word_limit(self, model: str, credentials: dict) -> Optional[int]:
@@ -111,7 +148,10 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.WORD_LIMIT]
 
     def _get_model_workers_limit(self, model: str, credentials: dict) -> Optional[int]:
@@ -121,30 +161,33 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.MAX_WORKERS]
-        
+
     @staticmethod
-    def _split_text_into_sentences(text: str, limit: int, delimiters=None):
-        if delimiters is None:
-            delimiters = set('。！？；\n')
-
-        buf = []
-        word_count = 0
-        for char in text:
-            buf.append(char)
-            if char in delimiters:
-                if word_count >= limit:
-                    yield ''.join(buf)
-                    buf = []
-                    word_count = 0
-                else:
-                    word_count += 1
-            else:
-                word_count += 1
-
-        if buf:
-            yield ''.join(buf)
+    def _split_text_into_sentences(org_text, max_length=2000, pattern=r"[。.!?]"):
+        match = re.compile(pattern)
+        tx = match.finditer(org_text)
+        start = 0
+        result = []
+        one_sentence = ""
+        for i in tx:
+            end = i.regs[0][1]
+            tmp = org_text[start:end]
+            if len(one_sentence + tmp) > max_length:
+                result.append(one_sentence)
+                one_sentence = ""
+            one_sentence += tmp
+            start = end
+        last_sens = org_text[start:]
+        if last_sens:
+            one_sentence += last_sens
+        if one_sentence != "":
+            result.append(one_sentence)
+        return result
 
     @staticmethod
     def _is_ffmpeg_installed():
@@ -153,13 +196,17 @@ class TTSModel(AIModel):
             if "ffmpeg version" in output.decode("utf-8"):
                 return True
             else:
-                raise InvokeBadRequestError("ffmpeg is not installed, "
-                                            "details: https://docs.dify.ai/getting-started/install-self-hosted"
-                                            "/install-faq#id-14.-what-to-do-if-this-error-occurs-in-text-to-speech")
+                raise InvokeBadRequestError(
+                    "ffmpeg is not installed, "
+                    "details: https://docs.dify.ai/getting-started/install-self-hosted"
+                    "/install-faq#id-14.-what-to-do-if-this-error-occurs-in-text-to-speech"
+                )
         except Exception:
-            raise InvokeBadRequestError("ffmpeg is not installed, "
-                                        "details: https://docs.dify.ai/getting-started/install-self-hosted"
-                                        "/install-faq#id-14.-what-to-do-if-this-error-occurs-in-text-to-speech")
+            raise InvokeBadRequestError(
+                "ffmpeg is not installed, "
+                "details: https://docs.dify.ai/getting-started/install-self-hosted"
+                "/install-faq#id-14.-what-to-do-if-this-error-occurs-in-text-to-speech"
+            )
 
     # Todo: To improve the streaming function
     @staticmethod
@@ -167,6 +214,6 @@ class TTSModel(AIModel):
         hash_object = hashlib.sha256(file_content.encode())
         hex_digest = hash_object.hexdigest()
 
-        namespace_uuid = uuid.UUID('a5da6ef9-b303-596f-8e88-bf8fa40f4b31')
+        namespace_uuid = uuid.UUID("a5da6ef9-b303-596f-8e88-bf8fa40f4b31")
         unique_uuid = uuid.uuid5(namespace_uuid, hex_digest)
         return str(unique_uuid)
