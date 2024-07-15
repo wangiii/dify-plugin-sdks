@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from ..core.runtime.entities.message import SessionMessage
+from ..core.runtime.entities.plugin.message import SessionMessage
 
 class Event(Enum):
         LOG = 'log'
