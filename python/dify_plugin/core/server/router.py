@@ -27,26 +27,26 @@ class Router:
         
         if instance:
             # get first parameter of func
+            parameter = parameters[2]
+            # get annotation of the first parameter
+            annotation = parameter.annotation
+            def wrapper(session: Session, data: dict):
+                try:
+                    data = annotation(**data)
+                except TypeError:
+                    raise ValueError(f"Cannot parse data to {annotation}")
+                return f(instance, session, data)
+        else:
+            # get first parameter of func
             parameter = parameters[1]
             # get annotation of the first parameter
             annotation = parameter.annotation
-            def wrapper(data: dict):
+            def wrapper(session: Session, data: dict):
                 try:
                     data = annotation(**data)
                 except TypeError:
                     raise ValueError(f"Cannot parse data to {annotation}")
-                return f(instance, data)
-        else:
-            # get first parameter of func
-            parameter = parameters[0]
-            # get annotation of the first parameter
-            annotation = parameter.annotation
-            def wrapper(data: dict):
-                try:
-                    data = annotation(**data)
-                except TypeError:
-                    raise ValueError(f"Cannot parse data to {annotation}")
-                return f(data)
+                return f(session, data)
 
         self.routes.append(Route(filter, wrapper))
     
