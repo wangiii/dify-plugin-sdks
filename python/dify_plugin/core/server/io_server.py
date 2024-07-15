@@ -16,9 +16,14 @@ class IOServer(ABC):
 
     @abstractmethod
     def _execute_request(self, session_id: str, data: dict):
-        pass
+        """
+        accept requests and execute them, should be implemented outside
+        """
 
     def _setup_instruction_listener(self):
+        """
+        start listen to stdin and dispatch task to executor
+        """
         def filter(data: PluginInStream) -> bool:
             if data.event == PluginInStream.Event.Request:
                 return True
@@ -28,6 +33,9 @@ class IOServer(ABC):
             self.executer.submit(self._execute_request_thread, data.session_id, data.data)
 
     def _execute_request_thread(self, session_id: str, data: dict):
+        """
+        wrapper for _execute_request
+        """
         # wait for the task to finish
         try:
             self._execute_request(session_id, data)
@@ -47,4 +55,7 @@ class IOServer(ABC):
         th2.join()
 
     def run(self):
+        """
+        start plugin server
+        """
         self._run()

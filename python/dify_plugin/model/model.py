@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-
 import os
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -120,7 +118,3 @@ class ModelProvider(ABC):
         self.model_instance_map[f"{provider_name}.{model_type.value}"] = model_instance_map
 
         return model_instance_map
-
-
-class Model(BaseModel):
-    pass

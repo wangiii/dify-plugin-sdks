@@ -96,7 +96,7 @@ provider:
       provider_source: provider/openai.py
       model_sources:
         - "models/llm/llm.py"
-        - "models/text-embedding/text_embedding.py"
+        - "models/text_embedding/text_embedding.py"
         - "models/speech2text/speech2text.py"
         - "models/moderation/moderation.py"
         - "models/tts/tts.py"

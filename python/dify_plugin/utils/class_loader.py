@@ -38,6 +38,18 @@ def get_subclasses_from_module(mod: ModuleType, parent_type: type) -> list[type]
                if isinstance(x, type) and x != parent_type and issubclass(x, parent_type)]
     return classes
 
+def load_multi_subclasses_from_source(
+    *, module_name: str, script_path: AnyStr, parent_type: type, use_lazy_loader: bool = False
+) -> list[type]:
+    """
+    Load multiple subclasses from the source
+    """
+    module = import_module_from_source(
+        module_name=module_name, py_file_path=script_path, use_lazy_loader=use_lazy_loader
+    )
+    subclasses = get_subclasses_from_module(module, parent_type)
+    return subclasses
+
 def load_single_subclass_from_source(
     *, module_name: str, script_path: AnyStr, parent_type: type, use_lazy_loader: bool = False
 ) -> type:
