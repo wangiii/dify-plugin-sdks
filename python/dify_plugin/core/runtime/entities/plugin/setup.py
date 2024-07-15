@@ -37,9 +37,3 @@ class PluginConfiguration(BaseModel):
 class PluginProviderType(Enum):
     Tool = "tool"
     Model = "model"
-
-class PluginConfigurationExtra(BaseModel):
-    class Python(BaseModel):
-        source: str
-
-    python: Python

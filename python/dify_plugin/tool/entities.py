@@ -1,9 +1,8 @@
-from typing import Optional, Union
-from pydantic import BaseModel, Field, field_validator
+from typing import Any, Optional, Union
+from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
-from dify_plugin.core.runtime.entities.common import I18nObject
-from dify_plugin.core.runtime.entities.plugin import PluginConfigurationExtra
+from dify_plugin.core.runtime.entities.plugin.common import I18nObject
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
 class ToolRuntime(BaseModel):
@@ -83,11 +82,17 @@ class ToolDescription(BaseModel):
     human: I18nObject = Field(..., description="The description presented to the user")
     llm: str = Field(..., description="The description presented to the LLM")
 
+class ToolConfigurationExtra(BaseModel):
+    class Python(BaseModel):
+        source: str
+
+    python: Python
+
 class ToolConfiguration(BaseModel):
     identity: ToolIdentity
     parameters: list[ToolParameter] = Field(default=[], description="The parameters of the tool")
     description: ToolDescription
-    extra: PluginConfigurationExtra
+    extra: ToolConfigurationExtra
 
 class ToolLabelEnum(Enum):
     SEARCH = 'search'
@@ -149,11 +154,26 @@ class ToolProviderIdentity(BaseModel):
     label: I18nObject = Field(..., description="The label of the tool")
     tags: list[ToolLabelEnum] = Field(default=[], description="The tags of the tool", )
 
+class ToolProviderConfigurationExtra(BaseModel):
+    class Python(BaseModel):
+        source: str
+
+    python: Python
+
 class ToolProviderConfiguration(BaseModel):
     identity: ToolProviderIdentity
     credentials_schema: dict[str, ToolProviderCredentials] = Field(alias="credentials_for_provider", default={}, description="The credentials schema of the tool provider")
     tools: list[ToolConfiguration] = Field(default=[], description="The tools of the tool provider")
-    extra: PluginConfigurationExtra
+    extra: ToolProviderConfigurationExtra
+
+    @model_validator(mode='before')
+    def validate_credentials_schema(cls, data: dict) -> dict:
+        credentials_for_provider: dict[str, Any] = data.get("credentials_for_provider", {})
+        for credential in credentials_for_provider:
+            credentials_for_provider[credential]["name"] = credential
+
+        data["credentials_for_provider"] = credentials_for_provider
+        return data
 
     @field_validator('tools', mode='before')
     def validate_tools(cls, value) -> list[ToolConfiguration]:
@@ -172,7 +192,7 @@ class ToolProviderConfiguration(BaseModel):
                     "identity": ToolIdentity(**file["identity"]),
                     "parameters": [ToolParameter(**param) for param in file.get("parameters", [])],
                     "description": ToolDescription(**file["description"]),
-                    "extra": PluginConfigurationExtra(**file.get("extra", {}))
+                    "extra": ToolConfigurationExtra(**file.get("extra", {}))
                 }))
             except Exception as e:
                 raise ValueError(f"Error loading tool configuration: {str(e)}")

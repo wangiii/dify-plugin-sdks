@@ -2,9 +2,10 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from dify_plugin.core.runtime.entities.plugin.common import I18nObject
+from dify_plugin.model.parameter_template import PARAMETER_RULE_TEMPLATE, DefaultParameterName
 
 
 class ModelType(Enum):
@@ -36,31 +37,6 @@ class ModelFeature(Enum):
     AGENT_THOUGHT = "agent-thought"
     VISION = "vision"
     STREAM_TOOL_CALL = "stream-tool-call"
-
-
-class DefaultParameterName(Enum):
-    """
-    Enum class for parameter template variable.
-    """
-    TEMPERATURE = "temperature"
-    TOP_P = "top_p"
-    PRESENCE_PENALTY = "presence_penalty"
-    FREQUENCY_PENALTY = "frequency_penalty"
-    MAX_TOKENS = "max_tokens"
-    RESPONSE_FORMAT = "response_format"
-
-    @classmethod
-    def value_of(cls, value: Any) -> 'DefaultParameterName':
-        """
-        Get parameter name from value.
-
-        :param value: parameter value
-        :return: parameter name
-        """
-        for name in cls:
-            if name.value == value:
-                return name
-        raise ValueError(f'invalid parameter name {value}')
 
 
 class ParameterType(Enum):
@@ -98,11 +74,21 @@ class ProviderModel(BaseModel):
     label: I18nObject
     model_type: ModelType
     features: Optional[list[ModelFeature]] = None
-    fetch_from: FetchFrom
+    fetch_from: FetchFrom = Field(default=FetchFrom.PREDEFINED_MODEL)
     model_properties: dict[ModelPropertyKey, Any]
     deprecated: bool = False
     model_config = ConfigDict(protected_namespaces=())
 
+    """
+        use model as label
+    """
+    @model_validator(mode='before')
+    def validate_label(cls, data: dict) -> dict:
+        if isinstance(data, dict):
+            if not data.get("label"):
+                data["label"] = I18nObject(en_US=data["model"])
+        
+        return data
 
 class ParameterRule(BaseModel):
     """
@@ -120,6 +106,26 @@ class ParameterRule(BaseModel):
     precision: Optional[int] = None
     options: list[str] = []
 
+    @model_validator(mode='before')
+    def validate_label(cls, data: dict) -> dict:
+        if isinstance(data, dict):
+            if not data.get("label"):
+                data["label"] = I18nObject(en_US=data["name"])
+
+            # check if there is a template
+            if 'use_template' in data:
+                try:
+                    default_parameter_name = DefaultParameterName.value_of(data['use_template'])
+                    default_parameter_rule = PARAMETER_RULE_TEMPLATE.get(default_parameter_name)
+                    if not default_parameter_rule:
+                        raise Exception(f"Invalid model parameter rule name {default_parameter_name}")
+                    copy_default_parameter_rule = default_parameter_rule.copy()
+                    copy_default_parameter_rule.update(data)
+                    data = copy_default_parameter_rule
+                except ValueError:
+                    pass
+        
+        return data
 
 class PriceConfig(BaseModel):
     """

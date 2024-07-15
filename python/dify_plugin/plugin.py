@@ -1,20 +1,24 @@
 import logging
 import os
-from typing import Any, Type
+from typing import Type
 
 
 from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.runtime.entities.plugin import (
+from dify_plugin.core.runtime.entities.plugin.setup import (
     PluginConfiguration,
     PluginProviderType,
 )
-from dify_plugin.core.runtime.entities.request import (
+from dify_plugin.core.runtime.entities.plugin.request import (
     PluginInvokeType,
     ToolInvokeRequest,
 )
 from dify_plugin.core.runtime.session import Session
 from dify_plugin.core.server.io_server import IOServer
 from dify_plugin.logger_format import plugin_logger_handler
+from dify_plugin.model.ai_model import AIModel
+from dify_plugin.model.entities import ModelProviderConfiguration
+from dify_plugin.model.model import ModelProvider
+from dify_plugin.model.model_entities import ModelType
 from dify_plugin.tool.entities import (
     ToolConfiguration,
     ToolProviderConfiguration,
@@ -42,8 +46,19 @@ class Plugin(IOServer):
         ],
     ]
 
+    models_configuration: list[ModelProviderConfiguration]
+    models_mapping: dict[
+        str,
+        tuple[
+            ModelProviderConfiguration,
+            Type[ModelProvider],
+            dict[ModelType, Type[AIModel]],
+        ],
+    ]
+
     def __init__(self, config: DifyPluginEnv) -> None:
         self.tools_configuration = []
+        self.models_configuration = []
         self.tools_mapping = {}
 
         super().__init__(config)
@@ -51,7 +66,7 @@ class Plugin(IOServer):
         # load plugin configuration
         self._load_plugin_configuration()
         # load plugin class
-        self._load_plugin_cls()
+        self._resolve_plugin_cls()
 
     def _load_plugin_configuration(self):
         try:
@@ -61,28 +76,29 @@ class Plugin(IOServer):
             for provider in self.configuration.plugins:
                 fs = load_yaml_file(provider)
                 if fs.get("type") == PluginProviderType.Tool.value:
-                    credentials_for_provider: dict[str, Any] = fs.get(
-                        "provider", {}
-                    ).get("credentials_for_provider", {})
-                    self._fill_in_credentials(credentials_for_provider)
-
                     tool_provider_configuration = ToolProviderConfiguration(
                         **fs.get("provider", {})
                     )
+                    
                     self.tools_configuration.append(tool_provider_configuration)
 
                     logger.info(
                         f"Registered tool provider {tool_provider_configuration.identity.name}"
                     )
+                elif fs.get("type") == PluginProviderType.Model.value:
+                    model_provider_configuration = ModelProviderConfiguration(
+                        **fs.get("provider", {})
+                    )
+                    self.models_configuration.append(model_provider_configuration)
+
+                    logger.info(
+                        f"Registered model provider {model_provider_configuration.provider}"
+                    )
+
         except Exception as e:
             raise ValueError(f"Error loading plugin configuration: {str(e)}")
 
-    def _fill_in_credentials(self, credentials_for_provider: dict[str, Any]):
-        for credential in credentials_for_provider:
-            credentials_for_provider[credential]["name"] = credential
-        return credentials_for_provider
-
-    def _load_plugin_cls(self):
+    def _resolve_tool_providers(self):
         for provider in self.tools_configuration:
             # load class
             source = provider.extra.python.source
@@ -112,6 +128,9 @@ class Plugin(IOServer):
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)
 
+    def _resolve_plugin_cls(self):
+        self._resolve_tool_providers()
+        
     def get_tool_provider_cls(self, provider: str):
         for provider_registration in self.tools_mapping:
             if provider_registration == provider:
@@ -141,8 +160,7 @@ class Plugin(IOServer):
             provider = provider_cls()
             tool = tool_cls(
                 runtime=ToolRuntime(
-                    credentials=request.credentials,
-                    user_id=request.user_id
+                    credentials=request.credentials, user_id=request.user_id
                 )
             )
 

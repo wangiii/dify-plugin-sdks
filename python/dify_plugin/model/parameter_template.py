@@ -1,7 +1,30 @@
 
 
-from dify_plugin.model.model_entities import DefaultParameterName
+from enum import Enum
+from typing import Any
+class DefaultParameterName(Enum):
+    """
+    Enum class for parameter template variable.
+    """
+    TEMPERATURE = "temperature"
+    TOP_P = "top_p"
+    PRESENCE_PENALTY = "presence_penalty"
+    FREQUENCY_PENALTY = "frequency_penalty"
+    MAX_TOKENS = "max_tokens"
+    RESPONSE_FORMAT = "response_format"
 
+    @classmethod
+    def value_of(cls, value: Any) -> 'DefaultParameterName':
+        """
+        Get parameter name from value.
+
+        :param value: parameter value
+        :return: parameter name
+        """
+        for name in cls:
+            if name.value == value:
+                return name
+        raise ValueError(f'invalid parameter name {value}')
 
 PARAMETER_RULE_TEMPLATE: dict[DefaultParameterName, dict] = {
     DefaultParameterName.TEMPERATURE: {

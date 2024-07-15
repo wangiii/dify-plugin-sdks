@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.runtime.entities.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 from dify_plugin.utils.io_reader import PluginInputStream
 from dify_plugin.utils.io_writer import PluginOutputStream
 
