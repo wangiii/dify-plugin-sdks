@@ -4,7 +4,7 @@ import sys
 import threading
 from typing import Optional
 
-from dify_plugin.core.runtime.entities.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 from dify_plugin.utils.io_writer import PluginOutputStream
 
 class PluginReader:
