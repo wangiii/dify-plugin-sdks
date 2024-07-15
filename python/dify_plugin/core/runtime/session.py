@@ -1,8 +1,8 @@
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 
-from dify_plugin.core.runtime.entities.model import LLMResultChunk
-from dify_plugin.core.runtime.entities.request import ToolActions
+from dify_plugin.core.runtime.entities.model_runtime.llm import LLMResultChunk
+from dify_plugin.core.runtime.entities.plugin.request import ToolActions
 from dify_plugin.model.model import Model, ModelProvider
 from dify_plugin.tool.tool import Tool, ToolProvider
 

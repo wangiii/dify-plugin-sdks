@@ -1,6 +1,5 @@
 from collections.abc import Callable, Generator
 from queue import Queue
-import signal
 import sys
 import threading
 from typing import Optional

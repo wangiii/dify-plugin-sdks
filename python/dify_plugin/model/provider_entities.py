@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from dify_plugin.core.runtime.entities.common import I18nObject
 from dify_plugin.model.model_entities import ModelType, ProviderModel
@@ -40,7 +40,7 @@ class FormOption(BaseModel):
     """
     label: I18nObject
     value: str
-    show_on: list[FormShowOnObject] = []
+    show_on: list[FormShowOnObject] = Field(default_factory=list)
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -62,7 +62,7 @@ class CredentialFormSchema(BaseModel):
     options: Optional[list[FormOption]] = None
     placeholder: Optional[I18nObject] = None
     max_length: int = 0
-    show_on: list[FormShowOnObject] = []
+    show_on: list[FormShowOnObject] = Field(default_factory=list)
 
 
 class ProviderCredentialSchema(BaseModel):
@@ -118,7 +118,7 @@ class ProviderEntity(BaseModel):
     help: Optional[ProviderHelpEntity] = None
     supported_model_types: Sequence[ModelType]
     configurate_methods: list[ConfigurateMethod]
-    models: list[ProviderModel] = []
+    models: list[ProviderModel] = Field(default_factory=list)
     provider_credential_schema: Optional[ProviderCredentialSchema] = None
     model_credential_schema: Optional[ModelCredentialSchema] = None
 

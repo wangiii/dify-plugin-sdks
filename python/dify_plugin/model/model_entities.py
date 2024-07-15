@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from dify_plugin.core.runtime.entities.common import I18nObject
+from dify_plugin.core.runtime.entities.plugin.common import I18nObject
 
 
 class ModelType(Enum):

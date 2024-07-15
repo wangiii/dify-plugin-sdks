@@ -17,11 +17,3 @@ class SessionMessage(BaseModel):
             'type': self.type.value,
             'data': self.data
         }
-    
-class InvokeMessage(BaseModel):
-    data: dict
-
-    def to_dict(self):
-        return {
-            'data': self.data
-        }

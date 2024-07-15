@@ -3,10 +3,12 @@ from typing import Any
 import uuid
 
 from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
-from dify_plugin.core.runtime.entities.dify import ToolProviderType
-from dify_plugin.core.runtime.entities.invocation import InvokeType
-from dify_plugin.core.runtime.entities.model import LLMResultChunk, RerankResult, TextEmbeddingResult
-from dify_plugin.core.runtime.entities.workflow import KnowledgeRetrievalNodeData, NodeResponse, ParameterExtractorNodeData, QuestionClassifierNodeData
+from dify_plugin.core.runtime.entities.model_runtime.llm import LLMResult, LLMResultChunk
+from dify_plugin.core.runtime.entities.model_runtime.rerank import RerankResult
+from dify_plugin.core.runtime.entities.model_runtime.text_embedding import TextEmbeddingResult
+from dify_plugin.core.runtime.entities.plugin.dify import ToolProviderType
+from dify_plugin.core.runtime.entities.plugin.invocation import InvokeType
+from dify_plugin.core.runtime.entities.plugin.workflow import KnowledgeRetrievalNodeData, NodeResponse, ParameterExtractorNodeData, QuestionClassifierNodeData
 from dify_plugin.tool.entities import ToolInvokeMessage
 from dify_plugin.utils.io_writer import PluginOutputStream
 
@@ -63,7 +65,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         return super().invoke_api_tool(provider, tool_name, parameters)
 
-    def invoke_llm(self, provider: str, model_name: str, parameters: dict[str, Any]) -> Generator[LLMResultChunk, None, None]:
+    def invoke_llm(self, provider: str, model_name: str, parameters: dict[str, Any]) -> Generator[LLMResultChunk, None, None] | LLMResult:
         """
         Invoke llm
         """
