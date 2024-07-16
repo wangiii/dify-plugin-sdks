@@ -1,11 +1,12 @@
 from dify_plugin.core.runtime.entities.plugin.request import (
-    ModelInvokeRequest,
+    ModelInvokeLLMRequest,
     ModelValidateModelCredentialsRequest,
     ModelValidateProviderCredentialsRequest,
     ToolInvokeRequest,
     ToolValidateCredentialsRequest,
 )
 from dify_plugin.core.runtime.session import Session
+from dify_plugin.model.large_language_model import LargeLanguageModel
 from dify_plugin.plugin_registration import PluginRegistration
 from dify_plugin.tool.entities import ToolRuntime
 
@@ -56,5 +57,18 @@ class PluginExecutor:
     ):
         pass
 
-    def invoke_model(self, session: Session, data: ModelInvokeRequest):
-        pass
+    def invoke_llm(self, session: Session, data: ModelInvokeLLMRequest):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, LargeLanguageModel):
+            return model_instance.invoke(
+                data.model,
+                data.credentials,
+                data.prompt_messages,
+                data.model_parameters,
+                data.tools,
+                data.stop,
+                data.stream,
+                data.user_id,
+            )

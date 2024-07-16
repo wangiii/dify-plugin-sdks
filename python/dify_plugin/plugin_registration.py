@@ -2,7 +2,10 @@ import logging
 import os
 from typing import Type
 from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.runtime.entities.plugin.setup import PluginConfiguration, PluginProviderType
+from dify_plugin.core.runtime.entities.plugin.setup import (
+    PluginConfiguration,
+    PluginProviderType,
+)
 from dify_plugin.model.ai_model import AIModel
 from dify_plugin.model.entities import ModelProviderConfiguration
 from dify_plugin.model.large_language_model import LargeLanguageModel
@@ -15,13 +18,17 @@ from dify_plugin.model.text_embedding_model import TextEmbeddingModel
 from dify_plugin.model.tts_model import TTSModel
 from dify_plugin.tool.entities import ToolConfiguration, ToolProviderConfiguration
 from dify_plugin.tool.tool import Tool, ToolProvider
-from dify_plugin.utils.class_loader import load_multi_subclasses_from_source, load_single_subclass_from_source
+from dify_plugin.utils.class_loader import (
+    load_multi_subclasses_from_source,
+    load_single_subclass_from_source,
+)
 from dify_plugin.utils.yaml_loader import load_yaml_file
 from dify_plugin.logger_format import plugin_logger_handler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(plugin_logger_handler)
+
 
 class PluginRegistration:
     configuration: PluginConfiguration
@@ -40,8 +47,8 @@ class PluginRegistration:
         str,
         tuple[
             ModelProviderConfiguration,
-            Type[ModelProvider],
-            dict[ModelType, Type[AIModel]],
+            ModelProvider,
+            dict[ModelType, AIModel],
         ],
     ]
 
@@ -126,6 +133,16 @@ class PluginRegistration:
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)
 
+    def _is_strict_subclass(self, cls: Type, *parent_cls: Type) -> bool:
+        """
+        check if the class is a strict subclass of one of the parent classes
+        """
+        for parent in parent_cls:
+            if issubclass(cls, parent) and cls != parent:
+                return True
+            
+        return False
+
     def _resolve_model_providers(self):
         """
         walk through all the model providers and models and load the classes from sources
@@ -143,6 +160,8 @@ class PluginRegistration:
                 parent_type=ModelProvider,
             )
 
+
+
             # load models class
             models = {}
             for model_source in provider.extra.python.model_sources:
@@ -155,20 +174,18 @@ class PluginRegistration:
                 )
 
                 for model_cls in model_classes:
-                    if issubclass(
+                    if self._is_strict_subclass(
                         model_cls,
-                        (
-                            LargeLanguageModel,
-                            TextEmbeddingModel,
-                            RerankModel,
-                            TTSModel,
-                            Speech2TextModel,
-                            ModerationModel,
-                        ),
+                        LargeLanguageModel,
+                        TextEmbeddingModel,
+                        RerankModel,
+                        TTSModel,
+                        Speech2TextModel,
+                        ModerationModel,
                     ):
-                        models[model_cls.model_type] = model_cls
+                        models[model_cls.model_type] = model_cls(provider.models)
 
-            self.models_mapping[provider.provider] = (provider, cls, models)
+            self.models_mapping[provider.provider] = (provider, cls(), models)
 
     def _resolve_plugin_cls(self):
         """
@@ -202,8 +219,8 @@ class PluginRegistration:
                 registration = self.tools_mapping[provider_registration][2].get(tool)
                 if registration:
                     return registration[1]
-    
-    def get_model_provider_cls(self, provider: str):
+
+    def get_model_provider_instance(self, provider: str):
         """
         get the model provider class by provider name
         :param provider: provider name
@@ -212,8 +229,8 @@ class PluginRegistration:
         for provider_registration in self.models_mapping:
             if provider_registration == provider:
                 return self.models_mapping[provider_registration][1]
-    
-    def get_model_cls(self, provider: str, model_type: ModelType):
+
+    def get_model_instance(self, provider: str, model_type: ModelType):
         """
         get the model class by provider
         :param provider: provider name
@@ -222,6 +239,8 @@ class PluginRegistration:
         """
         for provider_registration in self.models_mapping:
             if provider_registration == provider:
-                registration = self.models_mapping[provider_registration][2].get(model_type)
+                registration = self.models_mapping[provider_registration][2].get(
+                    model_type
+                )
                 if registration:
                     return registration

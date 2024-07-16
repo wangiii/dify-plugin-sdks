@@ -11,7 +11,6 @@ from dify_plugin.model.errors import InvokeAuthorizationError, InvokeError
 from dify_plugin.model.model_entities import (
     AIModelEntity,
     DefaultParameterName,
-    FetchFrom,
     ModelType,
     PriceConfig,
     PriceInfo,
@@ -19,8 +18,6 @@ from dify_plugin.model.model_entities import (
 )
 from dify_plugin.model.parameter_template import PARAMETER_RULE_TEMPLATE
 from dify_plugin.model.tokenizer.gpt2_tokenizer import GPT2Tokenizer
-from dify_plugin.utils.position_helper import get_position_map, sort_by_position_map
-from dify_plugin.utils.yaml_loader import load_yaml_file
 
 
 class AIModel(ABC):
@@ -29,11 +26,14 @@ class AIModel(ABC):
     """
 
     model_type: ModelType
-    model_schemas: Optional[list[AIModelEntity]] = None
+    model_schemas: list[AIModelEntity]
     started_at: float = 0
 
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
+
+    def __init__(self, model_schemas: list[AIModelEntity]) -> None:
+        self.model_schemas = [model_schema for model_schema in model_schemas if model_schema.model_type == self.model_type]
 
     @abstractmethod
     def validate_credentials(self, model: str, credentials: Mapping) -> None:
@@ -138,104 +138,7 @@ class AIModel(ABC):
 
         :return:
         """
-        if self.model_schemas:
-            return self.model_schemas
-
-        model_schemas = []
-
-        # get module name
-        model_type = self.__class__.__module__.split(".")[-1]
-
-        # get provider name
-        provider_name = self.__class__.__module__.split(".")[-3]
-
-        # get the path of current classes
-        current_path = os.path.abspath(__file__)
-        # get parent path of the current path
-        provider_model_type_path = os.path.join(
-            os.path.dirname(os.path.dirname(current_path)), provider_name, model_type
-        )
-
-        # get all yaml files path under provider_model_type_path that do not start with __
-        model_schema_yaml_paths = [
-            os.path.join(provider_model_type_path, model_schema_yaml)
-            for model_schema_yaml in os.listdir(provider_model_type_path)
-            if not model_schema_yaml.startswith("__")
-            and not model_schema_yaml.startswith("_")
-            and os.path.isfile(
-                os.path.join(provider_model_type_path, model_schema_yaml)
-            )
-            and model_schema_yaml.endswith(".yaml")
-        ]
-
-        # get _position.yaml file path
-        position_map = get_position_map(provider_model_type_path)
-
-        # traverse all model_schema_yaml_paths
-        for model_schema_yaml_path in model_schema_yaml_paths:
-            # read yaml data from yaml file
-            yaml_data = load_yaml_file(model_schema_yaml_path, ignore_error=True)
-
-            new_parameter_rules = []
-            for parameter_rule in yaml_data.get("parameter_rules", []):
-                if "use_template" in parameter_rule:
-                    try:
-                        default_parameter_name = DefaultParameterName.value_of(
-                            parameter_rule["use_template"]
-                        )
-                        default_parameter_rule = (
-                            self._get_default_parameter_rule_variable_map(
-                                default_parameter_name
-                            )
-                        )
-                        copy_default_parameter_rule = default_parameter_rule.copy()
-                        copy_default_parameter_rule.update(parameter_rule)
-                        parameter_rule = copy_default_parameter_rule
-                    except ValueError:
-                        pass
-
-                if "label" not in parameter_rule:
-                    parameter_rule["label"] = {
-                        "zh_Hans": parameter_rule["name"],
-                        "en_US": parameter_rule["name"],
-                    }
-
-                new_parameter_rules.append(parameter_rule)
-
-            yaml_data["parameter_rules"] = new_parameter_rules
-
-            if "label" not in yaml_data:
-                yaml_data["label"] = {
-                    "zh_Hans": yaml_data["model"],
-                    "en_US": yaml_data["model"],
-                }
-
-            yaml_data["fetch_from"] = FetchFrom.PREDEFINED_MODEL.value
-
-            try:
-                # yaml_data to entity
-                model_schema = AIModelEntity(**yaml_data)
-            except Exception as e:
-                model_schema_yaml_file_name = os.path.basename(
-                    model_schema_yaml_path
-                ).rstrip(".yaml")
-                raise Exception(
-                    f"Invalid model schema for {provider_name}.{model_type}.{model_schema_yaml_file_name}:"
-                    f" {str(e)}"
-                )
-
-            # cache model schema
-            model_schemas.append(model_schema)
-
-        # resort model schemas by position
-        model_schemas = sort_by_position_map(
-            position_map, model_schemas, lambda x: x.model
-        )
-
-        # cache model schemas
-        self.model_schemas = model_schemas
-
-        return model_schemas
+        return self.model_schemas
 
     def get_model_schema(
         self, model: str, credentials: Optional[Mapping] = None

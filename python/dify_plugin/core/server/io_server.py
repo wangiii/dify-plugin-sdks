@@ -42,7 +42,7 @@ class IOServer(ABC):
         except Exception as e:
             PluginOutputStream.error(session_id=session_id, data={'error': str(e)})
 
-        PluginOutputStream.log(data={'message': 'Task finished', 'session_id': session_id})
+        PluginOutputStream.session_message(session_id=session_id, data={'message': 'Task finished'})
 
     def _run(self):
         th1 = Thread(target=self._setup_instruction_listener)

@@ -51,7 +51,7 @@ class Session:
         """
         Run model
         """
-        if action == ModelActions.Invoke:
+        if action == ModelActions.InvokeLLM:
             yield from self._run_model_invocation(
                 model,
                 model_type,

@@ -1,8 +1,7 @@
-from abc import ABC
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 
 class PromptMessageRole(Enum):
@@ -80,7 +79,7 @@ class ImagePromptMessageContent(PromptMessageContent):
     detail: DETAIL = DETAIL.LOW
 
 
-class PromptMessage(ABC, BaseModel):
+class PromptMessage(BaseModel):
     """
     Model class for prompt message.
     """
@@ -95,7 +94,6 @@ class PromptMessage(ABC, BaseModel):
         :return: True if prompt message is empty, False otherwise
         """
         return not self.content
-
 
 class UserPromptMessage(PromptMessage):
     """

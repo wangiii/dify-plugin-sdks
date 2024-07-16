@@ -40,9 +40,9 @@ class Plugin(IOServer, Router):
         Router.__init__(self)
 
         # register io routes
-        self._register_io_routes()
+        self._register_request_routes()
 
-    def _register_io_routes(self):
+    def _register_request_routes(self):
         """
         Register routes
         """
@@ -59,9 +59,9 @@ class Plugin(IOServer, Router):
         )
 
         self.register_route(
-            self.plugin_executer.invoke_model,
+            self.plugin_executer.invoke_llm,
             lambda data: data.get("type") == PluginInvokeType.Model.value
-            and data.get("action") == ModelActions.Invoke.value,
+            and data.get("action") == ModelActions.InvokeLLM.value,
         )
 
         self.register_route(
