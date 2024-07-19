@@ -1,11 +1,11 @@
 from os.path import abspath, dirname, join
 from threading import Lock
 from typing import Any
-
 from transformers.models.gpt2 import GPT2Tokenizer as TransformerGPT2Tokenizer
 
 _tokenizer = None
 _lock = Lock()
+
 
 class GPT2Tokenizer:
     @staticmethod

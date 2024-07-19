@@ -7,9 +7,10 @@ from pydantic import BaseModel
 from ..core.runtime.entities.plugin.message import SessionMessage
 
 class Event(Enum):
-        LOG = 'log'
-        ERROR = 'error'
-        SESSION = 'session'
+    LOG = 'log'
+    ERROR = 'error'
+    SESSION = 'session'
+    HEARTBEAT = 'heartbeat'
 
 class StreamOutputMessage(BaseModel):
     event: Event
@@ -43,6 +44,10 @@ class PluginOutputStream:
         return cls.put(Event.LOG, None, data)
     
     @classmethod
+    def heartbeat(cls):
+        return cls.put(Event.HEARTBEAT, None, {})
+    
+    @classmethod
     def session_message(cls, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
         return cls.put(Event.SESSION, 
                        session_id, 
@@ -63,6 +68,16 @@ class PluginOutputStream:
         return SessionMessage(
             type=SessionMessage.Type.END,
             data={}
+        )
+    
+    @classmethod
+    def stream_error_object(cls, data: dict | BaseModel) -> SessionMessage:
+        if isinstance(data, BaseModel):
+            data = data.model_dump()
+
+        return SessionMessage(
+            type=SessionMessage.Type.ERROR,
+            data=data
         )
     
     @classmethod

@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(plugin_logger_handler)
 
-
 class Plugin(IOServer, Router):
     def __init__(self, config: DifyPluginEnv) -> None:
         """
@@ -49,7 +48,7 @@ class Plugin(IOServer, Router):
         self.register_route(
             self.plugin_executer.invoke_tool,
             lambda data: data.get("type") == PluginInvokeType.Tool.value
-            and data.get("action") == ToolActions.Invoke.value,
+            and data.get("action") == ToolActions.InvokeTool.value,
         )
 
         self.register_route(

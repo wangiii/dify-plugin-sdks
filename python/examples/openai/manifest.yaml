@@ -1,6 +1,7 @@
 version: 0.0.1
+type: plugin
 author: "Yeuoly"
-name: "OpenAI"
+name: "openai"
 created_at: "2024-07-12T08:03:44.658609186Z"
 resource:
   memory: 1048576
@@ -13,6 +14,9 @@ resource:
       llm: true
 plugins:
   - "provider/openai.yaml"
+execution:
+  setup: install.sh
+  launch: launch.sh
 meta:
   version: 0.0.1
   arch:

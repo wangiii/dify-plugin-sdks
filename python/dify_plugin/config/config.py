@@ -5,6 +5,7 @@ from pydantic_settings import SettingsConfigDict
 class DifyPluginEnv(BaseModel):
     MAX_REQUEST_TIMEOUT: int = Field(default=300, description='Maximum request timeout in seconds')
     MAX_WORKER: int = Field(default=10, description='Maximum worker count')
+    HEARTBEAT_INTERVAL: float = Field(default=10, description='Heartbeat interval in seconds')
 
     model_config = SettingsConfigDict(
         # read from dotenv format config file

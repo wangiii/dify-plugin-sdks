@@ -30,7 +30,7 @@ class Session:
         """
         Run tool
         """
-        if action == ToolActions.Invoke:
+        if action == ToolActions.InvokeTool:
             yield from tool.invoke(parameters)
 
     def run_model(

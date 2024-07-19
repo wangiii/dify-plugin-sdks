@@ -8,6 +8,7 @@ class SessionMessage(BaseModel):
         STREAM = "stream"
         INVOKE = "invoke"
         END = "end"
+        ERROR = "error"
 
     type: Type
     data: dict

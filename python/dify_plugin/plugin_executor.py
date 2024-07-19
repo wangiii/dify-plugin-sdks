@@ -23,12 +23,12 @@ class PluginExecutor:
     def invoke_tool(self, session: Session, request: ToolInvokeRequest):
         provider_cls = self.registration.get_tool_provider_cls(request.provider)
         if provider_cls is None:
-            raise ValueError(f"Provider {request.provider} not found")
+            raise ValueError(f"Provider `{request.provider}` not found")
 
         tool_cls = self.registration.get_tool_cls(request.provider, request.tool)
         if tool_cls is None:
             raise ValueError(
-                f"Tool {request.tool} not found for provider {request.provider}"
+                f"Tool `{request.tool}` not found for provider `{request.provider}`"
             )
 
         # instantiate provider and tool
@@ -40,12 +40,15 @@ class PluginExecutor:
         )
 
         # invoke tool
-        return session.run_tool(
-            action=request.action,
-            provider=provider,
-            tool=tool,
-            parameters=request.parameters,
-        )
+        try:
+            return session.run_tool(
+                action=request.action,
+                provider=provider,
+                tool=tool,
+                parameters=request.parameters,
+            )
+        except Exception as e:
+            raise ValueError(f"Failed to invoke tool: {type(e).__name__}: {str(e)}")
 
     def validate_model_provider_credentials(
         self, session: Session, data: ModelValidateProviderCredentialsRequest

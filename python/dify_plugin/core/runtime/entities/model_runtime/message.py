@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator
 
 
 class PromptMessageRole(Enum):
@@ -32,6 +32,7 @@ class PromptMessageTool(BaseModel):
     Model class for prompt message tool.
     """
     name: str
+    
     description: str
     parameters: dict
 
@@ -94,6 +95,7 @@ class PromptMessage(BaseModel):
         :return: True if prompt message is empty, False otherwise
         """
         return not self.content
+
 
 class UserPromptMessage(PromptMessage):
     """
