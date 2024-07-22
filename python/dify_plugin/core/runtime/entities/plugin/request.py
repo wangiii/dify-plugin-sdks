@@ -20,7 +20,7 @@ class PluginInvokeType(Enum):
 
 
 class ToolActions(Enum):
-    ValidateCredentials = "validate_credentials"
+    ValidateCredentials = "validate_tool_credentials"
     InvokeTool = "invoke_tool"
 
 
@@ -125,14 +125,24 @@ class ModelInvokeModerationRequest(PluginAccessModelRequest):
     
     text: str
 
-class ModelValidateProviderCredentialsRequest(PluginAccessModelRequest):
-    action: ModelActions = ModelActions.ValidateProviderCredentials
+class ModelValidateProviderCredentialsRequest(BaseModel):
+    type: PluginInvokeType = PluginInvokeType.Model
+    user_id: str
     provider: str
     credentials: dict
+    
+    action: ModelActions = ModelActions.ValidateProviderCredentials
 
+    model_config = ConfigDict(protected_namespaces=())
 
-class ModelValidateModelCredentialsRequest(PluginAccessModelRequest):
-    action: ModelActions = ModelActions.ValidateModelCredentials
+class ModelValidateModelCredentialsRequest(BaseModel):
+    type: PluginInvokeType = PluginInvokeType.Model
+    user_id: str
     provider: str
+    model_type: ModelType
     model: str
     credentials: dict
+    
+    action: ModelActions = ModelActions.ValidateModelCredentials
+
+    model_config = ConfigDict(protected_namespaces=())

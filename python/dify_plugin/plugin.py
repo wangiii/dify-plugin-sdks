@@ -93,7 +93,6 @@ class Plugin(IOServer, Router):
             and data.get("action") == ModelActions.InvokeModeration.value,
         )
 
-
         self.register_route(
             self.plugin_executer.validate_model_provider_credentials,
             lambda data: data.get("type") == PluginInvokeType.Model.value

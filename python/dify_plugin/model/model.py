@@ -67,8 +67,7 @@ class ModelProvider(ABC):
         :param model_type: model type defined in `ModelType`
         :return:
         """
-        model_type_str = model_type.value
-        if model_type_str in self.model_instance_map:
-            return self.model_instance_map[model_type_str]
+        if model_type in self.model_instance_map:
+            return self.model_instance_map[model_type]
 
-        raise ValueError(f"Model instance not found for model type: {model_type_str}")
+        raise ValueError(f"Model instance not found for model type: {model_type}")

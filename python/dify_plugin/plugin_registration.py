@@ -183,7 +183,7 @@ class PluginRegistration:
                     ):
                         models[model_cls.model_type] = model_cls(provider.models)
 
-            provider_instance = cls(provider, models[model_cls.model_type])
+            provider_instance = cls(provider, models)
             self.models_mapping[provider.provider] = (provider, provider_instance, models)
 
     def _resolve_plugin_cls(self):

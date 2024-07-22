@@ -1,5 +1,4 @@
 import binascii
-import io
 import tempfile
 from dify_plugin.core.runtime.entities.plugin.request import (
     ModelInvokeLLMRequest,
@@ -31,7 +30,22 @@ class PluginExecutor:
     def validate_tool_provider_credentials(
         self, session: Session, data: ToolValidateCredentialsRequest
     ):
-        pass
+        provider_instance = self.registration.get_tool_provider_cls(data.provider)
+        if provider_instance is None:
+            raise ValueError(f"Provider `{data.provider}` not found")
+
+        provider_instance = provider_instance()
+
+        try:
+            provider_instance.validate_credentials(data.credentials)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to validate provider credentials: {type(e).__name__}: {str(e)}"
+            )
+        
+        return {
+            "result": True
+        }
 
     def invoke_tool(self, session: Session, request: ToolInvokeRequest):
         provider_cls = self.registration.get_tool_provider_cls(request.provider)
@@ -66,12 +80,46 @@ class PluginExecutor:
     def validate_model_provider_credentials(
         self, session: Session, data: ModelValidateProviderCredentialsRequest
     ):
-        pass
+        provider_instance = self.registration.get_model_provider_instance(data.provider)
+        if provider_instance is None:
+            raise ValueError(f"Provider `{data.provider}` not found")
+
+        try:
+            provider_instance.validate_provider_credentials(data.credentials)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to validate provider credentials: {type(e).__name__}: {str(e)}"
+            )
+        
+        return {
+            "result": True
+        }
 
     def validate_model_credentials(
         self, session: Session, data: ModelValidateModelCredentialsRequest
     ):
-        pass
+        provider_instance = self.registration.get_model_provider_instance(data.provider)
+        if provider_instance is None:
+            raise ValueError(f"Provider `{data.provider}` not found")
+
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if model_instance is None:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
+
+        try:
+            model_instance.validate_credentials(data.model, data.credentials)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to validate model credentials: {type(e).__name__}: {str(e)}"
+            )
+        
+        return {
+            "result": True
+        }
 
     def invoke_llm(self, session: Session, data: ModelInvokeLLMRequest):
         model_instance = self.registration.get_model_instance(
@@ -89,7 +137,9 @@ class PluginExecutor:
                 data.user_id,
             )
 
-    def invoke_text_embedding(self, session: Session, data: ModelInvokeTextEmbeddingRequest):
+    def invoke_text_embedding(
+        self, session: Session, data: ModelInvokeTextEmbeddingRequest
+    ):
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
         )
@@ -100,7 +150,7 @@ class PluginExecutor:
                 data.texts,
                 data.user_id,
             )
-        
+
     def invoke_rerank(self, session: Session, data: ModelInvokeRerankRequest):
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
@@ -115,7 +165,7 @@ class PluginExecutor:
                 data.top_n,
                 data.user_id,
             )
-        
+
     def invoke_tts(self, session: Session, data: ModelInvokeTTSRequest):
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
@@ -126,15 +176,17 @@ class PluginExecutor:
                 data.credentials,
                 data.content_text,
                 data.voice,
-                data.user_id
+                data.user_id,
             )
             if isinstance(b, bytes):
                 return {"result": binascii.hexlify(b).decode()}
-            
+
             for chunk in b:
                 yield {"result": binascii.hexlify(bytes(chunk)).decode()}
 
-    def invoke_speech_to_text(self, session: Session, data: ModelInvokeSpeech2TextRequest):
+    def invoke_speech_to_text(
+        self, session: Session, data: ModelInvokeSpeech2TextRequest
+    ):
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
         )
@@ -153,7 +205,7 @@ class PluginExecutor:
                             data.user_id,
                         )
                     }
-        
+
     def invoke_moderation(self, session: Session, data: ModelInvokeModerationRequest):
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
