@@ -64,6 +64,8 @@ class PluginAccessModelRequest(BaseModel):
     model: str
     credentials: dict
 
+    model_config = ConfigDict(protected_namespaces=())
+
 class ModelInvokeLLMRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeLLM
     
