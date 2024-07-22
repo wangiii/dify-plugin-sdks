@@ -59,7 +59,7 @@ class PluginInputStream:
                 for reader in readers:
                     reader.write(data)
             except Exception as e:
-                PluginOutputStream.error(session_id=session_id, data={'error': str(e)})
+                PluginOutputStream.error(session_id=session_id, data={'error': f'Failed to read input: {str(e)}, got: {line}'})
 
         cls.close()
         

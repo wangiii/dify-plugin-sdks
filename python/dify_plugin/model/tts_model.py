@@ -29,7 +29,6 @@ class TTSModel(AIModel):
     def invoke(
         self,
         model: str,
-        tenant_id: str,
         credentials: dict,
         content_text: str,
         voice: str,
@@ -56,7 +55,6 @@ class TTSModel(AIModel):
                 user=user,
                 content_text=content_text,
                 voice=voice,
-                tenant_id=tenant_id,
             )
         except Exception as e:
             raise self._transform_invoke_error(e)
@@ -65,7 +63,6 @@ class TTSModel(AIModel):
     def _invoke(
         self,
         model: str,
-        tenant_id: str,
         credentials: dict,
         content_text: str,
         voice: str,

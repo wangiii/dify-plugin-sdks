@@ -64,6 +64,37 @@ class Plugin(IOServer, Router):
         )
 
         self.register_route(
+            self.plugin_executer.invoke_text_embedding,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.InvokeTextEmbedding.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.invoke_rerank,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.InvokeRerank.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.invoke_tts,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.InvokeTTS.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.invoke_speech_to_text,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.InvokeSpeech2Text.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.invoke_moderation,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.InvokeModeration.value,
+        )
+
+
+        self.register_route(
             self.plugin_executer.validate_model_provider_credentials,
             lambda data: data.get("type") == PluginInvokeType.Model.value
             and data.get("action") == ModelActions.ValidateProviderCredentials.value,

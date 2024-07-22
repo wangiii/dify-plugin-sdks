@@ -1,5 +1,12 @@
+from base64 import b64decode
+import io
 from dify_plugin.core.runtime.entities.plugin.request import (
     ModelInvokeLLMRequest,
+    ModelInvokeModerationRequest,
+    ModelInvokeRerankRequest,
+    ModelInvokeSpeech2TextRequest,
+    ModelInvokeTTSRequest,
+    ModelInvokeTextEmbeddingRequest,
     ModelValidateModelCredentialsRequest,
     ModelValidateProviderCredentialsRequest,
     ToolInvokeRequest,
@@ -7,6 +14,11 @@ from dify_plugin.core.runtime.entities.plugin.request import (
 )
 from dify_plugin.core.runtime.session import Session
 from dify_plugin.model.large_language_model import LargeLanguageModel
+from dify_plugin.model.moderation_model import ModerationModel
+from dify_plugin.model.rerank_model import RerankModel
+from dify_plugin.model.speech2text_model import Speech2TextModel
+from dify_plugin.model.text_embedding_model import TextEmbeddingModel
+from dify_plugin.model.tts_model import TTSModel
 from dify_plugin.plugin_registration import PluginRegistration
 from dify_plugin.tool.entities import ToolRuntime
 
@@ -45,7 +57,7 @@ class PluginExecutor:
                 action=request.action,
                 provider=provider,
                 tool=tool,
-                parameters=request.parameters,
+                parameters=request.tool_parameters,
             )
         except Exception as e:
             raise ValueError(f"Failed to invoke tool: {type(e).__name__}: {str(e)}")
@@ -75,3 +87,70 @@ class PluginExecutor:
                 data.stream,
                 data.user_id,
             )
+
+    def invoke_text_embedding(self, session: Session, data: ModelInvokeTextEmbeddingRequest):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, TextEmbeddingModel):
+            return model_instance.invoke(
+                data.model,
+                data.credentials,
+                data.texts,
+                data.user_id,
+            )
+        
+    def invoke_rerank(self, session: Session, data: ModelInvokeRerankRequest):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, RerankModel):
+            return model_instance.invoke(
+                data.model,
+                data.credentials,
+                data.query,
+                data.docs,
+                data.score_threshold,
+                data.top_n,
+                data.user_id,
+            )
+        
+    def invoke_tts(self, session: Session, data: ModelInvokeTTSRequest):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, TTSModel):
+            # TODO: refactor 
+            pass
+
+    def invoke_speech_to_text(self, session: Session, data: ModelInvokeSpeech2TextRequest):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+
+        file = io.BytesIO(b64decode(data.file))
+
+        if isinstance(model_instance, Speech2TextModel):
+            return {
+                "result": model_instance.invoke(
+                    data.model,
+                    data.credentials,
+                    file,
+                    data.user_id,
+                )
+            }
+        
+    def invoke_moderation(self, session: Session, data: ModelInvokeModerationRequest):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+
+        if isinstance(model_instance, ModerationModel):
+            return {
+                "result": model_instance.invoke(
+                    data.model,
+                    data.credentials,
+                    data.text,
+                    data.user_id,
+                )
+            }

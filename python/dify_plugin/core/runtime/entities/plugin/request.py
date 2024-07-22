@@ -46,7 +46,7 @@ class ToolInvokeRequest(PluginAccessRequest):
     provider: str
     tool: str
     credentials: dict
-    parameters: dict[str, Any]
+    tool_parameters: dict[str, Any]
 
 
 class ToolValidateCredentialsRequest(PluginAccessRequest):
@@ -59,14 +59,14 @@ class ToolValidateCredentialsRequest(PluginAccessRequest):
 class PluginAccessModelRequest(BaseModel):
     type: PluginInvokeType = PluginInvokeType.Model
     user_id: str
-
-
-class ModelInvokeLLMRequest(PluginAccessModelRequest):
-    action: ModelActions = ModelActions.InvokeLLM
     provider: str
     model_type: ModelType
     model: str
     credentials: dict
+
+class ModelInvokeLLMRequest(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.InvokeLLM
+    
     model_parameters: dict[str, Any]
     prompt_messages: list[PromptMessage]
     stop: Optional[list[str]]
@@ -94,6 +94,34 @@ class ModelInvokeLLMRequest(PluginAccessModelRequest):
 
         return v
 
+class ModelInvokeTextEmbeddingRequest(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.InvokeTextEmbedding
+    
+    texts: list[str]
+
+class ModelInvokeRerankRequest(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.InvokeRerank
+    
+    query: str
+    docs: list[str]
+    score_threshold: Optional[float]
+    top_n: Optional[int]
+
+class ModelInvokeTTSRequest(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.InvokeTTS
+    
+    content_text: str
+    voice: str
+
+class ModelInvokeSpeech2TextRequest(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.InvokeSpeech2Text
+    
+    file: str
+
+class ModelInvokeModerationRequest(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.InvokeModeration
+    
+    text: str
 
 class ModelValidateProviderCredentialsRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.ValidateProviderCredentials
