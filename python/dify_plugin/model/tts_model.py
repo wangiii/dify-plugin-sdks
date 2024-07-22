@@ -1,3 +1,4 @@
+from collections.abc import Generator
 import hashlib
 import logging
 import re
@@ -33,7 +34,7 @@ class TTSModel(AIModel):
         content_text: str,
         voice: str,
         user: Optional[str] = None,
-    ):
+    ) -> bytes | Generator[bytes, None, None]:
         """
         Invoke large language model
 
@@ -67,7 +68,7 @@ class TTSModel(AIModel):
         content_text: str,
         voice: str,
         user: Optional[str] = None,
-    ):
+    ) -> bytes | Generator[bytes, None, None]:
         """
         Invoke large language model
 

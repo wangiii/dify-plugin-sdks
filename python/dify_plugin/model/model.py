@@ -5,7 +5,6 @@ from typing import Optional
 from dify_plugin.model.ai_model import AIModel
 from dify_plugin.model.model_entities import AIModelEntity, ModelType
 from dify_plugin.model.provider_entities import ProviderEntity
-from dify_plugin.utils.class_loader import get_subclasses_from_module, import_module_from_source
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
 
@@ -84,37 +83,17 @@ class ModelProvider(ABC):
         :param model_type: model type defined in `ModelType`
         :return:
         """
-        # get dirname of the current path
-        provider_name = self.__class__.__module__.split(".")[-1]
+        model_type_str = model_type.value
+        if model_type_str in self.model_instance_map:
+            return self.model_instance_map[model_type_str]
 
-        if f"{provider_name}.{model_type.value}" in self.model_instance_map:
-            return self.model_instance_map[f"{provider_name}.{model_type.value}"]
+        # get model class
+        model_class = self._get_model_class(model_type)
 
-        # get the path of the model type classes
-        base_path = os.path.abspath(__file__)
-        model_type_name = model_type.value.replace('-', '_')
-        model_type_path = os.path.join(os.path.dirname(os.path.dirname(base_path)), provider_name, model_type_name)
-        model_type_py_path = os.path.join(model_type_path, f'{model_type_name}.py')
+        # create model instance
+        model_instance = model_class()
 
-        if not os.path.isdir(model_type_path) or not os.path.exists(model_type_py_path):
-            raise Exception(f'Invalid model type {model_type} for provider {provider_name}')
+        # cache model instance
+        self.model_instance_map[model_type_str] = model_instance
 
-        # Dynamic loading {model_type_name}.py file and find the subclass of AIModel
-        parent_module = '.'.join(self.__class__.__module__.split('.')[:-1])
-        mod = import_module_from_source(
-            module_name=f"{parent_module}.{model_type_name}.{model_type_name}", py_file_path=model_type_py_path
-        )
-        model_class = next(
-            filter(
-                lambda x: x.__module__ == mod.__name__ and not x.__abstractmethods__,
-                get_subclasses_from_module(mod, AIModel),
-            ),
-            None,
-        )
-        if not model_class:
-            raise Exception(f"Missing AIModel Class for model type {model_type} in {model_type_py_path}")
-
-        model_instance_map = model_class()
-        self.model_instance_map[f"{provider_name}.{model_type.value}"] = model_instance_map
-
-        return model_instance_map
+        return model_instance

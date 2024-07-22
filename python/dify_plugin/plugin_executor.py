@@ -1,5 +1,6 @@
-from base64 import b64decode
+import binascii
 import io
+import tempfile
 from dify_plugin.core.runtime.entities.plugin.request import (
     ModelInvokeLLMRequest,
     ModelInvokeModerationRequest,
@@ -120,25 +121,38 @@ class PluginExecutor:
             data.provider, data.model_type
         )
         if isinstance(model_instance, TTSModel):
-            # TODO: refactor 
-            pass
+            b = model_instance.invoke(
+                data.model,
+                data.credentials,
+                data.content_text,
+                data.voice,
+                data.user_id
+            )
+            if isinstance(b, bytes):
+                return {"result": binascii.hexlify(b).decode()}
+            
+            for chunk in b:
+                yield {"result": binascii.hexlify(bytes(chunk)).decode()}
 
     def invoke_speech_to_text(self, session: Session, data: ModelInvokeSpeech2TextRequest):
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
         )
 
-        file = io.BytesIO(b64decode(data.file))
+        with tempfile.NamedTemporaryFile(suffix=".mp3", mode="wb", delete=True) as temp:
+            temp.write(binascii.unhexlify(data.file))
+            temp.flush()
 
-        if isinstance(model_instance, Speech2TextModel):
-            return {
-                "result": model_instance.invoke(
-                    data.model,
-                    data.credentials,
-                    file,
-                    data.user_id,
-                )
-            }
+            with open(temp.name, "rb") as f:
+                if isinstance(model_instance, Speech2TextModel):
+                    return {
+                        "result": model_instance.invoke(
+                            data.model,
+                            data.credentials,
+                            f,
+                            data.user_id,
+                        )
+                    }
         
     def invoke_moderation(self, session: Session, data: ModelInvokeModerationRequest):
         model_instance = self.registration.get_model_instance(
