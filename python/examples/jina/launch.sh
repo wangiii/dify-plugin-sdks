@@ -1,0 +1,1 @@
+/Users/yeuoly/miniconda3/envs/dify-plugin-sdk/bin/python -m main

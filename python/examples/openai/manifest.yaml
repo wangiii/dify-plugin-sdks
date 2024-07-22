@@ -15,7 +15,7 @@ resource:
 plugins:
   - "provider/openai.yaml"
 execution:
-  setup: install.sh
+  install: install.sh
   launch: launch.sh
 meta:
   version: 0.0.1
