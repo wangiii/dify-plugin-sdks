@@ -19,9 +19,15 @@ from dify_plugin.plugin_registration import PluginRegistration
 
 from dify_plugin.utils.io_writer import PluginOutputStream
 
+from gevent import monkey
+
+# patch all the blocking calls
+monkey.patch_all()
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(plugin_logger_handler)
+
 
 class Plugin(IOServer, Router):
     def __init__(self, config: DifyPluginEnv) -> None:
@@ -104,7 +110,6 @@ class Plugin(IOServer, Router):
             lambda data: data.get("type") == PluginInvokeType.Model.value
             and data.get("action") == ModelActions.ValidateModelCredentials.value,
         )
-
 
     def _execute_request(self, session_id: str, data: dict):
         """

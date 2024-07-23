@@ -18,7 +18,7 @@ class RequestInterface(AbstractRequestInterface):
     def __init__(self, session_id: str) -> None:
         self.session_id = session_id
 
-    def _generate_request_id(self):
+    def _generate_backwards_request_id(self):
         return uuid.uuid4().hex
 
     def invoke_tool(self, provider_type: ToolProviderType, provider: str, tool_name: str,
@@ -26,13 +26,13 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke tool
         """
-        request_id = self._generate_request_id()
+        backwards_request_id = self._generate_backwards_request_id()
 
         PluginOutputStream.session_message(
             session_id=self.session_id, 
             data=PluginOutputStream.stream_invoke_object(data={
                 'type': InvokeType.Tool.value,
-                'request_id': request_id,
+                'backwards_request_id': backwards_request_id,
                 'request': {
                     'provider_type': provider_type.value,
                     'provider': provider,
