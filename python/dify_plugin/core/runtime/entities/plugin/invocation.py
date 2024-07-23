@@ -3,7 +3,12 @@ from enum import Enum
 
 class InvokeType(Enum):
     Tool = 'tool'
-    Model = 'model'
+    LLM = 'llm'
+    TextEmbedding = 'text_embedding'
+    Rerank = 'rerank'
+    TTS = 'tts'
+    Speech2Text = 'speech2text'
+    Moderation = 'moderation'
     Node = 'node'
 
     @classmethod

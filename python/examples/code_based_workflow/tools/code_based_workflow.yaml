@@ -1,0 +1,24 @@
+type: tool
+provider:
+  identity:
+    author: Dify
+    name: google
+    label:
+      en_US: Google
+      zh_Hans: Google
+      pt_BR: Google
+    description:
+      en_US: Google
+      zh_Hans: GoogleSearch
+      pt_BR: Google
+    icon: icon.svg
+    tags:
+      - search
+  tools:
+    - tools/parameter_extractor.yaml
+    - tools/question_classifier.yaml
+    - tools/llm.yaml
+    - tools/tool.yaml
+  extra:
+    python:
+      source: provider/code_based_workflow.py
