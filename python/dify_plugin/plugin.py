@@ -1,28 +1,29 @@
-from collections.abc import Generator
-import logging
+from gevent import monkey
 
-from dify_plugin.config.config import DifyPluginEnv
+# patch all the blocking calls
+monkey.patch_all(sys=True)
 
-from dify_plugin.core.runtime.entities.plugin.request import (
+from collections.abc import Generator  # noqa: E402
+import logging  # noqa: E402
+
+from dify_plugin.config.config import DifyPluginEnv  # noqa: E402
+
+from dify_plugin.core.runtime.entities.plugin.request import (  # noqa: E402
     ModelActions,
     PluginInvokeType,
     ToolActions,
 )
-from dify_plugin.core.runtime.session import Session
-from dify_plugin.core.server.io_server import IOServer
-from dify_plugin.core.server.router import Router
-from dify_plugin.logger_format import plugin_logger_handler
+from dify_plugin.core.runtime.session import Session  # noqa: E402
+from dify_plugin.core.server.io_server import IOServer  # noqa: E402
+from dify_plugin.core.server.router import Router  # noqa: E402
+from dify_plugin.logger_format import plugin_logger_handler  # noqa: E402
 
-from dify_plugin.plugin_executor import PluginExecutor
-from dify_plugin.plugin_registration import PluginRegistration
+from dify_plugin.plugin_executor import PluginExecutor  # noqa: E402
+from dify_plugin.plugin_registration import PluginRegistration  # noqa: E402
 
 
-from dify_plugin.utils.io_writer import PluginOutputStream
+from dify_plugin.utils.io_writer import PluginOutputStream  # noqa: E402
 
-from gevent import monkey
-
-# patch all the blocking calls
-monkey.patch_all()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

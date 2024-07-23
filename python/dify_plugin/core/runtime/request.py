@@ -124,7 +124,7 @@ class RequestInterface(AbstractRequestInterface):
                 "provider_type": provider_type.value,
                 "provider": provider,
                 "tool": tool_name,
-                "parameters": parameters,
+                "tool_parameters": parameters,
             },
         )
 

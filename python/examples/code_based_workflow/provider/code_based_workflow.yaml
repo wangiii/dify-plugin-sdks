@@ -2,15 +2,15 @@ type: tool
 provider:
   identity:
     author: Dify
-    name: google
+    name: code_based_workflow
     label:
-      en_US: Google
-      zh_Hans: Google
-      pt_BR: Google
+      en_US: CodeBasedWorkflow
+      zh_Hans: CodeBasedWorkflow
+      pt_BR: CodeBasedWorkflow
     description:
-      en_US: Google
-      zh_Hans: GoogleSearch
-      pt_BR: Google
+      en_US: CodeBasedWorkflow
+      zh_Hans: CodeBasedWorkflow
+      pt_BR: CodeBasedWorkflow
     icon: icon.svg
     tags:
       - search

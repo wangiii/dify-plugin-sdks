@@ -1,9 +1,12 @@
 from collections.abc import Callable, Generator
+import os
 from queue import Queue
 import queue
 import sys
 import threading
 from typing import Optional, overload
+
+from gevent.select import select
 
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 from dify_plugin.utils.io_writer import PluginOutputStream
@@ -63,22 +66,52 @@ class PluginInputStream:
     @classmethod
     def event_loop(cls):
         # read line by line
-        for line in sys.stdin:
-            session_id = None
-            try:
-                data = PluginInStream.model_validate_json(line)
-                session_id = data.session_id
-                readers: list[PluginReader] = []
-                with cls.lock:
-                    for reader in cls.readers:
-                        if reader.filter(data):
-                            readers.append(reader)
-                for reader in readers:
-                    reader.write(data)
-            except Exception as e:
-                PluginOutputStream.error(session_id=session_id, data={'error': f'Failed to read input: {str(e)}, got: {line}'})
+        buffer = ''
+        while True:
+            ready, _, _ = select([sys.stdin], [], [], 1)
+            if not ready:
+                continue
+
+            # read data from stdin through os.read to avoid buffering related issues
+            data = os.read(sys.stdin.fileno(), 4096).decode()
+
+            if not data:
+                continue
+            buffer += data
+
+            # process line by line and keep the last line if it is not complete
+            lines = buffer.split('\n')
+            if len(lines) == 0:
+                continue
+
+            if lines[-1] != '':
+                buffer = lines[-1]
+            else:
+                buffer = ''
+
+            lines = lines[:-1]
+            for line in lines:
+                cls._process_line(line)
 
         cls.close()
+
+    @classmethod
+    def _process_line(cls, line: str):
+        session_id = None
+        try:
+            data = PluginInStream.model_validate_json(line)
+            session_id = data.session_id
+            readers: list[PluginReader] = []
+            with cls.lock:
+                for reader in cls.readers:
+                    if reader.filter(data):
+                        readers.append(reader)
+            for reader in readers:
+                reader.write(data)
+        except Exception as e:
+            PluginOutputStream.error(session_id=session_id, data={
+                'error': f'Failed to read input: {str(e)}, got: {line}'
+            })
         
     @classmethod
     def read(cls, filter: Callable[[PluginInStream], bool]) -> PluginReader:
