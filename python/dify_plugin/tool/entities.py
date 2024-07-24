@@ -7,7 +7,8 @@ from dify_plugin.utils.yaml_loader import load_yaml_file
 
 class ToolRuntime(BaseModel):
     credentials: dict[str, str]
-    user_id: str
+    user_id: Optional[str]
+    session_id: Optional[str]
 
 class ToolInvokeMessage(BaseModel):
     class TextMessage(BaseModel):

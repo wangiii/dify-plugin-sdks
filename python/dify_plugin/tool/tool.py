@@ -18,10 +18,11 @@ class Tool(RequestInterface, ABC):
 
     def __init__(self, runtime: ToolRuntime):
         self.runtime = runtime
+        RequestInterface.__init__(self, runtime.session_id)
 
     @classmethod
     def from_credentials(cls, credentials: dict) -> 'Tool':
-        return cls(ToolRuntime(credentials=credentials, user_id=''))
+        return cls(ToolRuntime(credentials=credentials, user_id=None, session_id=None))
 
     def create_text_message(self, text: str) -> ToolInvokeMessage:
         return ToolInvokeMessage(

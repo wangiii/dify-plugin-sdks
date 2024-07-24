@@ -66,5 +66,3 @@ class Router:
         for route in self.routes:
             if route.filter(data):
                     return route.func(session, data)
-
-        raise ValueError("No route found: " + str(data))

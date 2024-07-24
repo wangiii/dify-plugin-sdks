@@ -62,7 +62,7 @@ class PluginExecutor:
         provider = provider_cls()
         tool = tool_cls(
             runtime=ToolRuntime(
-                credentials=request.credentials, user_id=request.user_id
+                credentials=request.credentials, user_id=request.user_id, session_id=session.session_id,
             )
         )
 

@@ -1,11 +1,12 @@
 from binascii import hexlify, unhexlify
 from collections.abc import Generator
-from typing import IO, Any, Type
+from typing import IO, Any, Optional, Type
 import uuid
 
 from pydantic import BaseModel
 
 from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
+from dify_plugin.core.runtime.entities.backwards_invocation.resopnse_event import BackwardsInvocationResponseEvent
 from dify_plugin.core.runtime.entities.model_runtime.llm import (
     LLMResult,
     LLMResultChunk,
@@ -23,7 +24,9 @@ from dify_plugin.core.runtime.entities.model_runtime.model_config import (
 )
 from dify_plugin.core.runtime.entities.model_runtime.moderation import ModerationResult
 from dify_plugin.core.runtime.entities.model_runtime.rerank import RerankResult
-from dify_plugin.core.runtime.entities.model_runtime.speech2text import Speech2TextResult
+from dify_plugin.core.runtime.entities.model_runtime.speech2text import (
+    Speech2TextResult,
+)
 from dify_plugin.core.runtime.entities.model_runtime.text_embedding import (
     TextEmbeddingResult,
 )
@@ -43,9 +46,9 @@ from dify_plugin.utils.io_writer import PluginOutputStream
 
 
 class RequestInterface(AbstractRequestInterface):
-    session_id: str
+    session_id: Optional[str]
 
-    def __init__(self, session_id: str) -> None:
+    def __init__(self, session_id: Optional[str] = None) -> None:
         self.session_id = session_id
 
     def _generate_backwards_request_id(self):
@@ -74,12 +77,7 @@ class RequestInterface(AbstractRequestInterface):
 
         def filter(data: PluginInStream) -> bool:
             return (
-                data.event
-                in [
-                    PluginInStream.Event.BackwardInvocationResponse,
-                    PluginInStream.Event.BackwardInvocationError,
-                    PluginInStream.Event.BackwardInvocationEnd,
-                ]
+                data.event == PluginInStream.Event.BackwardInvocationResponse
                 and data.data.get("backwards_request_id") == request_id
             )
 
@@ -93,14 +91,15 @@ class RequestInterface(AbstractRequestInterface):
                     empty_response_count += 1
                     # if no response for 60 seconds, break
                     if empty_response_count >= 60:
-                        break
+                        raise Exception("invocation exited without response")
                     continue
 
-                if data.event == PluginInStream.Event.BackwardInvocationEnd:
+                event = BackwardsInvocationResponseEvent(**data.data)
+                if event.event == BackwardsInvocationResponseEvent.Event.End:
                     break
 
-                if data.event == PluginInStream.Event.BackwardInvocationError:
-                    raise Exception(data.data.get("error"))
+                if event.event == BackwardsInvocationResponseEvent.Event.Error:
+                    raise Exception(event.message)
 
                 empty_response_count = 0
                 yield data_type(**data.data)
@@ -204,9 +203,11 @@ class RequestInterface(AbstractRequestInterface):
             },
         )
 
-        for data in self._wrapper_stream_invoke(backwards_request_id, TextEmbeddingResult):
+        for data in self._wrapper_stream_invoke(
+            backwards_request_id, TextEmbeddingResult
+        ):
             return data
-        
+
         raise Exception("No response from text embedding")
 
     def invoke_rerank(
@@ -249,7 +250,9 @@ class RequestInterface(AbstractRequestInterface):
             },
         )
 
-        for data in self._wrapper_stream_invoke(backwards_request_id, Speech2TextResult):
+        for data in self._wrapper_stream_invoke(
+            backwards_request_id, Speech2TextResult
+        ):
             return data.result
 
         raise Exception("No response from speech2text")
