@@ -1,12 +1,17 @@
 from gevent import monkey
 
+from dify_plugin.core.server.stdio_stream import StdioStream
+from dify_plugin.core.server.tcp_stream import TCPStream
+from dify_plugin.stream.input_stream import PluginInputStream
+from dify_plugin.stream.output_stream import PluginOutputStream
+
 # patch all the blocking calls
 monkey.patch_all(sys=True)
 
 from collections.abc import Generator  # noqa: E402
 import logging  # noqa: E402
 
-from dify_plugin.config.config import DifyPluginEnv  # noqa: E402
+from dify_plugin.config.config import DifyPluginEnv, InstallMethod  # noqa: E402
 
 from dify_plugin.core.runtime.entities.plugin.request import (  # noqa: E402
     ModelActions,
@@ -22,9 +27,6 @@ from dify_plugin.plugin_executor import PluginExecutor  # noqa: E402
 from dify_plugin.plugin_registration import PluginRegistration  # noqa: E402
 
 
-from dify_plugin.utils.io_writer import PluginOutputStream  # noqa: E402
-
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(plugin_logger_handler)
@@ -35,6 +37,14 @@ class Plugin(IOServer, Router):
         """
         Initialize plugin
         """
+        if config.INSTALL_METHOD == InstallMethod.Local:
+            stdio_stream = StdioStream()
+            PluginInputStream.reset(stdio_stream)
+            PluginOutputStream.init(stdio_stream)
+        elif config.INSTALL_METHOD == InstallMethod.Remote:
+            tcp_stream = TCPStream(config.REMOTE_INSTALL_HOST, config.REMOTE_INSTALL_PORT)
+            PluginInputStream.reset(tcp_stream)
+            PluginOutputStream.init(tcp_stream)
 
         # load plugin configuration
         self.registration = PluginRegistration(config)

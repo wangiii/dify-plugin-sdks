@@ -4,8 +4,8 @@ from threading import Thread
 import time
 from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
-from dify_plugin.utils.io_reader import PluginInputStream
-from dify_plugin.utils.io_writer import PluginOutputStream
+from dify_plugin.stream.input_stream import PluginInputStream
+from dify_plugin.stream.output_stream import PluginOutputStream
 
 
 class IOServer(ABC):

@@ -3,7 +3,7 @@ import inspect
 from typing import Any
 
 from dify_plugin.core.runtime.session import Session
-from dify_plugin.utils.io_writer import PluginOutputStream
+from dify_plugin.stream.output_stream import PluginOutputStream
 
 
 class Route:

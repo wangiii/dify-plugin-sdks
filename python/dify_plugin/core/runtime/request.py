@@ -6,7 +6,9 @@ import uuid
 from pydantic import BaseModel
 
 from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
-from dify_plugin.core.runtime.entities.backwards_invocation.resopnse_event import BackwardsInvocationResponseEvent
+from dify_plugin.core.runtime.entities.backwards_invocation.response_event import (
+    BackwardsInvocationResponseEvent,
+)
 from dify_plugin.core.runtime.entities.model_runtime.llm import (
     LLMResult,
     LLMResultChunk,
@@ -40,9 +42,9 @@ from dify_plugin.core.runtime.entities.plugin.workflow import (
     ParameterExtractorNodeData,
     QuestionClassifierNodeData,
 )
+from dify_plugin.stream.input_stream import PluginInputStream
+from dify_plugin.stream.output_stream import PluginOutputStream
 from dify_plugin.tool.entities import ToolInvokeMessage
-from dify_plugin.utils.io_reader import PluginInputStream
-from dify_plugin.utils.io_writer import PluginOutputStream
 
 
 class RequestInterface(AbstractRequestInterface):

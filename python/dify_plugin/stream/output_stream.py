@@ -1,23 +1,25 @@
-from enum import Enum
-import sys
 from typing import Optional
 
 from pydantic import BaseModel
 
-from ..core.runtime.entities.plugin.message import SessionMessage
+from dify_plugin.core.runtime.entities.plugin.message import SessionMessage
+from dify_plugin.stream.stream_writer import Event, PluginOutputStreamWriter, StreamOutputMessage
 
-class Event(Enum):
-    LOG = 'log'
-    ERROR = 'error'
-    SESSION = 'session'
-    HEARTBEAT = 'heartbeat'
-
-class StreamOutputMessage(BaseModel):
-    event: Event
-    session_id: Optional[str]
-    data: Optional[dict | BaseModel]
 
 class PluginOutputStream:
+    writer: Optional[PluginOutputStreamWriter] = None
+
+    @classmethod
+    def init(cls, writer: PluginOutputStreamWriter):
+        cls.writer = writer
+
+    @classmethod
+    def write(cls, data: str):
+        if cls.writer:
+            cls.writer.write(data)
+        else:
+            raise Exception('Output stream writer not initialized')
+
     @classmethod
     def put(cls, event: Event, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
         """
@@ -26,14 +28,12 @@ class PluginOutputStream:
         if isinstance(data, BaseModel):
             data = data.model_dump()
         
-        sys.stdout.write(StreamOutputMessage(
+        cls.write(StreamOutputMessage(
             event=event,
             session_id=session_id,
             data=data
         ).model_dump_json())
-        
-        sys.stdout.write('\n\n')
-        sys.stdout.flush()
+        cls.write('\n\n')
 
     @classmethod
     def error(cls, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
