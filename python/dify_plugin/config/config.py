@@ -1,6 +1,7 @@
 from enum import Enum
-from pydantic import BaseModel, Field
-from pydantic_settings import SettingsConfigDict
+from typing import Optional
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class InstallMethod(Enum):
@@ -9,7 +10,7 @@ class InstallMethod(Enum):
     AWSLambda = "aws_lambda"
 
 
-class DifyPluginEnv(BaseModel):
+class DifyPluginEnv(BaseSettings):
     MAX_REQUEST_TIMEOUT: int = Field(
         default=300, description="Maximum request timeout in seconds"
     )
@@ -32,6 +33,7 @@ class DifyPluginEnv(BaseModel):
     REMOTE_INSTALL_PORT: int = Field(
         default=5003, description="Remote installation port"
     )
+    REMOTE_INSTALL_KEY: Optional[str] = Field(default=None, description="Remote installation key")
 
     model_config = SettingsConfigDict(
         # read from dotenv format config file

@@ -29,10 +29,10 @@ class PluginInputStream:
                 cls._process_line(line)
 
     @classmethod
-    def _process_line(cls, line: str):
+    def _process_line(cls, line: dict):
         session_id = None
         try:
-            data = PluginInStream.model_validate_json(line)
+            data = PluginInStream(**line)
             session_id = data.session_id
             readers: list[PluginReader] = []
             with cls.lock:

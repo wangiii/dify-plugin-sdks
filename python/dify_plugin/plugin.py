@@ -37,17 +37,37 @@ class Plugin(IOServer, Router):
         """
         Initialize plugin
         """
+        # load plugin configuration
+        self.registration = PluginRegistration(config)
+
         if config.INSTALL_METHOD == InstallMethod.Local:
             stdio_stream = StdioStream()
             PluginInputStream.reset(stdio_stream)
             PluginOutputStream.init(stdio_stream)
         elif config.INSTALL_METHOD == InstallMethod.Remote:
-            tcp_stream = TCPStream(config.REMOTE_INSTALL_HOST, config.REMOTE_INSTALL_PORT)
+            if not config.REMOTE_INSTALL_KEY:
+                raise ValueError("Missing remote install key")
+
+            tcp_stream = TCPStream(
+                config.REMOTE_INSTALL_HOST,
+                config.REMOTE_INSTALL_PORT,
+                config.REMOTE_INSTALL_KEY,
+                on_connected=lambda: PluginOutputStream.write(
+                    self.registration.configuration.model_dump_json() + "\n\n"
+                )
+                and self._log_configuration(),
+            )
             PluginInputStream.reset(tcp_stream)
             PluginOutputStream.init(tcp_stream)
+            tcp_stream.launch()
+        else:
+            raise ValueError("Invalid install method")
 
-        # load plugin configuration
-        self.registration = PluginRegistration(config)
+        if config.INSTALL_METHOD == InstallMethod.Local:
+            PluginOutputStream.write(
+                self.registration.configuration.model_dump_json() + "\n\n"
+            )
+            self._log_configuration()
 
         # initialize plugin executor
         self.plugin_executer = PluginExecutor(self.registration)
@@ -57,6 +77,15 @@ class Plugin(IOServer, Router):
 
         # register io routes
         self._register_request_routes()
+
+    def _log_configuration(self):
+        """
+        Log plugin configuration
+        """
+        for tool in self.registration.tools_configuration:
+            logger.info(f"Installed tool: {tool.identity.name}")
+        for model in self.registration.models_configuration:
+            logger.info(f"Installed model: {model.provider}")
 
     def _register_request_routes(self):
         """

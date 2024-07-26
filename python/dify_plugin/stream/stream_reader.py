@@ -61,9 +61,10 @@ class PluginReader:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
+
 class PluginInputStreamReader(ABC):
     @abstractmethod
-    def read(self) -> Generator[str, None, None]:
+    def read(self) -> Generator[dict, None, None]:
         """
         read data from the stream infinitely
         """

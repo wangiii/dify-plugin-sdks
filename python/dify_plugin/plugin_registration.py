@@ -82,24 +82,16 @@ class PluginRegistration:
                     )
 
                     self.tools_configuration.append(tool_provider_configuration)
-
-                    logger.info(
-                        f"Registered tool provider {tool_provider_configuration.identity.name}"
-                    )
                 elif fs.get("type") == PluginProviderType.Model.value:
                     model_provider_configuration = ModelProviderConfiguration(
                         **fs.get("provider", {})
                     )
                     self.models_configuration.append(model_provider_configuration)
-
-                    logger.info(
-                        f"Registered model provider {model_provider_configuration.provider}"
-                    )
                 else:
                     raise ValueError("Unknown provider type")
         except Exception as e:
             raise ValueError(f"Error loading plugin configuration: {str(e)}")
-
+        
     def _resolve_tool_providers(self):
         """
         walk through all the tool providers and tools and load the classes from sources

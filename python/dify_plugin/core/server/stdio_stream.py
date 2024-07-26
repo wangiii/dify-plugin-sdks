@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from json import loads
 import os
 import sys
 
@@ -13,7 +14,7 @@ class StdioStream(PluginOutputStreamWriter, PluginInputStreamReader):
         sys.stdout.write(data)
         sys.stdout.flush()
 
-    def read(self) -> Generator[str, None, None]:
+    def read(self) -> Generator[dict, None, None]:
         buffer = ""
         while True:
             ready, _, _ = select([sys.stdin], [], [], 1)
@@ -39,4 +40,7 @@ class StdioStream(PluginOutputStreamWriter, PluginInputStreamReader):
 
             lines = lines[:-1]
             for line in lines:
-                yield line
+                try:
+                    yield loads(line)
+                except Exception:
+                    pass

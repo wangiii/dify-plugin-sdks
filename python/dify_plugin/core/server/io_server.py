@@ -64,7 +64,10 @@ class IOServer(ABC):
         """
         while True:
             # timer
-            PluginOutputStream.heartbeat()
+            try:
+                PluginOutputStream.heartbeat()
+            except Exception:
+                pass
             time.sleep(self.config.HEARTBEAT_INTERVAL)
 
     def _run(self):
