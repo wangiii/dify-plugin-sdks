@@ -97,14 +97,14 @@ class RequestInterface(AbstractRequestInterface):
                     continue
 
                 event = BackwardsInvocationResponseEvent(**data.data)
-                if event.event == BackwardsInvocationResponseEvent.Event.End:
+                if event.event == BackwardsInvocationResponseEvent.Event.End or event.data is None:
                     break
 
                 if event.event == BackwardsInvocationResponseEvent.Event.Error:
                     raise Exception(event.message)
 
                 empty_response_count = 0
-                yield data_type(**data.data)
+                yield data_type(**event.data)
 
     def invoke_tool(
         self,

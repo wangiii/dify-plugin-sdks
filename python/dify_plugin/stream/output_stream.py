@@ -9,7 +9,6 @@ from dify_plugin.stream.stream_writer import (
     StreamOutputMessage,
 )
 
-
 class PluginOutputStream:
     writer: Optional[PluginOutputStreamWriter] = None
 
