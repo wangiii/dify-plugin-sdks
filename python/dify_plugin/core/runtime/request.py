@@ -1,6 +1,6 @@
 from binascii import hexlify, unhexlify
 from collections.abc import Generator
-from typing import IO, Any, Optional, Type
+from typing import IO, Any, Literal, Optional, Type, overload
 import uuid
 
 from pydantic import BaseModel
@@ -102,12 +102,15 @@ class RequestInterface(AbstractRequestInterface):
 
                 if event.event == BackwardsInvocationResponseEvent.Event.Error:
                     raise Exception(event.message)
-                
+
                 if event.data is None:
                     break
 
                 empty_response_count = 0
-                yield data_type(**event.data)
+                try:
+                    yield data_type(**event.data)
+                except Exception as e:
+                    raise Exception(f"Failed to parse response: {str(e)}")
 
     def invoke_tool(
         self,
@@ -161,6 +164,26 @@ class RequestInterface(AbstractRequestInterface):
         Invoke api tool
         """
         return self.invoke_tool(ToolProviderType.API, provider, tool_name, parameters)
+
+    @overload
+    def invoke_llm(
+        self,
+        model_config: LLMModelConfig,
+        prompt_messages: list[PromptMessage],
+        tools: list[PromptMessageTool] | None = None,
+        stop: list[str] | None = None,
+        stream: Literal[True] = True,
+    ) -> Generator[LLMResultChunk, None, None]: ...
+
+    @overload
+    def invoke_llm(
+        self,
+        model_config: LLMModelConfig,
+        prompt_messages: list[PromptMessage],
+        tools: list[PromptMessageTool] | None = None,
+        stop: list[str] | None = None,
+        stream: Literal[False] = False,
+    ) -> LLMResult: ...
 
     def invoke_llm(
         self,
