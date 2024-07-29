@@ -36,15 +36,14 @@ class PluginReader:
         while True:
             try:
                 data = self.queue.get(timeout=timeout_for_round)
+                if data is None:
+                    break
+
+                yield data
             except queue.Empty:
                 yield None
             except Exception:
                 break
-
-            if data is None:
-                break
-
-            yield data
 
     def close(self):
         if self.close_callback:

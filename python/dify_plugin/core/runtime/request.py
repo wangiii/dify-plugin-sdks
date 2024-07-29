@@ -97,11 +97,14 @@ class RequestInterface(AbstractRequestInterface):
                     continue
 
                 event = BackwardsInvocationResponseEvent(**data.data)
-                if event.event == BackwardsInvocationResponseEvent.Event.End or event.data is None:
+                if event.event == BackwardsInvocationResponseEvent.Event.End:
                     break
 
                 if event.event == BackwardsInvocationResponseEvent.Event.Error:
                     raise Exception(event.message)
+                
+                if event.data is None:
+                    break
 
                 empty_response_count = 0
                 yield data_type(**event.data)
