@@ -3,7 +3,7 @@ from typing import Mapping
 from werkzeug import Request, Response
 from dify_plugin.webhook.webhook import Webhook
 
-text = """/\__/\
+text = """/\\__/\\
       (  ・ω・)
       ( つ🌈つ
 ╔═══━━━━━━━━━━━━═══╗
