@@ -1,9 +1,9 @@
 from collections.abc import Generator
 from json import loads
-import os
 import sys
 
-from gevent.select import select
+# import tp_read
+from gevent.os import tp_read
 
 from dify_plugin.stream.stream_reader import PluginInputStreamReader
 from dify_plugin.stream.stream_writer import PluginOutputStreamWriter
@@ -17,12 +17,8 @@ class StdioStream(PluginOutputStreamWriter, PluginInputStreamReader):
     def read(self) -> Generator[dict, None, None]:
         buffer = ""
         while True:
-            ready, _, _ = select([sys.stdin], [], [], 1)
-            if not ready:
-                continue
-
-            # read data from stdin through os.read to avoid buffering related issues
-            data = os.read(sys.stdin.fileno(), 4096).decode()
+            # read data from stdin through tp_read
+            data = tp_read(sys.stdin.fileno(), 512).decode()
 
             if not data:
                 continue

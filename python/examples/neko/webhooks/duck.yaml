@@ -1,0 +1,7 @@
+type: webhook
+provider:
+  path: "/duck/<id>"
+  method: "GET"
+  extra:
+    python:
+      source: "webhooks/duck.py"

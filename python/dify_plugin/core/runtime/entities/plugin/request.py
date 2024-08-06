@@ -17,6 +17,7 @@ from dify_plugin.model.model_entities import ModelType
 class PluginInvokeType(Enum):
     Tool = "tool"
     Model = "model"
+    Webhook = "webhook"
 
 
 class ToolActions(Enum):
@@ -33,6 +34,10 @@ class ModelActions(Enum):
     InvokeTTS = "invoke_tts"
     InvokeSpeech2Text = "invoke_speech2text"
     InvokeModeration = "invoke_moderation"
+
+
+class WebhookActions(Enum):
+    InvokeWebhook = "invoke_webhook"
 
 
 class PluginAccessRequest(BaseModel):
@@ -66,9 +71,10 @@ class PluginAccessModelRequest(BaseModel):
 
     model_config = ConfigDict(protected_namespaces=())
 
+
 class ModelInvokeLLMRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeLLM
-    
+
     model_parameters: dict[str, Any]
     prompt_messages: list[PromptMessage]
     stop: Optional[list[str]]
@@ -96,44 +102,51 @@ class ModelInvokeLLMRequest(PluginAccessModelRequest):
 
         return v
 
+
 class ModelInvokeTextEmbeddingRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeTextEmbedding
-    
+
     texts: list[str]
+
 
 class ModelInvokeRerankRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeRerank
-    
+
     query: str
     docs: list[str]
     score_threshold: Optional[float]
     top_n: Optional[int]
 
+
 class ModelInvokeTTSRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeTTS
-    
+
     content_text: str
     voice: str
 
+
 class ModelInvokeSpeech2TextRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeSpeech2Text
-    
+
     file: str
+
 
 class ModelInvokeModerationRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeModeration
-    
+
     text: str
+
 
 class ModelValidateProviderCredentialsRequest(BaseModel):
     type: PluginInvokeType = PluginInvokeType.Model
     user_id: str
     provider: str
     credentials: dict
-    
+
     action: ModelActions = ModelActions.ValidateProviderCredentials
 
     model_config = ConfigDict(protected_namespaces=())
+
 
 class ModelValidateModelCredentialsRequest(BaseModel):
     type: PluginInvokeType = PluginInvokeType.Model
@@ -142,7 +155,13 @@ class ModelValidateModelCredentialsRequest(BaseModel):
     model_type: ModelType
     model: str
     credentials: dict
-    
+
     action: ModelActions = ModelActions.ValidateModelCredentials
 
     model_config = ConfigDict(protected_namespaces=())
+
+
+class WebhookInvokeRequest(BaseModel):
+    type: PluginInvokeType = PluginInvokeType.Webhook
+    action: WebhookActions = WebhookActions.InvokeWebhook
+    raw_http_request: str

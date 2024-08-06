@@ -1,0 +1,7 @@
+type: webhook
+provider:
+  path: "/neko"
+  method: "POST"
+  extra:
+    python:
+      source: "webhooks/neko.py"

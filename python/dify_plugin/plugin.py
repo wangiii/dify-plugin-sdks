@@ -17,6 +17,7 @@ from dify_plugin.core.runtime.entities.plugin.request import (  # noqa: E402
     ModelActions,
     PluginInvokeType,
     ToolActions,
+    WebhookActions,
 )
 from dify_plugin.core.runtime.session import Session  # noqa: E402
 from dify_plugin.core.server.io_server import IOServer  # noqa: E402
@@ -149,6 +150,12 @@ class Plugin(IOServer, Router):
             self.plugin_executer.validate_model_credentials,
             lambda data: data.get("type") == PluginInvokeType.Model.value
             and data.get("action") == ModelActions.ValidateModelCredentials.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.invoke_webhook,
+            lambda data: data.get("type") == PluginInvokeType.Webhook.value
+            and data.get("action") == WebhookActions.InvokeWebhook.value,
         )
 
     def _execute_request(self, session_id: str, data: dict):

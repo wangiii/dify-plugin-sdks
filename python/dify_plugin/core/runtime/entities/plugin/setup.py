@@ -48,3 +48,4 @@ class PluginConfiguration(BaseModel):
 class PluginProviderType(Enum):
     Tool = "tool"
     Model = "model"
+    Webhook = "webhook"

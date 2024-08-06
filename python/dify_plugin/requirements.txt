@@ -3,3 +3,5 @@ pydantic_settings~=2.3.4
 pyyaml~=6.0.1
 transformers~=4.42.4
 gevent~=24.2.1
+Werkzeug~=3.0.3
+dpkt~=1.9.8

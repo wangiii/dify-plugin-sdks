@@ -1,5 +1,9 @@
 import binascii
+from collections.abc import Generator, Iterable
 import tempfile
+
+from werkzeug import Response
+
 from dify_plugin.core.runtime.entities.plugin.request import (
     ModelInvokeLLMRequest,
     ModelInvokeModerationRequest,
@@ -11,6 +15,7 @@ from dify_plugin.core.runtime.entities.plugin.request import (
     ModelValidateProviderCredentialsRequest,
     ToolInvokeRequest,
     ToolValidateCredentialsRequest,
+    WebhookInvokeRequest,
 )
 from dify_plugin.core.runtime.session import Session
 from dify_plugin.model.large_language_model import LargeLanguageModel
@@ -21,6 +26,7 @@ from dify_plugin.model.text_embedding_model import TextEmbeddingModel
 from dify_plugin.model.tts_model import TTSModel
 from dify_plugin.plugin_registration import PluginRegistration
 from dify_plugin.tool.entities import ToolRuntime
+from dify_plugin.utils.http_parser import parse_raw_request
 
 
 class PluginExecutor:
@@ -42,10 +48,8 @@ class PluginExecutor:
             raise ValueError(
                 f"Failed to validate provider credentials: {type(e).__name__}: {str(e)}"
             )
-        
-        return {
-            "result": True
-        }
+
+        return {"result": True}
 
     def invoke_tool(self, session: Session, request: ToolInvokeRequest):
         provider_cls = self.registration.get_tool_provider_cls(request.provider)
@@ -58,22 +62,18 @@ class PluginExecutor:
                 f"Tool `{request.tool}` not found for provider `{request.provider}`"
             )
 
-        # instantiate provider and tool
-        provider = provider_cls()
+        # instantiate tool
         tool = tool_cls(
             runtime=ToolRuntime(
-                credentials=request.credentials, user_id=request.user_id, session_id=session.session_id,
+                credentials=request.credentials,
+                user_id=request.user_id,
+                session_id=session.session_id,
             )
         )
 
         # invoke tool
         try:
-            return session.run_tool(
-                action=request.action,
-                provider=provider,
-                tool=tool,
-                parameters=request.tool_parameters,
-            )
+            yield from tool.invoke(request.tool_parameters)
         except Exception as e:
             raise ValueError(f"Failed to invoke tool: {type(e).__name__}: {str(e)}")
 
@@ -90,10 +90,8 @@ class PluginExecutor:
             raise ValueError(
                 f"Failed to validate provider credentials: {type(e).__name__}: {str(e)}"
             )
-        
-        return {
-            "result": True
-        }
+
+        return {"result": True}
 
     def validate_model_credentials(
         self, session: Session, data: ModelValidateModelCredentialsRequest
@@ -116,10 +114,8 @@ class PluginExecutor:
             raise ValueError(
                 f"Failed to validate model credentials: {type(e).__name__}: {str(e)}"
             )
-        
-        return {
-            "result": True
-        }
+
+        return {"result": True}
 
     def invoke_llm(self, session: Session, data: ModelInvokeLLMRequest):
         model_instance = self.registration.get_model_instance(
@@ -220,3 +216,54 @@ class PluginExecutor:
                     data.user_id,
                 )
             }
+
+    def invoke_webhook(self, session: Session, data: WebhookInvokeRequest):
+        bytes_data = binascii.unhexlify(data.raw_http_request)
+        request = parse_raw_request(bytes_data)
+
+
+        try:
+            # dispatch request
+            webhook, values = self.registration.dispatch_webhook_request(request)
+            # construct response
+            webhook_instance = webhook()
+            response = webhook_instance.invoke(request, values)
+        except Exception:
+            response = Response('Not Found', status=404)
+
+        # check if response is a generator
+        if isinstance(response.response, Generator):
+            # return headers
+            yield {
+                "status": response.status,
+                "headers": {k: v for k, v in response.headers.items()},
+            }
+
+            for chunk in response.response:
+                if isinstance(chunk, bytes | bytearray | memoryview):
+                    yield {"result": binascii.hexlify(chunk).decode()}
+                else:
+                    yield {"result": binascii.hexlify(chunk.encode("utf-8")).decode()}
+        else:
+            result = {
+                "status": response.status,
+                "headers": {k: v for k, v in response.headers.items()},
+            }
+
+            if isinstance(response.response, bytes | bytearray | memoryview):
+                result["result"] = binascii.hexlify(response.response).decode()
+            elif isinstance(response.response, str):
+                result["result"] = binascii.hexlify(
+                    response.response.encode("utf-8")
+                ).decode()
+            elif isinstance(response.response, Iterable):
+                result["result"] = ""
+                for chunk in response.response:
+                    if isinstance(chunk, bytes | bytearray | memoryview):
+                        result["result"] += binascii.hexlify(chunk).decode()
+                    else:
+                        result["result"] += binascii.hexlify(
+                            chunk.encode("utf-8")
+                        ).decode()
+
+            yield result
