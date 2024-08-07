@@ -3,7 +3,7 @@ from typing import Mapping
 from werkzeug import Request, Response
 from dify_plugin.webhook.webhook import Webhook
 
-text = """/\\__/\\
+text = """<pre>/\\__/\\
       (  ・ω・)
       ( つ🌈つ
 ╔═══━━━━━━━━━━━━═══╗
@@ -15,7 +15,7 @@ text = """/\\__/\\
 ╚═══━━━━━━━━━━━━═══╝
    ∪∪             ∪∪
    
-  ～～～～～～～～～～～～～～～～～～～～～～🌟"""
+  ～～～～～～～～～～～～～～～～～～～～～～🌟</pre>"""
 
 class Neko(Webhook):
     def _invoke(self, r: Request, values: Mapping) -> Response:

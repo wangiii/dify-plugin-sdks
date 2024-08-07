@@ -12,6 +12,8 @@ resource:
     model:
       enabled: true
       llm: true
+    webhook:
+      enabled: true
 plugins:
   - "webhooks/neko.yaml"
   - "webhooks/duck.yaml"

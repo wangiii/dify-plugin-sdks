@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -28,6 +29,36 @@ class PluginMeta(BaseModel):
     arch: list[PluginArch]
     runner: dict
 
+
+class PluginResourceRequirements(BaseModel):
+    memory: int
+    storage: int
+
+    class Permission(BaseModel):
+        class Tool(BaseModel):
+            enabled: bool
+
+        class Model(BaseModel):
+            enabled: Optional[bool]
+            llm: Optional[bool]
+            text_embedding: Optional[bool]
+            rerank: Optional[bool]
+            tts: Optional[bool]
+            speech2text: Optional[bool]
+            moderation: Optional[bool]
+
+        class Node(BaseModel):
+            enabled: bool
+
+        class Webhook(BaseModel):
+            enabled: bool
+
+        tool: Optional[Tool]
+        model: Optional[Model]
+        node: Optional[Node]
+        webhook: Optional[Webhook]
+
+    permission: Permission
 
 class PluginConfiguration(BaseModel):
     class Meta(BaseModel):

@@ -174,11 +174,11 @@ class PluginExecutor:
                 data.voice,
                 data.user_id,
             )
-            if isinstance(b, bytes):
+            if isinstance(b, bytes | bytearray | memoryview):
                 return {"result": binascii.hexlify(b).decode()}
 
             for chunk in b:
-                yield {"result": binascii.hexlify(bytes(chunk)).decode()}
+                yield {"result": binascii.hexlify(chunk).decode()}
 
     def invoke_speech_to_text(
         self, session: Session, data: ModelInvokeSpeech2TextRequest
@@ -235,7 +235,7 @@ class PluginExecutor:
         if isinstance(response.response, Generator):
             # return headers
             yield {
-                "status": response.status,
+                "status": response.status_code,
                 "headers": {k: v for k, v in response.headers.items()},
             }
 
@@ -246,7 +246,7 @@ class PluginExecutor:
                     yield {"result": binascii.hexlify(chunk.encode("utf-8")).decode()}
         else:
             result = {
-                "status": response.status,
+                "status": response.status_code,
                 "headers": {k: v for k, v in response.headers.items()},
             }
 
