@@ -26,13 +26,19 @@ class PluginInputStream:
                 continue
 
             for line in cls.stream_reader.read():
-                cls._process_line(line)
+                if isinstance(line, dict):
+                    cls._process_line(line)
+                else:
+                    cls._process_line(line[0], hijack=line[1])
 
     @classmethod
-    def _process_line(cls, line: dict):
+    def _process_line(cls, line: dict, hijack: Optional[Callable[[Callable[[], None]], None]] = None):
         session_id = None
         try:
             data = PluginInStream(**line)
+            if hijack:
+                data.set_executor_hijack(hijack)
+                
             session_id = data.session_id
             readers: list[PluginReader] = []
             with cls.lock:
@@ -41,6 +47,7 @@ class PluginInputStream:
                         readers.append(reader)
             for reader in readers:
                 reader.write(data)
+
         except Exception as e:
             PluginOutputStream.error(
                 session_id=session_id,

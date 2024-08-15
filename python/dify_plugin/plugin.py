@@ -43,11 +43,11 @@ class Plugin(IOServer, Router):
         self.registration = PluginRegistration(config)
 
         if config.INSTALL_METHOD == InstallMethod.Local:
-            self._launch_local_stream()
+            self._launch_local_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.Remote:
-            self._launch_remote_stream()
+            self._launch_remote_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
-            self._launch_aws_stream()
+            self._launch_aws_stream(config)
         else:
             raise ValueError("Invalid install method")
 
@@ -60,7 +60,7 @@ class Plugin(IOServer, Router):
         # register io routes
         self._register_request_routes()
 
-    def _launch_local_stream(self):
+    def _launch_local_stream(self, config: DifyPluginEnv):
         """
         Launch local stream
         """
@@ -71,20 +71,20 @@ class Plugin(IOServer, Router):
         PluginOutputStream.write(
             self.registration.configuration.model_dump_json() + "\n\n"
         )
-        
+
         self._log_configuration()
 
-    def _launch_remote_stream(self):
+    def _launch_remote_stream(self, config: DifyPluginEnv):
         """
         Launch remote stream
         """
-        if not self.config.REMOTE_INSTALL_KEY:
+        if not config.REMOTE_INSTALL_KEY:
             raise ValueError("Missing remote install key")
         
         tcp_stream = TCPStream(
-            self.config.REMOTE_INSTALL_HOST,
-            self.config.REMOTE_INSTALL_PORT,
-            self.config.REMOTE_INSTALL_KEY,
+            config.REMOTE_INSTALL_HOST,
+            config.REMOTE_INSTALL_PORT,
+            config.REMOTE_INSTALL_KEY,
             on_connected=lambda: PluginOutputStream.write(
                 self.registration.configuration.model_dump_json() + "\n\n"
             )
@@ -94,11 +94,11 @@ class Plugin(IOServer, Router):
         PluginOutputStream.init(tcp_stream)
         tcp_stream.launch()
 
-    def _launch_aws_stream(self):
+    def _launch_aws_stream(self, config: DifyPluginEnv):
         """
         Launch AWS stream
         """
-        aws_stream = AWSLambdaStream()
+        aws_stream = AWSLambdaStream(config.AWS_LAMBDA_PORT)
         PluginInputStream.reset(aws_stream)
         PluginOutputStream.init(aws_stream)
         aws_stream.launch()

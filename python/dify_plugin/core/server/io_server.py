@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 import time
+from typing import Callable, Optional
 from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 from dify_plugin.stream.input_stream import PluginInputStream
@@ -34,10 +35,31 @@ class IOServer(ABC):
 
         for data in PluginInputStream.read(filter).read():
             self.executer.submit(
-                self._execute_request_thread, data.session_id, data.data
+                self._hijack_execute_request,
+                data.session_id,
+                data.data,
+                data.get_executor_hijack(),
             )
 
-    def _execute_request_thread(self, session_id: str, data: dict):
+    def _hijack_execute_request(
+        self,
+        session_id: str,
+        data: dict,
+        hijack: Optional[Callable[[Callable[[], None]], None]],
+    ):
+        """
+        hijack the executor
+        """
+        if hijack:
+            hijack(lambda: self._execute_request_thread(session_id, data))
+        else:
+            self._execute_request_thread(session_id, data)
+
+    def _execute_request_thread(
+        self,
+        session_id: str,
+        data: dict,
+    ):
         """
         wrapper for _execute_request
         """

@@ -1,7 +1,6 @@
 from enum import Enum
-import os
 from typing import Optional
-from pydantic import Field, model_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,6 +34,10 @@ class DifyPluginEnv(BaseSettings):
         default=5003, description="Remote installation port"
     )
     REMOTE_INSTALL_KEY: Optional[str] = Field(default=None, description="Remote installation key")
+
+    AWS_LAMBDA_PORT: int = Field(
+        default=8080, description="AWS Lambda port"
+    )
 
     model_config = SettingsConfigDict(
         # read from dotenv format config file
