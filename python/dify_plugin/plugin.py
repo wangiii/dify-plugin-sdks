@@ -1,5 +1,6 @@
 from gevent import monkey
 
+from dify_plugin.core.server.aws_stream import AWSLambdaStream
 from dify_plugin.core.server.stdio_stream import StdioStream
 from dify_plugin.core.server.tcp_stream import TCPStream
 from dify_plugin.stream.input_stream import PluginInputStream
@@ -42,33 +43,13 @@ class Plugin(IOServer, Router):
         self.registration = PluginRegistration(config)
 
         if config.INSTALL_METHOD == InstallMethod.Local:
-            stdio_stream = StdioStream()
-            PluginInputStream.reset(stdio_stream)
-            PluginOutputStream.init(stdio_stream)
+            self._launch_local_stream()
         elif config.INSTALL_METHOD == InstallMethod.Remote:
-            if not config.REMOTE_INSTALL_KEY:
-                raise ValueError("Missing remote install key")
-
-            tcp_stream = TCPStream(
-                config.REMOTE_INSTALL_HOST,
-                config.REMOTE_INSTALL_PORT,
-                config.REMOTE_INSTALL_KEY,
-                on_connected=lambda: PluginOutputStream.write(
-                    self.registration.configuration.model_dump_json() + "\n\n"
-                )
-                and self._log_configuration(),
-            )
-            PluginInputStream.reset(tcp_stream)
-            PluginOutputStream.init(tcp_stream)
-            tcp_stream.launch()
+            self._launch_remote_stream()
+        elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
+            self._launch_aws_stream()
         else:
             raise ValueError("Invalid install method")
-
-        if config.INSTALL_METHOD == InstallMethod.Local:
-            PluginOutputStream.write(
-                self.registration.configuration.model_dump_json() + "\n\n"
-            )
-            self._log_configuration()
 
         # initialize plugin executor
         self.plugin_executer = PluginExecutor(self.registration)
@@ -78,6 +59,49 @@ class Plugin(IOServer, Router):
 
         # register io routes
         self._register_request_routes()
+
+    def _launch_local_stream(self):
+        """
+        Launch local stream
+        """
+        stdio_stream = StdioStream()
+        PluginInputStream.reset(stdio_stream)
+        PluginOutputStream.init(stdio_stream)
+
+        PluginOutputStream.write(
+            self.registration.configuration.model_dump_json() + "\n\n"
+        )
+        
+        self._log_configuration()
+
+    def _launch_remote_stream(self):
+        """
+        Launch remote stream
+        """
+        if not self.config.REMOTE_INSTALL_KEY:
+            raise ValueError("Missing remote install key")
+        
+        tcp_stream = TCPStream(
+            self.config.REMOTE_INSTALL_HOST,
+            self.config.REMOTE_INSTALL_PORT,
+            self.config.REMOTE_INSTALL_KEY,
+            on_connected=lambda: PluginOutputStream.write(
+                self.registration.configuration.model_dump_json() + "\n\n"
+            )
+            and self._log_configuration(),
+        )
+        PluginInputStream.reset(tcp_stream)
+        PluginOutputStream.init(tcp_stream)
+        tcp_stream.launch()
+
+    def _launch_aws_stream(self):
+        """
+        Launch AWS stream
+        """
+        aws_stream = AWSLambdaStream()
+        PluginInputStream.reset(aws_stream)
+        PluginOutputStream.init(aws_stream)
+        aws_stream.launch()
 
     def _log_configuration(self):
         """

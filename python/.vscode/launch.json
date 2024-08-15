@@ -1,0 +1,62 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Python Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Tools",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/google/main.py",
+            "cwd": "${workspaceFolder}/examples/google",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "GEVENT_SUPPORT": "True"
+            }
+        },
+        {
+            "name": "Model",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/openai/main.py",
+            "cwd": "${workspaceFolder}/examples/openai",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "GEVENT_SUPPORT": "True"
+            }
+        },
+        {
+            "name": "BackwardsInvocation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/code_based_workflow/main.py",
+            "cwd": "${workspaceFolder}/examples/code_based_workflow",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "GEVENT_SUPPORT": "True"
+            }
+        },
+        {
+            "name": "Neko",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/neko/main.py",
+            "cwd": "${workspaceFolder}/examples/neko",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "GEVENT_SUPPORT": "True"
+            }
+        }
+    ]
+}

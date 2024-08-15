@@ -5,3 +5,4 @@ transformers~=4.42.4
 gevent~=24.2.1
 Werkzeug~=3.0.3
 dpkt~=1.9.8
+awslambdaric~=2.1.0

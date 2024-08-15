@@ -1,7 +1,17 @@
 {
     "cSpell.words": [
+        "abstractmethods",
+        "Configurate",
         "eventloop",
+        "gevent",
+        "hexlify",
+        "ipynb",
+        "Neko",
         "Peekable",
-        "Rerank"
+        "Rerank",
+        "SERP",
+        "serpapi",
+        "tiktoken",
+        "unhexlify"
     ]
 }
