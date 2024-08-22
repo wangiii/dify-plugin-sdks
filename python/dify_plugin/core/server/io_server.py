@@ -5,17 +5,19 @@ import time
 from typing import Callable, Optional
 from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
-from dify_plugin.stream.input_stream import PluginInputStream
-from dify_plugin.stream.output_stream import PluginOutputStream
+from dify_plugin.stream.io_stream import PluginIOStream
 
 
 class IOServer(ABC):
-    def __init__(self, config: DifyPluginEnv) -> None:
+    io_stream: PluginIOStream
+
+    def __init__(self, config: DifyPluginEnv, io_stream: PluginIOStream) -> None:
         self.config = config
         self.executer = ThreadPoolExecutor(max_workers=self.config.MAX_WORKER)
+        self.io_stream = io_stream
 
     def close(self, *args):
-        PluginInputStream.close()
+        self.io_stream.close()
 
     @abstractmethod
     def _execute_request(self, session_id: str, data: dict):
@@ -33,7 +35,7 @@ class IOServer(ABC):
                 return True
             return False
 
-        for data in PluginInputStream.read(filter).read():
+        for data in self.io_stream.read(filter).read():
             self.executer.submit(
                 self._hijack_execute_request,
                 data.session_id,
@@ -67,17 +69,17 @@ class IOServer(ABC):
         try:
             self._execute_request(session_id, data)
         except Exception as e:
-            PluginOutputStream.session_message(
+            self.io_stream.session_message(
                 session_id=session_id,
-                data=PluginOutputStream.stream_error_object(
+                data=self.io_stream.stream_error_object(
                     data={
                         "error": f"Failed to execute request ({type(e).__name__}): {str(e)}"
                     }
                 ),
             )
 
-        PluginOutputStream.session_message(
-            session_id=session_id, data=PluginOutputStream.stream_end_object()
+        self.io_stream.session_message(
+            session_id=session_id, data=self.io_stream.stream_end_object()
         )
 
     def _heartbeat(self):
@@ -87,14 +89,14 @@ class IOServer(ABC):
         while True:
             # timer
             try:
-                PluginOutputStream.heartbeat()
+                self.io_stream.heartbeat()
             except Exception:
                 pass
             time.sleep(self.config.HEARTBEAT_INTERVAL)
 
     def _run(self):
         th1 = Thread(target=self._setup_instruction_listener)
-        th2 = Thread(target=PluginInputStream.event_loop)
+        th2 = Thread(target=self.io_stream.event_loop)
         th3 = Thread(target=self._heartbeat)
 
         th1.start()

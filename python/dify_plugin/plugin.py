@@ -3,8 +3,7 @@ from gevent import monkey
 from dify_plugin.core.server.aws_stream import AWSLambdaStream
 from dify_plugin.core.server.stdio_stream import StdioStream
 from dify_plugin.core.server.tcp_stream import TCPStream
-from dify_plugin.stream.input_stream import PluginInputStream
-from dify_plugin.stream.output_stream import PluginOutputStream
+from dify_plugin.stream.io_stream import PluginIOStream
 
 # patch all the blocking calls
 monkey.patch_all(sys=True)
@@ -43,65 +42,66 @@ class Plugin(IOServer, Router):
         self.registration = PluginRegistration(config)
 
         if config.INSTALL_METHOD == InstallMethod.Local:
-            self._launch_local_stream(config)
+            io_stream = self._launch_local_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.Remote:
-            self._launch_remote_stream(config)
+            io_stream = self._launch_remote_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
-            self._launch_aws_stream(config)
+            io_stream = self._launch_aws_stream(config)
         else:
             raise ValueError("Invalid install method")
 
         # initialize plugin executor
         self.plugin_executer = PluginExecutor(self.registration)
 
-        IOServer.__init__(self, config)
-        Router.__init__(self)
+        IOServer.__init__(self, config, io_stream)
+        Router.__init__(self, io_stream)
 
         # register io routes
         self._register_request_routes()
 
-    def _launch_local_stream(self, config: DifyPluginEnv):
+    def _launch_local_stream(self, config: DifyPluginEnv) -> PluginIOStream:
         """
         Launch local stream
         """
         stdio_stream = StdioStream()
-        PluginInputStream.reset(stdio_stream)
-        PluginOutputStream.init(stdio_stream)
+        io_stream = PluginIOStream(stdio_stream, stdio_stream)
 
-        PluginOutputStream.write(
-            self.registration.configuration.model_dump_json() + "\n\n"
-        )
+        io_stream.write(self.registration.configuration.model_dump_json() + "\n\n")
 
         self._log_configuration()
+        return io_stream
 
-    def _launch_remote_stream(self, config: DifyPluginEnv):
+    def _launch_remote_stream(self, config: DifyPluginEnv) -> PluginIOStream:
         """
         Launch remote stream
         """
         if not config.REMOTE_INSTALL_KEY:
             raise ValueError("Missing remote install key")
-        
+
         tcp_stream = TCPStream(
             config.REMOTE_INSTALL_HOST,
             config.REMOTE_INSTALL_PORT,
             config.REMOTE_INSTALL_KEY,
-            on_connected=lambda: PluginOutputStream.write(
+            on_connected=lambda: tcp_stream.write(
                 self.registration.configuration.model_dump_json() + "\n\n"
             )
             and self._log_configuration(),
         )
-        PluginInputStream.reset(tcp_stream)
-        PluginOutputStream.init(tcp_stream)
+
+        io_stream = PluginIOStream(tcp_stream, tcp_stream)
         tcp_stream.launch()
 
-    def _launch_aws_stream(self, config: DifyPluginEnv):
+        return io_stream
+
+    def _launch_aws_stream(self, config: DifyPluginEnv) -> PluginIOStream:
         """
         Launch AWS stream
         """
-        aws_stream = AWSLambdaStream(config.AWS_LAMBDA_PORT)
-        PluginInputStream.reset(aws_stream)
-        PluginOutputStream.init(aws_stream)
+        aws_stream = AWSLambdaStream(config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT)
+        io_stream = PluginIOStream(aws_stream, aws_stream)
         aws_stream.launch()
+
+        return io_stream
 
     def _log_configuration(self):
         """
@@ -194,12 +194,12 @@ class Plugin(IOServer, Router):
         if response:
             if isinstance(response, Generator):
                 for message in response:
-                    PluginOutputStream.session_message(
+                    self.io_stream.session_message(
                         session_id=session_id,
-                        data=PluginOutputStream.stream_object(data=message),
+                        data=self.io_stream.stream_object(data=message),
                     )
             else:
-                PluginOutputStream.session_message(
+                self.io_stream.session_message(
                     session_id=session_id,
-                    data=PluginOutputStream.stream_object(data=response),
+                    data=self.io_stream.stream_object(data=response),
                 )

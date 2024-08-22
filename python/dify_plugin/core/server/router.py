@@ -3,8 +3,7 @@ import inspect
 from typing import Any
 
 from dify_plugin.core.runtime.session import Session
-from dify_plugin.stream.output_stream import PluginOutputStream
-
+from dify_plugin.stream.io_stream import PluginIOStream
 
 class Route:
     filter: Callable[[dict], bool]
@@ -17,9 +16,11 @@ class Route:
 
 class Router:
     routes: list[Route]
+    io_stream: PluginIOStream
 
-    def __init__(self) -> None:
+    def __init__(self, io_stream: PluginIOStream) -> None:
         self.routes = []
+        self.io_stream = io_stream
 
     def register_route(
         self, f: Callable, filter: Callable[[dict], bool], instance: Any = None
@@ -39,7 +40,7 @@ class Router:
                 try:
                     data = annotation(**data)
                 except TypeError as e:
-                    PluginOutputStream.error(
+                    self.io_stream.error(
                         session_id=session.session_id,
                         data={"error": str(e), "error_type": type(e).__name__},
                     )
@@ -54,7 +55,7 @@ class Router:
                 try:
                     data = annotation(**data)
                 except TypeError as e:
-                    PluginOutputStream.error(
+                    self.io_stream.error(
                         session_id=session.session_id,
                         data={"error": str(e), "error_type": type(e).__name__},
                     )

@@ -42,16 +42,17 @@ from dify_plugin.core.runtime.entities.plugin.workflow import (
     ParameterExtractorNodeData,
     QuestionClassifierNodeData,
 )
-from dify_plugin.stream.input_stream import PluginInputStream
-from dify_plugin.stream.output_stream import PluginOutputStream
+from dify_plugin.stream.io_stream import PluginIOStream
 from dify_plugin.tool.entities import ToolInvokeMessage
 
 
 class RequestInterface(AbstractRequestInterface):
     session_id: Optional[str]
+    io_stream: PluginIOStream
 
-    def __init__(self, session_id: Optional[str] = None) -> None:
+    def __init__(self, io_stream: PluginIOStream, session_id: Optional[str] = None) -> None:
         self.session_id = session_id
+        self.io_stream = io_stream
 
     def _generate_backwards_request_id(self):
         return uuid.uuid4().hex
@@ -59,9 +60,9 @@ class RequestInterface(AbstractRequestInterface):
     def _backwards_invoke(
         self, backwards_request_id: str, type: InvokeType, data: dict
     ):
-        PluginOutputStream.session_message(
+        self.io_stream.session_message(
             session_id=self.session_id,
-            data=PluginOutputStream.stream_invoke_object(
+            data=self.io_stream.stream_invoke_object(
                 data={
                     "type": type.value,
                     "backwards_request_id": backwards_request_id,
@@ -84,7 +85,7 @@ class RequestInterface(AbstractRequestInterface):
             )
 
         empty_response_count = 0
-        with PluginInputStream.read(filter) as reader:
+        with self.io_stream.read(filter) as reader:
             for data in reader.read(timeout_for_round=1):
                 """
                 accept response from input stream and wait for at most 60 seconds
