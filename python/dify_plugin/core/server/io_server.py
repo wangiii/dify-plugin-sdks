@@ -2,16 +2,16 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 import time
-from typing import Callable, Optional
 from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
-from dify_plugin.stream.io_stream import PluginIOStream
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
 
 class IOServer(ABC):
-    io_stream: PluginIOStream
+    io_stream: RequestReader
 
-    def __init__(self, config: DifyPluginEnv, io_stream: PluginIOStream) -> None:
+    def __init__(self, config: DifyPluginEnv, io_stream: RequestReader) -> None:
         self.config = config
         self.executer = ThreadPoolExecutor(max_workers=self.config.MAX_WORKER)
         self.io_stream = io_stream
@@ -37,30 +37,14 @@ class IOServer(ABC):
 
         for data in self.io_stream.read(filter).read():
             self.executer.submit(
-                self._hijack_execute_request,
+                self._execute_request_thread,
                 data.session_id,
                 data.data,
-                data.get_executor_hijack(),
+                data.writer,
             )
 
-    def _hijack_execute_request(
-        self,
-        session_id: str,
-        data: dict,
-        hijack: Optional[Callable[[Callable[[], None]], None]],
-    ):
-        """
-        hijack the executor
-        """
-        if hijack:
-            hijack(lambda: self._execute_request_thread(session_id, data))
-        else:
-            self._execute_request_thread(session_id, data)
-
     def _execute_request_thread(
-        self,
-        session_id: str,
-        data: dict,
+        self, session_id: str, data: dict, writer: ResponseWriter
     ):
         """
         wrapper for _execute_request
@@ -69,27 +53,25 @@ class IOServer(ABC):
         try:
             self._execute_request(session_id, data)
         except Exception as e:
-            self.io_stream.session_message(
+            writer.session_message(
                 session_id=session_id,
-                data=self.io_stream.stream_error_object(
+                data=writer.stream_error_object(
                     data={
                         "error": f"Failed to execute request ({type(e).__name__}): {str(e)}"
                     }
                 ),
             )
 
-        self.io_stream.session_message(
-            session_id=session_id, data=self.io_stream.stream_end_object()
-        )
+        writer.session_message(session_id=session_id, data=writer.stream_end_object())
 
-    def _heartbeat(self):
+    def _heartbeat(self, writer: ResponseWriter):
         """
         send heartbeat to stdout
         """
         while True:
             # timer
             try:
-                self.io_stream.heartbeat()
+                writer.heartbeat()
             except Exception:
                 pass
             time.sleep(self.config.HEARTBEAT_INTERVAL)

@@ -1,9 +1,14 @@
 from collections.abc import Callable
 import inspect
-from typing import Any
+import logging
+from typing import Any, Optional
 
 from dify_plugin.core.runtime.session import Session
-from dify_plugin.stream.io_stream import PluginIOStream
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
+
+logger = logging.getLogger(__file__)
+
 
 class Route:
     filter: Callable[[dict], bool]
@@ -16,11 +21,14 @@ class Route:
 
 class Router:
     routes: list[Route]
-    io_stream: PluginIOStream
+    request_reader: RequestReader
 
-    def __init__(self, io_stream: PluginIOStream) -> None:
+    def __init__(
+        self, request_reader: RequestReader, response_writer: Optional[ResponseWriter]
+    ) -> None:
         self.routes = []
-        self.io_stream = io_stream
+        self.request_reader = request_reader
+        self.response_writer = response_writer
 
     def register_route(
         self, f: Callable, filter: Callable[[dict], bool], instance: Any = None
@@ -40,10 +48,13 @@ class Router:
                 try:
                     data = annotation(**data)
                 except TypeError as e:
-                    self.io_stream.error(
-                        session_id=session.session_id,
-                        data={"error": str(e), "error_type": type(e).__name__},
-                    )
+                    if not self.response_writer:
+                        logger.error("failed to route request: %s", e)
+                    else:
+                        self.response_writer.error(
+                            session_id=session.session_id,
+                            data={"error": str(e), "error_type": type(e).__name__},
+                        )
                 return f(instance, session, data)
         else:
             # get first parameter of func
@@ -55,10 +66,13 @@ class Router:
                 try:
                     data = annotation(**data)
                 except TypeError as e:
-                    self.io_stream.error(
-                        session_id=session.session_id,
-                        data={"error": str(e), "error_type": type(e).__name__},
-                    )
+                    if not self.response_writer:
+                        logger.error("failed to route request: %s", e)
+                    else:
+                        self.response_writer.error(
+                            session_id=session.session_id,
+                            data={"error": str(e), "error_type": type(e).__name__},
+                        )
                 return f(session, data)
 
         self.routes.append(Route(filter, wrapper))
@@ -66,4 +80,4 @@ class Router:
     def dispatch(self, session: Session, data: dict) -> Any:
         for route in self.routes:
             if route.filter(data):
-                    return route.func(session, data)
+                return route.func(session, data)

@@ -38,6 +38,9 @@ class DifyPluginEnv(BaseSettings):
     AWS_LAMBDA_PORT: int = Field(
         default=8080, description="AWS Lambda port"
     )
+    DIFY_PLUGIN_DAEMON_URL: str = Field(
+        default="http://localhost:5002", description="backwards invocation address"
+    )
 
     model_config = SettingsConfigDict(
         # read from dotenv format config file

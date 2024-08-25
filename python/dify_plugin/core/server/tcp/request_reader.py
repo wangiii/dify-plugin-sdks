@@ -5,15 +5,16 @@ from typing import Callable, Generator, Optional
 
 from gevent.select import select
 
-from dify_plugin.stream.stream_reader import PluginInputStreamReader
-from dify_plugin.stream.stream_writer import PluginOutputStreamWriter
+from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from dify_plugin.core.server.__base.stream_reader import PluginInputStreamReader
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class TCPStream(PluginOutputStreamWriter, PluginInputStreamReader):
+class TCPReaderWriter(PluginInputStreamReader, ResponseWriter):
     def __init__(
         self,
         host: str,
@@ -48,6 +49,19 @@ class TCPStream(PluginOutputStreamWriter, PluginInputStreamReader):
             self.sock.close()
             self.alive = False
 
+    def write(self, data: str):
+        if not self.alive:
+            raise Exception("connection is dead")
+
+        try:
+            self.sock.sendall(data.encode())
+        except Exception as e:
+            logger.error(f"Failed to write data: {e}")
+            self._launch()
+
+    def done(self):
+        pass
+
     def _launch(self):
         """
         Connect to the target, try to reconnect if failed
@@ -80,21 +94,7 @@ class TCPStream(PluginOutputStreamWriter, PluginInputStreamReader):
             logger.error(f"Failed to connect to {self.host}:{self.port}, {e}")
             raise e
 
-    def write(self, data: str):
-        """
-        Write data to the target
-        """
-        if not self.alive:
-            raise Exception("Connection is not alive")
-
-        try:
-            self.sock.sendall(data.encode())
-        except Exception as e:
-            logger.error(f"Failed to write data to {self.host}:{self.port}, {e}")
-            self.alive = False
-            self._launch()
-
-    def read(self) -> Generator[dict, None, None]:
+    def read(self) -> Generator[PluginInStream, None, None]:
         """
         Read data from the target
         """
@@ -132,6 +132,12 @@ class TCPStream(PluginOutputStreamWriter, PluginInputStreamReader):
             lines = lines[:-1]
             for line in lines:
                 try:
-                    yield loads(line)
+                    data = loads(line)
+                    yield PluginInStream(
+                        session_id=data["session_id"],
+                        event=PluginInStream.Event.value_of(data["event"]),
+                        data=data["data"],
+                        writer=self,
+                    )
                 except Exception:
                     logger.error(f"An error occurred while parsing the data: {line}")

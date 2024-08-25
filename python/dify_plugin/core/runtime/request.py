@@ -42,17 +42,24 @@ from dify_plugin.core.runtime.entities.plugin.workflow import (
     ParameterExtractorNodeData,
     QuestionClassifierNodeData,
 )
-from dify_plugin.stream.io_stream import PluginIOStream
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 from dify_plugin.tool.entities import ToolInvokeMessage
 
 
 class RequestInterface(AbstractRequestInterface):
     session_id: Optional[str]
-    io_stream: PluginIOStream
+    response_writer: ResponseWriter
 
-    def __init__(self, io_stream: PluginIOStream, session_id: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        response_writer: ResponseWriter,
+        request_reader: RequestReader,
+        session_id: Optional[str] = None,
+    ) -> None:
+        self.response_writer = response_writer
+        self.request_reader = request_reader
         self.session_id = session_id
-        self.io_stream = io_stream
 
     def _generate_backwards_request_id(self):
         return uuid.uuid4().hex
@@ -60,9 +67,12 @@ class RequestInterface(AbstractRequestInterface):
     def _backwards_invoke(
         self, backwards_request_id: str, type: InvokeType, data: dict
     ):
-        self.io_stream.session_message(
+        """
+        TODO: using different strategy depends on different runtime type
+        """
+        self.response_writer.session_message(
             session_id=self.session_id,
-            data=self.io_stream.stream_invoke_object(
+            data=self.response_writer.stream_invoke_object(
                 data={
                     "type": type.value,
                     "backwards_request_id": backwards_request_id,
@@ -85,7 +95,7 @@ class RequestInterface(AbstractRequestInterface):
             )
 
         empty_response_count = 0
-        with self.io_stream.read(filter) as reader:
+        with self.request_reader.read(filter) as reader:
             for data in reader.read(timeout_for_round=1):
                 """
                 accept response from input stream and wait for at most 60 seconds

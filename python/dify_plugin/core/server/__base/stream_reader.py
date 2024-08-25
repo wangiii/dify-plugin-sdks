@@ -66,7 +66,7 @@ class PluginInputStreamReader(ABC):
     def read(
         self,
     ) -> Generator[
-        dict | tuple[dict, Callable[[Callable[[], None]], None]], None, None
+        PluginInStream, None, None
     ]:
         """
         read data from the stream infinitely

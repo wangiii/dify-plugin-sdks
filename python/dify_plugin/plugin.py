@@ -1,9 +1,13 @@
+from typing import Optional
 from gevent import monkey
 
-from dify_plugin.core.server.aws_stream import AWSLambdaStream
-from dify_plugin.core.server.stdio_stream import StdioStream
-from dify_plugin.core.server.tcp_stream import TCPStream
-from dify_plugin.stream.io_stream import PluginIOStream
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from dify_plugin.core.server.__base.stream_reader import PluginInputStreamReader
+from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader
+from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
+from dify_plugin.core.server.stdio.response_writer import StdioResponseWriter
+from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
 
 # patch all the blocking calls
 monkey.patch_all(sys=True)
@@ -42,43 +46,50 @@ class Plugin(IOServer, Router):
         self.registration = PluginRegistration(config)
 
         if config.INSTALL_METHOD == InstallMethod.Local:
-            io_stream = self._launch_local_stream(config)
+            stream_reader, response_writer = self._launch_local_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.Remote:
-            io_stream = self._launch_remote_stream(config)
+            stream_reader, response_writer = self._launch_remote_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
-            io_stream = self._launch_aws_stream(config)
+            stream_reader, response_writer = self._launch_aws_stream(config)
         else:
             raise ValueError("Invalid install method")
+
+        # set default response writer
+        self.default_response_writer = response_writer
 
         # initialize plugin executor
         self.plugin_executer = PluginExecutor(self.registration)
 
-        IOServer.__init__(self, config, io_stream)
-        Router.__init__(self, io_stream)
+        request_reader = RequestReader(stream_reader)
+        IOServer.__init__(self, config, request_reader)
+        Router.__init__(self, request_reader, response_writer)
 
         # register io routes
         self._register_request_routes()
 
-    def _launch_local_stream(self, config: DifyPluginEnv) -> PluginIOStream:
+    def _launch_local_stream(
+        self, config: DifyPluginEnv
+    ) -> tuple[PluginInputStreamReader, Optional[ResponseWriter]]:
         """
         Launch local stream
         """
-        stdio_stream = StdioStream()
-        io_stream = PluginIOStream(stdio_stream, stdio_stream)
-
-        io_stream.write(self.registration.configuration.model_dump_json() + "\n\n")
+        reader = StdioRequestReader()
+        writer = StdioResponseWriter()
+        writer.write(self.registration.configuration.model_dump_json() + "\n\n")
 
         self._log_configuration()
-        return io_stream
+        return reader, writer
 
-    def _launch_remote_stream(self, config: DifyPluginEnv) -> PluginIOStream:
+    def _launch_remote_stream(
+        self, config: DifyPluginEnv
+    ) -> tuple[PluginInputStreamReader, Optional[ResponseWriter]]:
         """
         Launch remote stream
         """
         if not config.REMOTE_INSTALL_KEY:
             raise ValueError("Missing remote install key")
 
-        tcp_stream = TCPStream(
+        tcp_stream = TCPReaderWriter(
             config.REMOTE_INSTALL_HOST,
             config.REMOTE_INSTALL_PORT,
             config.REMOTE_INSTALL_KEY,
@@ -88,20 +99,22 @@ class Plugin(IOServer, Router):
             and self._log_configuration(),
         )
 
-        io_stream = PluginIOStream(tcp_stream, tcp_stream)
         tcp_stream.launch()
 
-        return io_stream
+        return tcp_stream, tcp_stream
 
-    def _launch_aws_stream(self, config: DifyPluginEnv) -> PluginIOStream:
+    def _launch_aws_stream(
+        self, config: DifyPluginEnv
+    ) -> tuple[PluginInputStreamReader, Optional[ResponseWriter]]:
         """
         Launch AWS stream
         """
-        aws_stream = AWSLambdaStream(config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT)
-        io_stream = PluginIOStream(aws_stream, aws_stream)
+        aws_stream = AWSLambdaRequestReader(
+            config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT
+        )
         aws_stream.launch()
 
-        return io_stream
+        return aws_stream, None
 
     def _log_configuration(self):
         """
@@ -194,12 +207,14 @@ class Plugin(IOServer, Router):
         if response:
             if isinstance(response, Generator):
                 for message in response:
-                    self.io_stream.session_message(
-                        session_id=session_id,
-                        data=self.io_stream.stream_object(data=message),
-                    )
+                    if self.response_writer:
+                        self.response_writer.session_message(
+                            session_id=session_id,
+                            data=self.response_writer.stream_object(data=message),
+                        )
             else:
-                self.io_stream.session_message(
-                    session_id=session_id,
-                    data=self.io_stream.stream_object(data=response),
-                )
+                if self.response_writer:
+                    self.response_writer.session_message(
+                        session_id=session_id,
+                        data=self.response_writer.stream_object(data=response),
+                    )
