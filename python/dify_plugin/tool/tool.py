@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
+from typing import Optional
 
 from dify_plugin.core.runtime.request import RequestInterface
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 from dify_plugin.tool.entities import ToolInvokeMessage, ToolRuntime
 
 
@@ -13,27 +16,44 @@ class ToolProvider(ABC):
     def _validate_credentials(self, credentials: dict):
         pass
 
+
 class Tool(RequestInterface, ABC):
     runtime: ToolRuntime
 
-    def __init__(self, runtime: ToolRuntime):
+    def __init__(
+        self,
+        runtime: ToolRuntime,
+        request_reader: Optional[RequestReader],
+        response_writer: Optional[ResponseWriter],
+    ):
         self.runtime = runtime
-        RequestInterface.__init__(self, runtime.session_id)
+        RequestInterface.__init__(
+            self, response_writer, request_reader, runtime.session_id
+        )
 
     @classmethod
-    def from_credentials(cls, credentials: dict) -> 'Tool':
-        return cls(ToolRuntime(credentials=credentials, user_id=None, session_id=None))
+    def from_credentials(
+        cls,
+        credentials: dict,
+        request_reader: Optional[RequestReader],
+        response_writer: Optional[ResponseWriter],
+    ) -> "Tool":
+        return cls(
+            ToolRuntime(credentials=credentials, user_id=None, session_id=None),
+            request_reader=request_reader,
+            response_writer=response_writer,
+        )
 
     def create_text_message(self, text: str) -> ToolInvokeMessage:
         return ToolInvokeMessage(
             type=ToolInvokeMessage.MessageType.TEXT,
-            message=ToolInvokeMessage.TextMessage(text=text)
+            message=ToolInvokeMessage.TextMessage(text=text),
         )
-    
+
     def create_json_message(self, json: dict) -> ToolInvokeMessage:
         return ToolInvokeMessage(
             type=ToolInvokeMessage.MessageType.JSON,
-            message=ToolInvokeMessage.JsonMessage(json_object=json)
+            message=ToolInvokeMessage.JsonMessage(json_object=json),
         )
 
     @abstractmethod

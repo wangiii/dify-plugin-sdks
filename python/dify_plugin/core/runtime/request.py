@@ -48,13 +48,10 @@ from dify_plugin.tool.entities import ToolInvokeMessage
 
 
 class RequestInterface(AbstractRequestInterface):
-    session_id: Optional[str]
-    response_writer: ResponseWriter
-
     def __init__(
         self,
-        response_writer: ResponseWriter,
-        request_reader: RequestReader,
+        response_writer: Optional[ResponseWriter],
+        request_reader: Optional[RequestReader],
         session_id: Optional[str] = None,
     ) -> None:
         self.response_writer = response_writer
@@ -64,12 +61,30 @@ class RequestInterface(AbstractRequestInterface):
     def _generate_backwards_request_id(self):
         return uuid.uuid4().hex
 
-    def _backwards_invoke(
-        self, backwards_request_id: str, type: InvokeType, data: dict
-    ):
+    def _backwards_invoke[T: BaseModel](
+        self,
+        backwards_request_id: str,
+        type: InvokeType,
+        data_type: Type[T],
+        data: dict,
+    ) -> Generator[T, None, None]:
         """
-        TODO: using different strategy depends on different runtime type
+        backwards invoke dify depends on current runtime type
         """
+        return self._full_duplex_backwards_invoke(
+            backwards_request_id, type, data_type, data
+        )
+
+    def _full_duplex_backwards_invoke[T: BaseModel](
+        self,
+        backwards_request_id: str,
+        type: InvokeType,
+        data_type: Type[T],
+        data: dict,
+    ) -> Generator[T, None, None]:
+        if not self.response_writer or not self.request_reader:
+            raise Exception("current tool runtime does not support backwards invoke")
+
         self.response_writer.session_message(
             session_id=self.session_id,
             data=self.response_writer.stream_invoke_object(
@@ -81,33 +96,26 @@ class RequestInterface(AbstractRequestInterface):
             ),
         )
 
-    def _wrapper_stream_invoke[T: BaseModel](
-        self, request_id: str, data_type: Type[T]
-    ) -> Generator[T, None, None]:
-        """
-        Wrapper for stream invoke
-        """
-
         def filter(data: PluginInStream) -> bool:
             return (
                 data.event == PluginInStream.Event.BackwardInvocationResponse
-                and data.data.get("backwards_request_id") == request_id
+                and data.data.get("backwards_request_id") == backwards_request_id
             )
 
         empty_response_count = 0
         with self.request_reader.read(filter) as reader:
-            for data in reader.read(timeout_for_round=1):
+            for chunk in reader.read(timeout_for_round=1):
                 """
                 accept response from input stream and wait for at most 60 seconds
                 """
-                if data is None:
+                if chunk is None:
                     empty_response_count += 1
-                    # if no response for 60 seconds, break
-                    if empty_response_count >= 60:
+                    # if no response for 250 seconds, break
+                    if empty_response_count >= 250:
                         raise Exception("invocation exited without response")
                     continue
 
-                event = BackwardsInvocationResponseEvent(**data.data)
+                event = BackwardsInvocationResponseEvent(**chunk.data)
                 if event.event == BackwardsInvocationResponseEvent.Event.End:
                     break
 
@@ -135,9 +143,10 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        return self._backwards_invoke(
             backwards_request_id,
             InvokeType.Tool,
+            ToolInvokeMessage,
             {
                 "provider_type": provider_type.value,
                 "provider": provider,
@@ -145,8 +154,6 @@ class RequestInterface(AbstractRequestInterface):
                 "tool_parameters": parameters,
             },
         )
-
-        return self._wrapper_stream_invoke(backwards_request_id, ToolInvokeMessage)
 
     def invoke_builtin_tool(
         self, provider: str, tool_name: str, parameters: dict[str, Any]
@@ -209,9 +216,10 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        return self._backwards_invoke(
             backwards_request_id,
             InvokeType.LLM,
+            LLMResultChunk,
             {
                 **model_config.model_dump(),
                 "prompt_messages": [
@@ -223,8 +231,6 @@ class RequestInterface(AbstractRequestInterface):
             },
         )
 
-        return self._wrapper_stream_invoke(backwards_request_id, LLMResultChunk)
-
     def invoke_text_embedding(
         self, model_config: TextEmbeddingResult, texts: list[str]
     ) -> TextEmbeddingResult:
@@ -233,17 +239,14 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        for data in self._backwards_invoke(
             backwards_request_id,
             InvokeType.TextEmbedding,
+            TextEmbeddingResult,
             {
                 **model_config.model_dump(),
                 "texts": texts,
             },
-        )
-
-        for data in self._wrapper_stream_invoke(
-            backwards_request_id, TextEmbeddingResult
         ):
             return data
 
@@ -257,17 +260,16 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        for data in self._backwards_invoke(
             backwards_request_id,
             InvokeType.Rerank,
+            RerankResult,
             {
                 **model_config.model_dump(),
                 "docs": docs,
                 "query": query,
             },
-        )
-
-        for data in self._wrapper_stream_invoke(backwards_request_id, RerankResult):
+        ):
             return data
 
         raise Exception("No response from rerank")
@@ -280,17 +282,14 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        for data in self._backwards_invoke(
             backwards_request_id,
             InvokeType.Speech2Text,
+            Speech2TextResult,
             {
                 **model_config.model_dump(),
                 "file": hexlify(file.read()),
             },
-        )
-
-        for data in self._wrapper_stream_invoke(
-            backwards_request_id, Speech2TextResult
         ):
             return data.result
 
@@ -302,16 +301,15 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        for data in self._backwards_invoke(
             backwards_request_id,
             InvokeType.Moderation,
+            ModerationResult,
             {
                 **model_config.model_dump(),
                 "text": text,
             },
-        )
-
-        for data in self._wrapper_stream_invoke(backwards_request_id, ModerationResult):
+        ):
             return data.result
 
         raise Exception("No response from moderation")
@@ -324,16 +322,15 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        self._backwards_invoke(
+        for data in self._backwards_invoke(
             backwards_request_id,
             InvokeType.TTS,
+            TTSResult,
             {
                 **model_config.model_dump(),
                 "content_text": content_text,
             },
-        )
-
-        for data in self._wrapper_stream_invoke(backwards_request_id, TTSResult):
+        ):
             yield unhexlify(data.result)
 
     def invoke_question_classifier(

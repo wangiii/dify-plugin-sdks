@@ -33,11 +33,11 @@ class DifyPluginEnv(BaseSettings):
     REMOTE_INSTALL_PORT: int = Field(
         default=5003, description="Remote installation port"
     )
-    REMOTE_INSTALL_KEY: Optional[str] = Field(default=None, description="Remote installation key")
-
-    AWS_LAMBDA_PORT: int = Field(
-        default=8080, description="AWS Lambda port"
+    REMOTE_INSTALL_KEY: Optional[str] = Field(
+        default=None, description="Remote installation key"
     )
+
+    AWS_LAMBDA_PORT: int = Field(default=8080, description="AWS Lambda port")
     DIFY_PLUGIN_DAEMON_URL: str = Field(
         default="http://localhost:5002", description="backwards invocation address"
     )
