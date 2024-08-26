@@ -1,7 +1,7 @@
-type: webhook
+type: endpoint
 provider:
   path: "/neko"
   method: "GET"
   extra:
     python:
-      source: "webhooks/neko.py"
+      source: "endpoints/neko.py"

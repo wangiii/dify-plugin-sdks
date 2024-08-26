@@ -1,7 +1,7 @@
 import time
 from typing import Mapping
 from werkzeug import Request, Response
-from dify_plugin.webhook.webhook import Webhook
+from dify_plugin.endpoint.endpoint import Endpoint
 
 text = """<pre>
                    _____
@@ -18,10 +18,10 @@ text = """<pre>
 </pre>
 """
 
-class Neko(Webhook):
+class Neko(Endpoint):
     def _invoke(self, r: Request, values: Mapping) -> Response:
         """
-        Invokes the webhook with the given request.
+        Invokes the endpoint with the given request.
         """
         def generator():
             for i in range(0, len(text), 2):

@@ -1,11 +1,11 @@
 from typing import Mapping
 from werkzeug import Request, Response
-from dify_plugin.webhook.webhook import Webhook
+from dify_plugin.endpoint.endpoint import Endpoint
 
 
-class Duck(Webhook):
+class Duck(Endpoint):
     def _invoke(self, r: Request, values: Mapping) -> Response:
         """
-        Invokes the webhook with the given request.
+        Invokes the endpoint with the given request.
         """
         return Response("quack", status=200)

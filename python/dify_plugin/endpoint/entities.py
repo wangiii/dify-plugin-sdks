@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 
 
-class WebhookConfigurationExtra(BaseModel):
+class EndpointConfigurationExtra(BaseModel):
     class Python(BaseModel):
         source: str
 
     python: Python
 
 
-class WebhookConfiguration(BaseModel):
+class EndpointConfiguration(BaseModel):
     path: str
     method: str
-    extra: WebhookConfigurationExtra
+    extra: EndpointConfigurationExtra

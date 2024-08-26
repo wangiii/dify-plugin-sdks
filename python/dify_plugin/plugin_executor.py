@@ -16,7 +16,7 @@ from dify_plugin.core.runtime.entities.plugin.request import (
     ModelValidateProviderCredentialsRequest,
     ToolInvokeRequest,
     ToolValidateCredentialsRequest,
-    WebhookInvokeRequest,
+    EndpointInvokeRequest,
 )
 from dify_plugin.core.runtime.session import Session
 from dify_plugin.model.large_language_model import LargeLanguageModel
@@ -219,16 +219,16 @@ class PluginExecutor:
                 )
             }
 
-    def invoke_webhook(self, session: Session, data: WebhookInvokeRequest):
+    def invoke_endpoint(self, session: Session, data: EndpointInvokeRequest):
         bytes_data = binascii.unhexlify(data.raw_http_request)
         request = parse_raw_request(bytes_data)
 
         try:
             # dispatch request
-            webhook, values = self.registration.dispatch_webhook_request(request)
+            endpoint, values = self.registration.dispatch_endpoint_request(request)
             # construct response
-            webhook_instance = webhook()
-            response = webhook_instance.invoke(request, values)
+            endpoint_instance = endpoint()
+            response = endpoint_instance.invoke(request, values)
         except Exception:
             response = Response("Not Found", status=404)
 

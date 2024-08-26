@@ -27,8 +27,8 @@ from dify_plugin.utils.class_loader import (
     load_single_subclass_from_source,
 )
 from dify_plugin.utils.yaml_loader import load_yaml_file
-from dify_plugin.webhook.entities import WebhookConfiguration
-from dify_plugin.webhook.webhook import Webhook
+from dify_plugin.endpoint.entities import EndpointConfiguration
+from dify_plugin.endpoint.endpoint import Endpoint
 
 
 class PluginRegistration:
@@ -52,8 +52,8 @@ class PluginRegistration:
             dict[ModelType, AIModel],
         ],
     ]
-    webhooks_configuration: list[WebhookConfiguration]
-    webhooks: Map
+    endpoints_configuration: list[EndpointConfiguration]
+    endpoints: Map
 
     def __init__(self, config: DifyPluginEnv) -> None:
         """
@@ -63,8 +63,8 @@ class PluginRegistration:
         self.models_configuration = []
         self.tools_mapping = {}
         self.models_mapping = {}
-        self.webhooks_configuration = []
-        self.webhooks = Map()
+        self.endpoints_configuration = []
+        self.endpoints = Map()
 
         # load plugin configuration
         self._load_plugin_configuration()
@@ -92,11 +92,11 @@ class PluginRegistration:
                         **fs.get("provider", {})
                     )
                     self.models_configuration.append(model_provider_configuration)
-                elif fs.get("type") == PluginProviderType.Webhook.value:
-                    webhook_configuration = WebhookConfiguration(
+                elif fs.get("type") == PluginProviderType.Endpoint.value:
+                    endpoint_configuration = EndpointConfiguration(
                         **fs.get("provider", {})
                     )
-                    self.webhooks_configuration.append(webhook_configuration)
+                    self.endpoints_configuration.append(endpoint_configuration)
                 else:
                     raise ValueError("Unknown provider type")
         except Exception as e:
@@ -192,22 +192,22 @@ class PluginRegistration:
                 models,
             )
 
-    def _resolve_webhooks(self):
+    def _resolve_endpoints(self):
         """
-        load webhooks
+        load endpoints
         """
-        for webhook in self.webhooks_configuration:
+        for endpoint in self.endpoints_configuration:
             # remove extension
-            module_source = os.path.splitext(webhook.extra.python.source)[0]
+            module_source = os.path.splitext(endpoint.extra.python.source)[0]
             # replace / with .
             module_source = module_source.replace("/", ".")
-            webhook_cls = load_single_subclass_from_source(
+            endpoint_cls = load_single_subclass_from_source(
                 module_name=module_source,
-                script_path=os.path.join(os.getcwd(), webhook.extra.python.source),
-                parent_type=Webhook,
+                script_path=os.path.join(os.getcwd(), endpoint.extra.python.source),
+                parent_type=Endpoint,
             )
 
-            self.webhooks.add(Rule(webhook.path, methods=[webhook.method], endpoint=webhook_cls))
+            self.endpoints.add(Rule(endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls))
 
     def _resolve_plugin_cls(self):
         """
@@ -219,8 +219,8 @@ class PluginRegistration:
         # load model providers and models
         self._resolve_model_providers()
 
-        # load webhooks
-        self._resolve_webhooks()
+        # load endpoints
+        self._resolve_endpoints()
 
     def get_tool_provider_cls(self, provider: str):
         """
@@ -270,15 +270,15 @@ class PluginRegistration:
                 if registration:
                     return registration
 
-    def dispatch_webhook_request(self, request: Request) -> tuple[Type[Webhook], Mapping]:
+    def dispatch_endpoint_request(self, request: Request) -> tuple[Type[Endpoint], Mapping]:
         """
-        dispatch webhook request, match the request to the registered webhooks
+        dispatch endpoint request, match the request to the registered endpoints
 
-        returns the webhook and the values
+        returns the endpoint and the values
         """
-        adapter = self.webhooks.bind_to_environ(request.environ)
+        adapter = self.endpoints.bind_to_environ(request.environ)
         try:
             endpoint, values = adapter.match()
             return endpoint, values
         except Exception as e:
-            raise ValueError(f"Failed to dispatch webhook request: {str(e)}")
+            raise ValueError(f"Failed to dispatch endpoint request: {str(e)}")

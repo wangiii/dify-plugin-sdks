@@ -12,11 +12,11 @@ resource:
     model:
       enabled: true
       llm: true
-    webhook:
+    endpoint:
       enabled: true
 plugins:
-  - "webhooks/neko.yaml"
-  - "webhooks/duck.yaml"
+  - "endpoints/neko.yaml"
+  - "endpoints/duck.yaml"
 execution:
   install: install.sh
   launch: launch.sh

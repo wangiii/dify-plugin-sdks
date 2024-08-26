@@ -17,7 +17,7 @@ from dify_plugin.model.model_entities import ModelType
 class PluginInvokeType(Enum):
     Tool = "tool"
     Model = "model"
-    Webhook = "webhook"
+    Endpoint = "endpoint"
 
 
 class ToolActions(Enum):
@@ -36,8 +36,8 @@ class ModelActions(Enum):
     InvokeModeration = "invoke_moderation"
 
 
-class WebhookActions(Enum):
-    InvokeWebhook = "invoke_webhook"
+class EndpointActions(Enum):
+    InvokeEndpoint = "invoke_endpoint"
 
 
 class PluginAccessRequest(BaseModel):
@@ -161,7 +161,7 @@ class ModelValidateModelCredentialsRequest(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
 
-class WebhookInvokeRequest(BaseModel):
-    type: PluginInvokeType = PluginInvokeType.Webhook
-    action: WebhookActions = WebhookActions.InvokeWebhook
+class EndpointInvokeRequest(BaseModel):
+    type: PluginInvokeType = PluginInvokeType.Endpoint
+    action: EndpointActions = EndpointActions.InvokeEndpoint
     raw_http_request: str

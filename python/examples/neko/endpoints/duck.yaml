@@ -1,7 +1,7 @@
-type: webhook
+type: endpoint
 provider:
   path: "/duck/<id>"
   method: "GET"
   extra:
     python:
-      source: "webhooks/duck.py"
+      source: "endpoints/duck.py"

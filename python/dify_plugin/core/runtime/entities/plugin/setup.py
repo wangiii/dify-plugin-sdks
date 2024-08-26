@@ -50,13 +50,13 @@ class PluginResourceRequirements(BaseModel):
         class Node(BaseModel):
             enabled: bool
 
-        class Webhook(BaseModel):
+        class Endpoint(BaseModel):
             enabled: bool
 
         tool: Optional[Tool]
         model: Optional[Model]
         node: Optional[Node]
-        webhook: Optional[Webhook]
+        endpoint: Optional[Endpoint]
 
     permission: Permission
 
@@ -79,4 +79,4 @@ class PluginConfiguration(BaseModel):
 class PluginProviderType(Enum):
     Tool = "tool"
     Model = "model"
-    Webhook = "webhook"
+    Endpoint = "endpoint"
