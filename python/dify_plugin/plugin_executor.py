@@ -4,6 +4,7 @@ import tempfile
 
 from werkzeug import Response
 
+from dify_plugin.config.config import InstallMethod
 from dify_plugin.core.runtime.entities.plugin.request import (
     ModelInvokeLLMRequest,
     ModelInvokeModerationRequest,
@@ -30,7 +31,8 @@ from dify_plugin.utils.http_parser import parse_raw_request
 
 
 class PluginExecutor:
-    def __init__(self, registration: PluginRegistration) -> None:
+    def __init__(self, install_method: InstallMethod, registration: PluginRegistration) -> None:
+        self.install_method = install_method
         self.registration = registration
 
     def validate_tool_provider_credentials(
@@ -68,6 +70,7 @@ class PluginExecutor:
                 credentials=request.credentials,
                 user_id=request.user_id,
                 session_id=session.session_id,
+                install_method=self.install_method
             )
         )
 
