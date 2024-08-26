@@ -5,6 +5,7 @@ import uuid
 
 from pydantic import BaseModel
 
+from dify_plugin.config.config import InstallMethod
 from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
 from dify_plugin.core.runtime.entities.backwards_invocation.response_event import (
     BackwardsInvocationResponseEvent,
@@ -66,9 +67,25 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards invoke dify depends on current runtime type
         """
-        return self._full_duplex_backwards_invoke(
-            backwards_request_id, type, data_type, data
-        )
+        if not self.session:
+            raise Exception("current tool runtime does not support backwards invoke")
+        if self.session.install_method in [InstallMethod.Local, InstallMethod.Remote]:
+            return self._full_duplex_backwards_invoke(
+                backwards_request_id, type, data_type, data
+            )
+        return self._http_backwards_invoke(backwards_request_id, type, data_type, data)
+
+    def _http_backwards_invoke[T: BaseModel](
+        self,
+        backwards_request_id: str,
+        type: InvokeType,
+        data_type: Type[T],
+        data: dict,
+    ) -> Generator[T, None, None]:
+        """
+        http backwards invoke
+        """
+        raise NotImplementedError("http backwards invoke not implemented")
 
     def _full_duplex_backwards_invoke[T: BaseModel](
         self,

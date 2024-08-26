@@ -50,9 +50,7 @@ class Plugin(IOServer, Router):
         self.default_response_writer = response_writer
 
         # initialize plugin executor
-        self.plugin_executer = PluginExecutor(
-            self.config.INSTALL_METHOD, self.registration
-        )
+        self.plugin_executer = PluginExecutor(self.config, self.registration)
 
         IOServer.__init__(self, config, request_reader)
         Router.__init__(self, request_reader, response_writer)
@@ -198,7 +196,12 @@ class Plugin(IOServer, Router):
         """
 
         session = Session(
-            session_id=session_id, executor=self.executer, reader=reader, writer=writer
+            session_id=session_id,
+            executor=self.executer,
+            reader=reader,
+            writer=writer,
+            install_method=self.config.INSTALL_METHOD,
+            dify_plugin_daemon_url=self.config.DIFY_PLUGIN_DAEMON_URL,
         )
         response = self.dispatch(session, data)
         if response:
