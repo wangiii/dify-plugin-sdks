@@ -1,7 +1,10 @@
 from json import loads
 import sys
 from typing import Generator
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import (
+    PluginInStream,
+    PluginInStreamEvent,
+)
 
 from gevent.os import tp_read
 
@@ -36,7 +39,7 @@ class StdioRequestReader(RequestReader):
                     data = loads(line)
                     yield PluginInStream(
                         session_id=data["session_id"],
-                        event=PluginInStream.Event.value_of(data["event"]),
+                        event=PluginInStreamEvent.value_of(data["event"]),
                         data=data["data"],
                         reader=self,
                         writer=StdioResponseWriter(),

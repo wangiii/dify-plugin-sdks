@@ -2,7 +2,10 @@ from queue import Queue
 import threading
 from typing import Generator
 from flask import Flask, request
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import (
+    PluginInStream,
+    PluginInStreamEvent,
+)
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.aws.response_writer import AWSResponseWriter
 
@@ -37,7 +40,7 @@ class AWSLambdaRequestReader(RequestReader):
             queue = Queue[str]()
             try:
                 data = request.get_json()
-                event = PluginInStream.Event.value_of(data["event"])
+                event = PluginInStreamEvent.value_of(data["event"])
                 plugin_in = PluginInStream(
                     event=event,
                     session_id=data["session_id"],

@@ -1,9 +1,12 @@
 from binascii import hexlify, unhexlify
 from collections.abc import Generator
+import json
 from typing import IO, Any, Literal, Optional, Type, overload
 import uuid
 
+import httpx
 from pydantic import BaseModel
+from yarl import URL
 
 from dify_plugin.config.config import InstallMethod
 from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
@@ -36,7 +39,11 @@ from dify_plugin.core.runtime.entities.model_runtime.text_embedding import (
 from dify_plugin.core.runtime.entities.model_runtime.tts import TTSResult
 from dify_plugin.core.runtime.entities.plugin.dify import ToolProviderType
 from dify_plugin.core.runtime.entities.plugin.invocation import InvokeType
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import (
+    PluginInStream,
+    PluginInStreamBase,
+    PluginInStreamEvent,
+)
 from dify_plugin.core.runtime.entities.plugin.workflow import (
     KnowledgeRetrievalNodeData,
     NodeResponse,
@@ -75,6 +82,43 @@ class RequestInterface(AbstractRequestInterface):
             )
         return self._http_backwards_invoke(backwards_request_id, type, data_type, data)
 
+    def _line_converter_wrapper[T: BaseModel](
+        self,
+        generator: Generator[PluginInStreamBase | None, None, None],
+        data_type: Type[T],
+    ) -> Generator[T, None, None]:
+        """
+        convert string into type T
+        """
+        empty_response_count = 0
+
+        for chunk in generator:
+            """
+            accept response from input stream and wait for at most 60 seconds
+            """
+            if chunk is None:
+                empty_response_count += 1
+                # if no response for 250 seconds, break
+                if empty_response_count >= 250:
+                    raise Exception("invocation exited without response")
+                continue
+
+            event = BackwardsInvocationResponseEvent(**chunk.data)
+            if event.event == BackwardsInvocationResponseEvent.Event.End:
+                break
+
+            if event.event == BackwardsInvocationResponseEvent.Event.Error:
+                raise Exception(event.message)
+
+            if event.data is None:
+                break
+
+            empty_response_count = 0
+            try:
+                yield data_type(**event.data)
+            except Exception as e:
+                raise Exception(f"Failed to parse response: {str(e)}")
+
     def _http_backwards_invoke[T: BaseModel](
         self,
         backwards_request_id: str,
@@ -85,7 +129,47 @@ class RequestInterface(AbstractRequestInterface):
         """
         http backwards invoke
         """
-        raise NotImplementedError("http backwards invoke not implemented")
+        if not self.session or not self.session.dify_plugin_daemon_url:
+            raise Exception("current tool runtime does not support backwards invoke")
+
+        url = (
+            URL(self.session.dify_plugin_daemon_url)
+            / "backwards-invocation"
+            / "transaction"
+        )
+        headers = {
+            "Dify-Plugin-Session-ID": self.session.session_id,
+        }
+
+        payload = self.session.writer.session_message_text(
+            session_id=self.session.session_id,
+            data=self.session.writer.stream_invoke_object(
+                data={
+                    "type": type.value,
+                    "backwards_request_id": backwards_request_id,
+                    "request": data,
+                }
+            ),
+        )
+
+        with httpx.Client() as client:
+            with client.stream(
+                method="POST",
+                url=str(url),
+                headers=headers,
+                content=payload,
+            ) as response:
+
+                def generator():
+                    for line in response.iter_lines():
+                        data = json.loads(line)
+                        yield PluginInStreamBase(
+                            session_id=data["session_id"],
+                            event=PluginInStreamEvent.value_of(data["event"]),
+                            data=data["data"],
+                        )
+
+                return self._line_converter_wrapper(generator(), data_type)
 
     def _full_duplex_backwards_invoke[T: BaseModel](
         self,
@@ -110,38 +194,14 @@ class RequestInterface(AbstractRequestInterface):
 
         def filter(data: PluginInStream) -> bool:
             return (
-                data.event == PluginInStream.Event.BackwardInvocationResponse
+                data.event == PluginInStreamEvent.BackwardInvocationResponse
                 and data.data.get("backwards_request_id") == backwards_request_id
             )
 
-        empty_response_count = 0
         with self.session.reader.read(filter) as reader:
-            for chunk in reader.read(timeout_for_round=1):
-                """
-                accept response from input stream and wait for at most 60 seconds
-                """
-                if chunk is None:
-                    empty_response_count += 1
-                    # if no response for 250 seconds, break
-                    if empty_response_count >= 250:
-                        raise Exception("invocation exited without response")
-                    continue
-
-                event = BackwardsInvocationResponseEvent(**chunk.data)
-                if event.event == BackwardsInvocationResponseEvent.Event.End:
-                    break
-
-                if event.event == BackwardsInvocationResponseEvent.Event.Error:
-                    raise Exception(event.message)
-
-                if event.data is None:
-                    break
-
-                empty_response_count = 0
-                try:
-                    yield data_type(**event.data)
-                except Exception as e:
-                    raise Exception(f"Failed to parse response: {str(e)}")
+            return self._line_converter_wrapper(
+                reader.read(timeout_for_round=1), data_type
+            )
 
     def invoke_tool(
         self,
@@ -228,20 +288,30 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards_request_id = self._generate_backwards_request_id()
 
-        return self._backwards_invoke(
+        data = {
+            **model_config.model_dump(),
+            "prompt_messages": [message.model_dump() for message in prompt_messages],
+            "tools": [tool.model_dump() for tool in tools] if tools else None,
+            "stop": stop,
+            "stream": stream,
+        }
+        if stream:
+            return self._backwards_invoke(
+                backwards_request_id,
+                InvokeType.LLM,
+                LLMResultChunk,
+                data,
+            )
+
+        for data in self._backwards_invoke(
             backwards_request_id,
             InvokeType.LLM,
-            LLMResultChunk,
-            {
-                **model_config.model_dump(),
-                "prompt_messages": [
-                    message.model_dump() for message in prompt_messages
-                ],
-                "tools": [tool.model_dump() for tool in tools] if tools else None,
-                "stop": stop,
-                "stream": stream,
-            },
-        )
+            LLMResult,
+            data,
+        ):
+            return data
+
+        raise Exception("No response from llm")
 
     def invoke_text_embedding(
         self, model_config: TextEmbeddingResult, texts: list[str]

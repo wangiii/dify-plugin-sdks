@@ -5,7 +5,10 @@ from typing import Callable, Generator, Optional
 
 from gevent.select import select
 
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import (
+    PluginInStream,
+    PluginInStreamEvent,
+)
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
@@ -135,7 +138,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                     data = loads(line)
                     yield PluginInStream(
                         session_id=data["session_id"],
-                        event=PluginInStream.Event.value_of(data["event"]),
+                        event=PluginInStreamEvent.value_of(data["event"]),
                         data=data["data"],
                         reader=self,
                         writer=self,
