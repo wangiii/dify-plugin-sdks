@@ -89,11 +89,15 @@ class ToolConfigurationExtra(BaseModel):
 
     python: Python
 
+class ToolOutputSchema(BaseModel):
+    __root__: dict
+
 class ToolConfiguration(BaseModel):
     identity: ToolIdentity
     parameters: list[ToolParameter] = Field(default=[], description="The parameters of the tool")
     description: ToolDescription
     extra: ToolConfigurationExtra
+    output_schema: Optional[ToolOutputSchema] = Field(default_factory=dict)
 
 class ToolLabelEnum(Enum):
     SEARCH = 'search'
