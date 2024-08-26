@@ -64,9 +64,8 @@ class RequestInterface(AbstractRequestInterface):
     def _generate_backwards_request_id(self):
         return uuid.uuid4().hex
 
-    def _backwards_invoke[T: BaseModel](
+    def _backwards_invoke[T: BaseModel | dict](
         self,
-        backwards_request_id: str,
         type: InvokeType,
         data_type: Type[T],
         data: dict,
@@ -74,6 +73,8 @@ class RequestInterface(AbstractRequestInterface):
         """
         backwards invoke dify depends on current runtime type
         """
+        backwards_request_id = self._generate_backwards_request_id()
+
         if not self.session:
             raise Exception("current tool runtime does not support backwards invoke")
         if self.session.install_method in [InstallMethod.Local, InstallMethod.Remote]:
@@ -82,7 +83,7 @@ class RequestInterface(AbstractRequestInterface):
             )
         return self._http_backwards_invoke(backwards_request_id, type, data_type, data)
 
-    def _line_converter_wrapper[T: BaseModel](
+    def _line_converter_wrapper[T: BaseModel | dict](
         self,
         generator: Generator[PluginInStreamBase | None, None, None],
         data_type: Type[T],
@@ -115,11 +116,14 @@ class RequestInterface(AbstractRequestInterface):
 
             empty_response_count = 0
             try:
-                yield data_type(**event.data)
+                if data_type == dict:
+                    event.data
+                else:
+                    yield data_type(**event.data)
             except Exception as e:
                 raise Exception(f"Failed to parse response: {str(e)}")
 
-    def _http_backwards_invoke[T: BaseModel](
+    def _http_backwards_invoke[T: BaseModel | dict](
         self,
         backwards_request_id: str,
         type: InvokeType,
@@ -171,7 +175,7 @@ class RequestInterface(AbstractRequestInterface):
 
                 return self._line_converter_wrapper(generator(), data_type)
 
-    def _full_duplex_backwards_invoke[T: BaseModel](
+    def _full_duplex_backwards_invoke[T: BaseModel | dict](
         self,
         backwards_request_id: str,
         type: InvokeType,
@@ -213,10 +217,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke tool
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         return self._backwards_invoke(
-            backwards_request_id,
             InvokeType.Tool,
             ToolInvokeMessage,
             {
@@ -286,8 +287,6 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke llm
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         data = {
             **model_config.model_dump(),
             "prompt_messages": [message.model_dump() for message in prompt_messages],
@@ -297,14 +296,12 @@ class RequestInterface(AbstractRequestInterface):
         }
         if stream:
             return self._backwards_invoke(
-                backwards_request_id,
                 InvokeType.LLM,
                 LLMResultChunk,
                 data,
             )
 
         for data in self._backwards_invoke(
-            backwards_request_id,
             InvokeType.LLM,
             LLMResult,
             data,
@@ -319,10 +316,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke text embedding
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         for data in self._backwards_invoke(
-            backwards_request_id,
             InvokeType.TextEmbedding,
             TextEmbeddingResult,
             {
@@ -340,10 +334,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke rerank
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         for data in self._backwards_invoke(
-            backwards_request_id,
             InvokeType.Rerank,
             RerankResult,
             {
@@ -362,10 +353,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke speech2text
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         for data in self._backwards_invoke(
-            backwards_request_id,
             InvokeType.Speech2Text,
             Speech2TextResult,
             {
@@ -381,10 +369,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke moderation
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         for data in self._backwards_invoke(
-            backwards_request_id,
             InvokeType.Moderation,
             ModerationResult,
             {
@@ -402,10 +387,7 @@ class RequestInterface(AbstractRequestInterface):
         """
         Invoke tts
         """
-        backwards_request_id = self._generate_backwards_request_id()
-
         for data in self._backwards_invoke(
-            backwards_request_id,
             InvokeType.TTS,
             TTSResult,
             {
@@ -414,6 +396,151 @@ class RequestInterface(AbstractRequestInterface):
             },
         ):
             yield unhexlify(data.result)
+
+    @overload
+    def invoke_chat(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["streaming"],
+        conversation_id: str,
+        files: list,
+    ) -> Generator[dict, None, None]: ...
+
+    @overload
+    def invoke_chat(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["blocking"],
+        conversation_id: str,
+        files: list,
+    ) -> dict: ...
+
+    def invoke_chat(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["streaming", "blocking"],
+        conversation_id: str,
+        files: list,
+    ) -> Generator[dict, None, None] | dict:
+        """
+        Invoke chat app
+        """
+        response = self._backwards_invoke(
+            InvokeType.App,
+            dict,
+            {
+                "app_id": app_id,
+                "inputs": inputs,
+                "response_mode": response_mode,
+                "conversation_id": conversation_id,
+                "files": files,
+            },
+        )
+
+        if response_mode == "streaming":
+            return response
+
+        for data in response:
+            return data
+
+        raise Exception("No response from chat")
+
+    @overload
+    def invoke_completion(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["streaming"],
+        files: list,
+    ) -> Generator[dict, None, None]: ...
+
+    @overload
+    def invoke_completion(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["blocking"],
+        files: list,
+    ) -> dict: ...
+
+    def invoke_completion(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["streaming", "blocking"],
+        files: list,
+    ) -> Generator[dict, None, None] | dict:
+        """
+        Invoke completion app
+        """
+        response = self._backwards_invoke(
+            InvokeType.App,
+            dict,
+            {
+                "app_id": app_id,
+                "inputs": inputs,
+                "response_mode": response_mode,
+                "files": files,
+            },
+        )
+
+        if response_mode == "streaming":
+            return response
+
+        for data in response:
+            return data
+
+        raise Exception("No response from completion")
+
+    @overload
+    def invoke_workflow(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["streaming"],
+        files: list,
+    ) -> Generator[dict, None, None]: ...
+
+    @overload
+    def invoke_workflow(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["blocking"],
+        files: list,
+    ) -> dict: ...
+
+    def invoke_workflow(
+        self,
+        app_id: str,
+        inputs: dict,
+        response_mode: Literal["streaming", "blocking"],
+        files: list,
+    ) -> Generator[dict, None, None] | dict:
+        """
+        Invoke workflow app
+        """
+        response = self._backwards_invoke(
+            InvokeType.App,
+            dict,
+            {
+                "app_id": app_id,
+                "inputs": inputs,
+                "response_mode": response_mode,
+                "files": files,
+            },
+        )
+
+        if response_mode == "streaming":
+            return response
+
+        for data in response:
+            return data
+
+        raise Exception("No response from workflow")
 
     def invoke_question_classifier(
         self, node_data: QuestionClassifierNodeData, inputs: dict

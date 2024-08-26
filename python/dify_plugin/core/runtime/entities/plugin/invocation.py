@@ -10,6 +10,7 @@ class InvokeType(Enum):
     Speech2Text = 'speech2text'
     Moderation = 'moderation'
     Node = 'node'
+    App = 'app'
 
     @classmethod
     def value_of(cls, value: str) -> 'InvokeType':
