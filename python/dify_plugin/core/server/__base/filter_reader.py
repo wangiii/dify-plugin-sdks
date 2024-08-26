@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from collections.abc import Callable, Generator
 from queue import Queue
 import queue
@@ -8,7 +7,7 @@ from typing import Optional, overload
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 
 
-class PluginReader:
+class FilterReader:
     filter: Callable[[PluginInStream], bool]
     queue: Queue[PluginInStream | None]
     close_callback: Optional[Callable]
@@ -59,15 +58,3 @@ class PluginReader:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-
-
-class PluginInputStreamReader(ABC):
-    @abstractmethod
-    def read(
-        self,
-    ) -> Generator[
-        PluginInStream, None, None
-    ]:
-        """
-        read data from the stream infinitely
-        """

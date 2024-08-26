@@ -1,22 +1,14 @@
 from typing import Optional
-from gevent import monkey
 
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
-from dify_plugin.core.server.__base.stream_reader import PluginInputStreamReader
 from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader
 from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
 from dify_plugin.core.server.stdio.response_writer import StdioResponseWriter
 from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
-
-# patch all the blocking calls
-monkey.patch_all(sys=True)
-
 from collections.abc import Generator  # noqa: E402
 import logging  # noqa: E402
-
 from dify_plugin.config.config import DifyPluginEnv, InstallMethod  # noqa: E402
-
 from dify_plugin.core.runtime.entities.plugin.request import (  # noqa: E402
     ModelActions,
     PluginInvokeType,
@@ -46,11 +38,11 @@ class Plugin(IOServer, Router):
         self.registration = PluginRegistration(config)
 
         if config.INSTALL_METHOD == InstallMethod.Local:
-            stream_reader, response_writer = self._launch_local_stream(config)
+            request_reader, response_writer = self._launch_local_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.Remote:
-            stream_reader, response_writer = self._launch_remote_stream(config)
+            request_reader, response_writer = self._launch_remote_stream(config)
         elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
-            stream_reader, response_writer = self._launch_aws_stream(config)
+            request_reader, response_writer = self._launch_aws_stream(config)
         else:
             raise ValueError("Invalid install method")
 
@@ -60,7 +52,6 @@ class Plugin(IOServer, Router):
         # initialize plugin executor
         self.plugin_executer = PluginExecutor(self.registration)
 
-        request_reader = RequestReader(stream_reader)
         IOServer.__init__(self, config, request_reader)
         Router.__init__(self, request_reader, response_writer)
 
@@ -69,7 +60,7 @@ class Plugin(IOServer, Router):
 
     def _launch_local_stream(
         self, config: DifyPluginEnv
-    ) -> tuple[PluginInputStreamReader, Optional[ResponseWriter]]:
+    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch local stream
         """
@@ -82,7 +73,7 @@ class Plugin(IOServer, Router):
 
     def _launch_remote_stream(
         self, config: DifyPluginEnv
-    ) -> tuple[PluginInputStreamReader, Optional[ResponseWriter]]:
+    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch remote stream
         """
@@ -105,7 +96,7 @@ class Plugin(IOServer, Router):
 
     def _launch_aws_stream(
         self, config: DifyPluginEnv
-    ) -> tuple[PluginInputStreamReader, Optional[ResponseWriter]]:
+    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch AWS stream
         """
@@ -195,14 +186,18 @@ class Plugin(IOServer, Router):
             and data.get("action") == WebhookActions.InvokeWebhook.value,
         )
 
-    def _execute_request(self, session_id: str, data: dict):
+    def _execute_request(
+        self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
+    ):
         """
         accept requests and execute
         :param session_id: session id, unique for each request
         :param data: request data
         """
 
-        session = Session(session_id=session_id, executor=self.executer)
+        session = Session(
+            session_id=session_id, executor=self.executer, reader=reader, writer=writer
+        )
         response = self.dispatch(session, data)
         if response:
             if isinstance(response, Generator):

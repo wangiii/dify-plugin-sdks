@@ -1,5 +1,11 @@
-from .plugin import Plugin
-from .model.model import ModelProvider
-from .tool.tool import ToolProvider
+from gevent import monkey
 
-__all__ = ['Plugin', 'ModelProvider', 'ToolProvider']
+# patch all the blocking calls
+monkey.patch_all(sys=True)
+
+from .plugin import Plugin # noqa
+from .model.model import ModelProvider # noqa
+from .tool.tool import ToolProvider # noqa
+from .config.config import DifyPluginEnv # noqa
+
+__all__ = ['Plugin', 'ModelProvider', 'ToolProvider', 'DifyPluginEnv']

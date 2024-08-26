@@ -2,15 +2,15 @@ from json import loads
 import sys
 from typing import Generator
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
-from dify_plugin.core.server.__base.stream_reader import PluginInputStreamReader
 
 from gevent.os import tp_read
 
+from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.stdio.response_writer import StdioResponseWriter
 
 
-class StdioRequestReader(PluginInputStreamReader):
-    def read(self) -> Generator[PluginInStream, None, None]:
+class StdioRequestReader(RequestReader):
+    def _read_stream(self) -> Generator[PluginInStream, None, None]:
         buffer = ""
         while True:
             # read data from stdin through tp_read
@@ -38,6 +38,7 @@ class StdioRequestReader(PluginInputStreamReader):
                         session_id=data["session_id"],
                         event=PluginInStream.Event.value_of(data["event"]),
                         data=data["data"],
+                        reader=self,
                         writer=StdioResponseWriter(),
                     )
                 except Exception as e:

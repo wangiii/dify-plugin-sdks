@@ -2,6 +2,7 @@ from typing import Any, Optional, Union
 from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
+from dify_plugin.config.config import InstallMethod
 from dify_plugin.core.runtime.entities.plugin.common import I18nObject
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
@@ -9,6 +10,7 @@ class ToolRuntime(BaseModel):
     credentials: dict[str, str]
     user_id: Optional[str]
     session_id: Optional[str]
+    install_method: Optional[InstallMethod] = Field(default=InstallMethod.Local)
 
 class ToolInvokeMessage(BaseModel):
     class TextMessage(BaseModel):

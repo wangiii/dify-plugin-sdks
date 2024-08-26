@@ -3,8 +3,7 @@ from collections.abc import Generator
 from typing import Optional
 
 from dify_plugin.core.runtime.request import RequestInterface
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from dify_plugin.core.runtime.session import Session
 from dify_plugin.tool.entities import ToolInvokeMessage, ToolRuntime
 
 
@@ -23,25 +22,18 @@ class Tool(RequestInterface, ABC):
     def __init__(
         self,
         runtime: ToolRuntime,
-        request_reader: Optional[RequestReader],
-        response_writer: Optional[ResponseWriter],
+        session: Optional[Session] = None,
     ):
         self.runtime = runtime
-        RequestInterface.__init__(
-            self, response_writer, request_reader, runtime.session_id
-        )
+        RequestInterface.__init__(self, session)
 
     @classmethod
     def from_credentials(
         cls,
         credentials: dict,
-        request_reader: Optional[RequestReader],
-        response_writer: Optional[ResponseWriter],
     ) -> "Tool":
         return cls(
             ToolRuntime(credentials=credentials, user_id=None, session_id=None),
-            request_reader=request_reader,
-            response_writer=response_writer,
         )
 
     def create_text_message(self, text: str) -> ToolInvokeMessage:

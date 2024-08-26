@@ -3,11 +3,11 @@ import threading
 from typing import Generator
 from flask import Flask, request
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.aws.response_writer import AWSResponseWriter
-from dify_plugin.core.server.__base.stream_reader import PluginInputStreamReader
 
 
-class AWSLambdaRequestReader(PluginInputStreamReader):
+class AWSLambdaRequestReader(RequestReader):
     def __init__(self, port: int, max_single_connection_lifetime: int):
         """
         Initialize the AWSLambdaStream and wait for jobs
@@ -20,9 +20,7 @@ class AWSLambdaRequestReader(PluginInputStreamReader):
         # setup server
         self._serve()
 
-    def read(
-        self,
-    ) -> Generator[PluginInStream, None, None]:
+    def _read_stream(self) -> Generator[PluginInStream, None, None]:
         """
         Read request from http server
         """
@@ -44,6 +42,7 @@ class AWSLambdaRequestReader(PluginInputStreamReader):
                     event=event,
                     session_id=data["session_id"],
                     data=data["data"],
+                    reader=self,
                     writer=AWSResponseWriter(queue),
                 )
                 # put request to queue

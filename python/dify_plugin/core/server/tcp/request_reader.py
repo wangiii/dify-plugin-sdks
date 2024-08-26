@@ -6,15 +6,15 @@ from typing import Callable, Generator, Optional
 from gevent.select import select
 
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
-from dify_plugin.core.server.__base.stream_reader import PluginInputStreamReader
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class TCPReaderWriter(PluginInputStreamReader, ResponseWriter):
+class TCPReaderWriter(RequestReader, ResponseWriter):
     def __init__(
         self,
         host: str,
@@ -94,7 +94,7 @@ class TCPReaderWriter(PluginInputStreamReader, ResponseWriter):
             logger.error(f"Failed to connect to {self.host}:{self.port}, {e}")
             raise e
 
-    def read(self) -> Generator[PluginInStream, None, None]:
+    def _read_stream(self) -> Generator[PluginInStream, None, None]:
         """
         Read data from the target
         """
@@ -137,6 +137,7 @@ class TCPReaderWriter(PluginInputStreamReader, ResponseWriter):
                         session_id=data["session_id"],
                         event=PluginInStream.Event.value_of(data["event"]),
                         data=data["data"],
+                        reader=self,
                         writer=self,
                     )
                 except Exception:

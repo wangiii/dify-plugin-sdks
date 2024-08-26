@@ -1,34 +1,36 @@
+from abc import ABC, abstractmethod
+from collections.abc import Generator
 import threading
-from typing import Callable, Optional
+from typing import Callable
 
 
 from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
-from dify_plugin.core.server.__base.stream_reader import (
-    PluginInputStreamReader,
-    PluginReader,
+from dify_plugin.core.server.__base.filter_reader import (
+    FilterReader,
 )
 
-class RequestReader:
-    lock = threading.Lock()
-    readers: list[PluginReader] = []
-    stream_reader: Optional[PluginInputStreamReader]
 
-    def __init__(self, reader: PluginInputStreamReader):
-        self.stream_reader = reader
+class RequestReader(ABC):
+    lock: threading.Lock = threading.Lock()
+    readers: list[FilterReader] = []
+
+    @abstractmethod
+    def _read_stream(self) -> Generator[PluginInStream, None, None]:
+        """
+        Read stream from stdin
+        """
+        raise NotImplementedError
 
     def event_loop(self):
         # read line by line
         while True:
-            if self.stream_reader is None:
-                continue
-
-            for line in self.stream_reader.read():
+            for line in self._read_stream():
                 self._process_line(line)
 
     def _process_line(self, data: PluginInStream):
         try:
             session_id = data.session_id
-            readers: list[PluginReader] = []
+            readers: list[FilterReader] = []
             with self.lock:
                 for reader in self.readers:
                     if reader.filter(data):
@@ -43,12 +45,12 @@ class RequestReader:
                 },
             )
 
-    def read(self, filter: Callable[[PluginInStream], bool]) -> PluginReader:
-        def close(reader: PluginReader):
+    def read(self, filter: Callable[[PluginInStream], bool]) -> FilterReader:
+        def close(reader: FilterReader):
             with self.lock:
                 self.readers.remove(reader)
 
-        reader = PluginReader(filter, close_callback=lambda: close(reader))
+        reader = FilterReader(filter, close_callback=lambda: close(reader))
 
         with self.lock:
             self.readers.append(reader)

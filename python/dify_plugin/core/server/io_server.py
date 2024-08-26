@@ -20,7 +20,9 @@ class IOServer(ABC):
         self.io_stream.close()
 
     @abstractmethod
-    def _execute_request(self, session_id: str, data: dict):
+    def _execute_request(
+        self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
+    ):
         """
         accept requests and execute them, should be implemented outside
         """
@@ -40,18 +42,19 @@ class IOServer(ABC):
                 self._execute_request_thread,
                 data.session_id,
                 data.data,
+                data.reader,
                 data.writer,
             )
 
     def _execute_request_thread(
-        self, session_id: str, data: dict, writer: ResponseWriter
+        self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
     ):
         """
         wrapper for _execute_request
         """
         # wait for the task to finish
         try:
-            self._execute_request(session_id, data)
+            self._execute_request(session_id, data, reader, writer)
         except Exception as e:
             writer.session_message(
                 session_id=session_id,
