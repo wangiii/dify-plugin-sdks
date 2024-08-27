@@ -1,6 +1,6 @@
 from typing import Mapping
 from werkzeug import Request, Response
-from dify_plugin.endpoint.endpoint import Endpoint
+from dify_plugin import Endpoint
 
 
 class Duck(Endpoint):

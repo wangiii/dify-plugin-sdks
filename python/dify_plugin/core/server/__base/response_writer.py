@@ -58,14 +58,17 @@ class ResponseWriter(ABC):
         self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None
     ):
         return self.put(Event.SESSION, session_id, data)
-    
+
     def session_message_text(
         self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None
     ) -> str:
-        return StreamOutputMessage(
-            event=Event.SESSION, session_id=session_id, data=data
-        ).model_dump_json() + "\n\n"
-    
+        return (
+            StreamOutputMessage(
+                event=Event.SESSION, session_id=session_id, data=data
+            ).model_dump_json()
+            + "\n\n"
+        )
+
     def stream_object(self, data: dict | BaseModel) -> SessionMessage:
         if isinstance(data, BaseModel):
             data = data.model_dump()

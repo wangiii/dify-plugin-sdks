@@ -1,8 +1,8 @@
 from typing import Any
 
-from dify_plugin.tool.errors import ToolProviderCredentialValidationError
-from dify_plugin.tool.tool import ToolProvider
+from dify_plugin import ToolProvider, ToolProviderCredentialValidationError
 from tools.google_search import GoogleSearchTool
+
 
 class GoogleProvider(ToolProvider):
     def _validate_credentials(self, credentials: dict[str, Any]) -> None:

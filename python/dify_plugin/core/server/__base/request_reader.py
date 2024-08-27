@@ -3,8 +3,10 @@ from collections.abc import Generator
 import threading
 from typing import Callable
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
 from dify_plugin.core.server.__base.filter_reader import (
     FilterReader,
 )
@@ -15,7 +17,7 @@ class RequestReader(ABC):
     readers: list[FilterReader] = []
 
     @abstractmethod
-    def _read_stream(self) -> Generator[PluginInStream, None, None]:
+    def _read_stream(self) -> Generator["PluginInStream", None, None]:
         """
         Read stream from stdin
         """
@@ -27,7 +29,7 @@ class RequestReader(ABC):
             for line in self._read_stream():
                 self._process_line(line)
 
-    def _process_line(self, data: PluginInStream):
+    def _process_line(self, data: "PluginInStream"):
         try:
             session_id = data.session_id
             readers: list[FilterReader] = []
@@ -45,7 +47,7 @@ class RequestReader(ABC):
                 },
             )
 
-    def read(self, filter: Callable[[PluginInStream], bool]) -> FilterReader:
+    def read(self, filter: Callable[["PluginInStream"], bool]) -> FilterReader:
         def close(reader: FilterReader):
             with self.lock:
                 self.readers.remove(reader)

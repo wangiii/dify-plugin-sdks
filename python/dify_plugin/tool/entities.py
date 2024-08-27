@@ -1,5 +1,5 @@
 from typing import Any, Optional, Union
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
 from enum import Enum
 
 from dify_plugin.core.runtime.entities.plugin.common import I18nObject
@@ -89,8 +89,8 @@ class ToolConfigurationExtra(BaseModel):
 
     python: Python
 
-class ToolOutputSchema(BaseModel):
-    __root__: dict
+class ToolOutputSchema(RootModel):
+    root: dict[str, Any]
 
 class ToolConfiguration(BaseModel):
     identity: ToolIdentity

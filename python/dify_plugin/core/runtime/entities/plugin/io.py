@@ -1,6 +1,10 @@
 from enum import Enum
 
-from dify_plugin.core.server.__base.request_reader import RequestReader
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from dify_plugin.core.server.__base.request_reader import RequestReader
+
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
 
@@ -15,6 +19,7 @@ class PluginInStreamEvent(Enum):
                 return e
         raise ValueError(f"Invalid value for PluginInStream.Event: {v}")
 
+
 class PluginInStreamBase:
     def __init__(
         self,
@@ -26,14 +31,15 @@ class PluginInStreamBase:
         self.event = event
         self.data = data
 
+
 class PluginInStream(PluginInStreamBase):
     def __init__(
         self,
         session_id: str,
         event: PluginInStreamEvent,
         data: dict,
-        reader: RequestReader,
-        writer: ResponseWriter,
+        reader: "RequestReader",
+        writer: "ResponseWriter",
     ):
         self.reader = reader
         self.writer = writer

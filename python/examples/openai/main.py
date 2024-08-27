@@ -2,12 +2,12 @@
 # lib: dify-plugin
 # import sys
 import sys
-sys.path.append('../..')
 
-from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.plugin import Plugin
+sys.path.append("../..")
+
+from dify_plugin import Plugin, DifyPluginEnv
 
 plugin = Plugin(DifyPluginEnv(MAX_REQUEST_TIMEOUT=30))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plugin.run()

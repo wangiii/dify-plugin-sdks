@@ -2,8 +2,12 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 import time
+from typing import Optional
 from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.runtime.entities.plugin.io import (
+    PluginInStream,
+    PluginInStreamEvent,
+)
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
@@ -11,8 +15,14 @@ from dify_plugin.core.server.__base.response_writer import ResponseWriter
 class IOServer(ABC):
     io_stream: RequestReader
 
-    def __init__(self, config: DifyPluginEnv, io_stream: RequestReader) -> None:
+    def __init__(
+        self,
+        config: DifyPluginEnv,
+        io_stream: RequestReader,
+        default_writer: Optional[ResponseWriter],
+    ) -> None:
         self.config = config
+        self.default_writer = default_writer
         self.executer = ThreadPoolExecutor(max_workers=self.config.MAX_WORKER)
         self.io_stream = io_stream
 
@@ -33,7 +43,7 @@ class IOServer(ABC):
         """
 
         def filter(data: PluginInStream) -> bool:
-            if data.event == PluginInStream.Event.Request:
+            if data.event == PluginInStreamEvent.Request:
                 return True
             return False
 
@@ -67,14 +77,16 @@ class IOServer(ABC):
 
         writer.session_message(session_id=session_id, data=writer.stream_end_object())
 
-    def _heartbeat(self, writer: ResponseWriter):
+    def _heartbeat(self):
         """
         send heartbeat to stdout
         """
+        assert self.default_writer
+
         while True:
             # timer
             try:
-                writer.heartbeat()
+                self.default_writer.heartbeat()
             except Exception:
                 pass
             time.sleep(self.config.HEARTBEAT_INTERVAL)
@@ -82,15 +94,21 @@ class IOServer(ABC):
     def _run(self):
         th1 = Thread(target=self._setup_instruction_listener)
         th2 = Thread(target=self.io_stream.event_loop)
-        th3 = Thread(target=self._heartbeat)
+
+        if self.default_writer:
+            th3 = Thread(target=self._heartbeat)
 
         th1.start()
         th2.start()
-        th3.start()
+
+        if self.default_writer:
+            th3.start()
 
         th1.join()
         th2.join()
-        th3.join()
+
+        if self.default_writer:
+            th3.join()
 
     def run(self):
         """

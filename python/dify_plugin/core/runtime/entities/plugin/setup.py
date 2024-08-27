@@ -18,18 +18,6 @@ class PluginType(Enum):
     Plugin = "plugin"
 
 
-class PluginRunner(BaseModel):
-    language: PluginLanguage
-    version: str
-    entrypoint: str
-
-
-class PluginMeta(BaseModel):
-    version: str
-    arch: list[PluginArch]
-    runner: dict
-
-
 class PluginResourceRequirements(BaseModel):
     memory: int
     storage: int
@@ -60,11 +48,17 @@ class PluginResourceRequirements(BaseModel):
 
     permission: Permission
 
+
 class PluginConfiguration(BaseModel):
     class Meta(BaseModel):
-        class Arch(Enum):
-            AMD64 = "amd64"
-            ARM64 = "arm64"
+        class PluginRunner(BaseModel):
+            language: PluginLanguage
+            version: str
+            entrypoint: str
+
+        version: str
+        arch: list[PluginArch]
+        runner: PluginRunner
 
     version: str
     type: PluginType

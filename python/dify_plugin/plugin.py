@@ -50,9 +50,9 @@ class Plugin(IOServer, Router):
         self.default_response_writer = response_writer
 
         # initialize plugin executor
-        self.plugin_executer = PluginExecutor(self.config, self.registration)
+        self.plugin_executer = PluginExecutor(config, self.registration)
 
-        IOServer.__init__(self, config, request_reader)
+        IOServer.__init__(self, config, request_reader, response_writer)
         Router.__init__(self, request_reader, response_writer)
 
         # register io routes

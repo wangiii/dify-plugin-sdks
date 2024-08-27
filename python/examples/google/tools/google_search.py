@@ -3,8 +3,7 @@ from typing import Any
 
 import requests
 
-from dify_plugin.tool.entities import ToolInvokeMessage
-from dify_plugin.tool.tool import Tool
+from dify_plugin import ToolInvokeMessage, Tool
 
 SERP_API_URL = "https://serpapi.com/search"
 
