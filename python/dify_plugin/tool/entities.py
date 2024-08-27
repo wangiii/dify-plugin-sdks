@@ -2,7 +2,7 @@ from typing import Any, Optional, Union
 from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
 from enum import Enum
 
-from dify_plugin.core.runtime.entities.plugin.common import I18nObject
+from dify_plugin.core.entities.plugin.common import I18nObject
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
 class ToolRuntime(BaseModel):
@@ -121,15 +121,15 @@ class ToolCredentialsOption(BaseModel):
     value: str = Field(..., description="The value of the option")
     label: I18nObject = Field(..., description="The label of the option")
 
-class ToolProviderCredentials(BaseModel):
-    class CredentialsType(Enum):
+class ToolProviderConfig(BaseModel):
+    class Config(Enum):
         SECRET_INPUT = "secret-input"
         TEXT_INPUT = "text-input"
         SELECT = "select"
         BOOLEAN = "boolean"
 
         @classmethod
-        def value_of(cls, value: str) -> "ToolProviderCredentials.CredentialsType":
+        def value_of(cls, value: str) -> "ToolProviderConfig.Config":
             """
             Get value of given mode.
 
@@ -142,7 +142,7 @@ class ToolProviderCredentials(BaseModel):
             raise ValueError(f'invalid mode value {value}')
         
     name: str = Field(..., description="The name of the credentials")
-    type: CredentialsType = Field(..., description="The type of the credentials")
+    type: Config = Field(..., description="The type of the credentials")
     required: bool = False
     default: Optional[Union[int, float, str]] = None
     options: Optional[list[ToolCredentialsOption]] = None
@@ -167,7 +167,7 @@ class ToolProviderConfigurationExtra(BaseModel):
 
 class ToolProviderConfiguration(BaseModel):
     identity: ToolProviderIdentity
-    credentials_schema: dict[str, ToolProviderCredentials] = Field(alias="credentials_for_provider", default={}, description="The credentials schema of the tool provider")
+    credentials_schema: dict[str, ToolProviderConfig] = Field(alias="credentials_for_provider", default={}, description="The credentials schema of the tool provider")
     tools: list[ToolConfiguration] = Field(default=[], description="The tools of the tool provider")
     extra: ToolProviderConfigurationExtra
 

@@ -9,7 +9,7 @@ from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
 from collections.abc import Generator  # noqa: E402
 import logging  # noqa: E402
 from dify_plugin.config.config import DifyPluginEnv, InstallMethod  # noqa: E402
-from dify_plugin.core.runtime.entities.plugin.request import (  # noqa: E402
+from dify_plugin.core.entities.plugin.request import (  # noqa: E402
     ModelActions,
     PluginInvokeType,
     ToolActions,

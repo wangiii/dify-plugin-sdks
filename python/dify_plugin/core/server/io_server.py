@@ -4,7 +4,7 @@ from threading import Thread
 import time
 from typing import Optional
 from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.runtime.entities.plugin.io import (
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )

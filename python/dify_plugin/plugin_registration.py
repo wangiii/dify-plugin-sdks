@@ -6,7 +6,7 @@ from werkzeug import Request
 from werkzeug.routing import Map, Rule
 
 from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.runtime.entities.plugin.setup import (
+from dify_plugin.core.entities.plugin.setup import (
     PluginConfiguration,
     PluginProviderType,
 )

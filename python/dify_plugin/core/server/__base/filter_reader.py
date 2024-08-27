@@ -3,7 +3,7 @@ from queue import Queue
 import queue
 from typing import Optional, overload
 
-from dify_plugin.core.runtime.entities.plugin.io import PluginInStream
+from dify_plugin.core.entities.plugin.io import PluginInStream
 
 
 class FilterReader:

@@ -2,27 +2,27 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import IO, Any, Optional
 
-from dify_plugin.core.runtime.entities.model_runtime.llm import (
+from dify_plugin.core.entities.model_runtime.llm import (
     LLMResult,
     LLMResultChunk,
 )
-from dify_plugin.core.runtime.entities.model_runtime.message import (
+from dify_plugin.core.entities.model_runtime.message import (
     PromptMessage,
     PromptMessageTool,
 )
-from dify_plugin.core.runtime.entities.model_runtime.model_config import (
+from dify_plugin.core.entities.model_runtime.model_config import (
     LLMModelConfig,
     ModerationModelConfig,
     RerankModelConfig,
     Speech2TextModelConfig,
     TTSModelConfig,
 )
-from dify_plugin.core.runtime.entities.model_runtime.rerank import RerankResult
-from dify_plugin.core.runtime.entities.model_runtime.text_embedding import (
+from dify_plugin.core.entities.model_runtime.rerank import RerankResult
+from dify_plugin.core.entities.model_runtime.text_embedding import (
     TextEmbeddingResult,
 )
-from dify_plugin.core.runtime.entities.plugin.dify import ToolProviderType
-from dify_plugin.core.runtime.entities.plugin.workflow import (
+from dify_plugin.core.entities.plugin.dify import ToolProviderType
+from dify_plugin.core.entities.plugin.workflow import (
     KnowledgeRetrievalNodeData,
     NodeResponse,
     ParameterExtractorNodeData,

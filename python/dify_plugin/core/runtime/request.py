@@ -9,47 +9,47 @@ from pydantic import BaseModel
 from yarl import URL
 
 from dify_plugin.config.config import InstallMethod
-from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
-from dify_plugin.core.runtime.entities.backwards_invocation.response_event import (
+from dify_plugin.core.entities.backwards_invocation.response_event import (
     BackwardsInvocationResponseEvent,
 )
-from dify_plugin.core.runtime.entities.model_runtime.llm import (
+from dify_plugin.core.entities.model_runtime.llm import (
     LLMResult,
     LLMResultChunk,
 )
-from dify_plugin.core.runtime.entities.model_runtime.message import (
+from dify_plugin.core.entities.model_runtime.message import (
     PromptMessage,
     PromptMessageTool,
 )
-from dify_plugin.core.runtime.entities.model_runtime.model_config import (
+from dify_plugin.core.entities.model_runtime.model_config import (
     LLMModelConfig,
     ModerationModelConfig,
     RerankModelConfig,
     Speech2TextModelConfig,
     TTSModelConfig,
 )
-from dify_plugin.core.runtime.entities.model_runtime.moderation import ModerationResult
-from dify_plugin.core.runtime.entities.model_runtime.rerank import RerankResult
-from dify_plugin.core.runtime.entities.model_runtime.speech2text import (
+from dify_plugin.core.entities.model_runtime.moderation import ModerationResult
+from dify_plugin.core.entities.model_runtime.rerank import RerankResult
+from dify_plugin.core.entities.model_runtime.speech2text import (
     Speech2TextResult,
 )
-from dify_plugin.core.runtime.entities.model_runtime.text_embedding import (
+from dify_plugin.core.entities.model_runtime.text_embedding import (
     TextEmbeddingResult,
 )
-from dify_plugin.core.runtime.entities.model_runtime.tts import TTSResult
-from dify_plugin.core.runtime.entities.plugin.dify import ToolProviderType
-from dify_plugin.core.runtime.entities.plugin.invocation import InvokeType
-from dify_plugin.core.runtime.entities.plugin.io import (
+from dify_plugin.core.entities.model_runtime.tts import TTSResult
+from dify_plugin.core.entities.plugin.dify import ToolProviderType
+from dify_plugin.core.entities.plugin.invocation import InvokeType
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamBase,
     PluginInStreamEvent,
 )
-from dify_plugin.core.runtime.entities.plugin.workflow import (
+from dify_plugin.core.entities.plugin.workflow import (
     KnowledgeRetrievalNodeData,
     NodeResponse,
     ParameterExtractorNodeData,
     QuestionClassifierNodeData,
 )
+from dify_plugin.core.runtime.abstract.request import AbstractRequestInterface
 from dify_plugin.core.runtime.session import Session
 from dify_plugin.tool.entities import ToolInvokeMessage
 

@@ -1,7 +1,7 @@
 from json import loads
 import sys
 from typing import Generator
-from dify_plugin.core.runtime.entities.plugin.io import (
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
