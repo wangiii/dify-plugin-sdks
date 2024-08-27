@@ -1,4 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel
+
+from dify_plugin.model.provider_entities import ProviderConfig
 
 
 class EndpointConfigurationExtra(BaseModel):
@@ -11,4 +14,5 @@ class EndpointConfigurationExtra(BaseModel):
 class EndpointConfiguration(BaseModel):
     path: str
     method: str
+    settings: Optional[ProviderConfig] = None
     extra: EndpointConfigurationExtra

@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from dify_plugin.core.runtime.entities.plugin.common import I18nObject
+from dify_plugin.core.entities.plugin.common import I18nObject
 from dify_plugin.model.model_entities import AIModelEntity, ModelType
 from dify_plugin.utils.yaml_loader import load_yaml_file
 

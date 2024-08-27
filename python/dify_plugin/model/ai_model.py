@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from dify_plugin.core.runtime.entities.plugin.common import I18nObject
+from dify_plugin.core.entities.plugin.common import I18nObject
 from dify_plugin.model.errors import InvokeAuthorizationError, InvokeError
 from dify_plugin.model.model_entities import (
     AIModelEntity,

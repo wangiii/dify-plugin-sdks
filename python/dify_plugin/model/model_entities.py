@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from dify_plugin.core.runtime.entities.plugin.common import I18nObject
+from dify_plugin.core.entities.plugin.common import I18nObject
 from dify_plugin.model.parameter_template import PARAMETER_RULE_TEMPLATE, DefaultParameterName
 
 

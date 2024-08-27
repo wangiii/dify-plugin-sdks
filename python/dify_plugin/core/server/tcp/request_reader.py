@@ -5,7 +5,7 @@ from typing import Callable, Generator, Optional
 
 from gevent.select import select
 
-from dify_plugin.core.runtime.entities.plugin.io import (
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )

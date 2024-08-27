@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Any, Optional
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from dify_plugin.core.runtime.entities.model_runtime.message import (
+from dify_plugin.core.entities.model_runtime.message import (
     AssistantPromptMessage,
     PromptMessage,
     PromptMessageRole,

@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from dify_plugin.core.runtime.entities.model_runtime.text_embedding import TextEmbeddingResult
+from dify_plugin.core.entities.model_runtime.text_embedding import TextEmbeddingResult
 from dify_plugin.model.ai_model import AIModel
 from dify_plugin.model.model_entities import ModelPropertyKey, ModelType
 

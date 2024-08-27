@@ -3,12 +3,15 @@ from pydantic import BaseModel, Field, RootModel, field_validator, model_validat
 from enum import Enum
 
 from dify_plugin.core.entities.plugin.common import I18nObject
+from dify_plugin.core.entities.plugin.parameter_type import CommonParameterType
 from dify_plugin.utils.yaml_loader import load_yaml_file
+
 
 class ToolRuntime(BaseModel):
     credentials: dict[str, str]
     user_id: Optional[str]
     session_id: Optional[str]
+
 
 class ToolInvokeMessage(BaseModel):
     class TextMessage(BaseModel):
@@ -35,17 +38,18 @@ class ToolInvokeMessage(BaseModel):
     def to_dict(self):
         return {"type": self.type.value, "message": self.message.to_dict()}
 
+
 class ToolIdentity(BaseModel):
     author: str = Field(..., description="The author of the tool")
     name: str = Field(..., description="The name of the tool")
     label: I18nObject = Field(..., description="The label of the tool")
 
+
 class ToolParameterOption(BaseModel):
     value: str = Field(..., description="The value of the option")
     label: I18nObject = Field(..., description="The label of the option")
 
-
-    @field_validator('value', mode='before')
+    @field_validator("value", mode="before")
     @classmethod
     def transform_id_to_str(cls, value) -> str:
         if not isinstance(value, str):
@@ -53,25 +57,34 @@ class ToolParameterOption(BaseModel):
         else:
             return value
 
+
 class ToolParameter(BaseModel):
     class ToolParameterType(str, Enum):
-        STRING = "string"
-        NUMBER = "number"
-        BOOLEAN = "boolean"
-        SELECT = "select"
-        SECRET_INPUT = "secret-input"
-        FILE = "file"
+        STRING = CommonParameterType.STRING.value
+        NUMBER = CommonParameterType.NUMBER.value
+        BOOLEAN = CommonParameterType.BOOLEAN.value
+        SELECT = CommonParameterType.SELECT.value
+        SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
+        FILE = CommonParameterType.FILE.value
+        MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
+        CHAT_APP_ID = CommonParameterType.CHAT_APP_ID.value
+        COMPLETION_APP_ID = CommonParameterType.COMPLETION_APP_ID.value
+        WORKFLOW_APP_ID = CommonParameterType.WORKFLOW_APP_ID.value
 
     class ToolParameterForm(Enum):
-        SCHEMA = "schema" # should be set while adding tool
-        FORM = "form"     # should be set before invoking tool
-        LLM = "llm"       # will be set by LLM
+        SCHEMA = "schema"  # should be set while adding tool
+        FORM = "form"  # should be set before invoking tool
+        LLM = "llm"  # will be set by LLM
 
     name: str = Field(..., description="The name of the parameter")
     label: I18nObject = Field(..., description="The label presented to the user")
-    human_description: I18nObject = Field(..., description="The description presented to the user")
+    human_description: I18nObject = Field(
+        ..., description="The description presented to the user"
+    )
     type: ToolParameterType = Field(..., description="The type of the parameter")
-    form: ToolParameterForm = Field(..., description="The form of the parameter, schema/form/llm")
+    form: ToolParameterForm = Field(
+        ..., description="The form of the parameter, schema/form/llm"
+    )
     llm_description: Optional[str] = None
     required: Optional[bool] = False
     default: Optional[Union[int, str]] = None
@@ -79,9 +92,11 @@ class ToolParameter(BaseModel):
     max: Optional[Union[float, int]] = None
     options: Optional[list[ToolParameterOption]] = None
 
+
 class ToolDescription(BaseModel):
     human: I18nObject = Field(..., description="The description presented to the user")
     llm: str = Field(..., description="The description presented to the LLM")
+
 
 class ToolConfigurationExtra(BaseModel):
     class Python(BaseModel):
@@ -89,47 +104,58 @@ class ToolConfigurationExtra(BaseModel):
 
     python: Python
 
+
 class ToolOutputSchema(RootModel):
     root: dict[str, Any]
 
+
 class ToolConfiguration(BaseModel):
     identity: ToolIdentity
-    parameters: list[ToolParameter] = Field(default=[], description="The parameters of the tool")
+    parameters: list[ToolParameter] = Field(
+        default=[], description="The parameters of the tool"
+    )
     description: ToolDescription
     extra: ToolConfigurationExtra
     output_schema: Optional[ToolOutputSchema] = Field(default_factory=dict)
 
+
 class ToolLabelEnum(Enum):
-    SEARCH = 'search'
-    IMAGE = 'image'
-    VIDEOS = 'videos'
-    WEATHER = 'weather'
-    FINANCE = 'finance'
-    DESIGN = 'design'
-    TRAVEL = 'travel'
-    SOCIAL = 'social'
-    NEWS = 'news'
-    MEDICAL = 'medical'
-    PRODUCTIVITY = 'productivity'
-    EDUCATION = 'education'
-    BUSINESS = 'business'
-    ENTERTAINMENT = 'entertainment'
-    UTILITIES = 'utilities'
-    OTHER = 'other'
+    SEARCH = "search"
+    IMAGE = "image"
+    VIDEOS = "videos"
+    WEATHER = "weather"
+    FINANCE = "finance"
+    DESIGN = "design"
+    TRAVEL = "travel"
+    SOCIAL = "social"
+    NEWS = "news"
+    MEDICAL = "medical"
+    PRODUCTIVITY = "productivity"
+    EDUCATION = "education"
+    BUSINESS = "business"
+    ENTERTAINMENT = "entertainment"
+    UTILITIES = "utilities"
+    OTHER = "other"
+
 
 class ToolCredentialsOption(BaseModel):
     value: str = Field(..., description="The value of the option")
     label: I18nObject = Field(..., description="The label of the option")
 
-class ToolProviderConfig(BaseModel):
+
+class ProviderConfig(BaseModel):
     class Config(Enum):
-        SECRET_INPUT = "secret-input"
-        TEXT_INPUT = "text-input"
-        SELECT = "select"
-        BOOLEAN = "boolean"
+        SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
+        TEXT_INPUT = CommonParameterType.TEXT_INPUT.value
+        SELECT = CommonParameterType.SELECT.value
+        BOOLEAN = CommonParameterType.BOOLEAN.value
+        MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
+        CHAT_APP_ID = CommonParameterType.CHAT_APP_ID.value
+        COMPLETION_APP_ID = CommonParameterType.COMPLETION_APP_ID.value
+        WORKFLOW_APP_ID = CommonParameterType.WORKFLOW_APP_ID.value
 
         @classmethod
-        def value_of(cls, value: str) -> "ToolProviderConfig.Config":
+        def value_of(cls, value: str) -> "ProviderConfig.Config":
             """
             Get value of given mode.
 
@@ -139,8 +165,8 @@ class ToolProviderConfig(BaseModel):
             for mode in cls:
                 if mode.value == value:
                     return mode
-            raise ValueError(f'invalid mode value {value}')
-        
+            raise ValueError(f"invalid mode value {value}")
+
     name: str = Field(..., description="The name of the credentials")
     type: Config = Field(..., description="The type of the credentials")
     required: bool = False
@@ -151,13 +177,18 @@ class ToolProviderConfig(BaseModel):
     url: Optional[str] = None
     placeholder: Optional[I18nObject] = None
 
+
 class ToolProviderIdentity(BaseModel):
     author: str = Field(..., description="The author of the tool")
     name: str = Field(..., description="The name of the tool")
     description: I18nObject = Field(..., description="The description of the tool")
     icon: str = Field(..., description="The icon of the tool")
     label: I18nObject = Field(..., description="The label of the tool")
-    tags: list[ToolLabelEnum] = Field(default=[], description="The tags of the tool", )
+    tags: list[ToolLabelEnum] = Field(
+        default=[],
+        description="The tags of the tool",
+    )
+
 
 class ToolProviderConfigurationExtra(BaseModel):
     class Python(BaseModel):
@@ -165,22 +196,31 @@ class ToolProviderConfigurationExtra(BaseModel):
 
     python: Python
 
+
 class ToolProviderConfiguration(BaseModel):
     identity: ToolProviderIdentity
-    credentials_schema: dict[str, ToolProviderConfig] = Field(alias="credentials_for_provider", default={}, description="The credentials schema of the tool provider")
-    tools: list[ToolConfiguration] = Field(default=[], description="The tools of the tool provider")
+    credentials_schema: dict[str, ProviderConfig] = Field(
+        alias="credentials_for_provider",
+        default={},
+        description="The credentials schema of the tool provider",
+    )
+    tools: list[ToolConfiguration] = Field(
+        default=[], description="The tools of the tool provider"
+    )
     extra: ToolProviderConfigurationExtra
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     def validate_credentials_schema(cls, data: dict) -> dict:
-        credentials_for_provider: dict[str, Any] = data.get("credentials_for_provider", {})
+        credentials_for_provider: dict[str, Any] = data.get(
+            "credentials_for_provider", {}
+        )
         for credential in credentials_for_provider:
             credentials_for_provider[credential]["name"] = credential
 
         data["credentials_for_provider"] = credentials_for_provider
         return data
 
-    @field_validator('tools', mode='before')
+    @field_validator("tools", mode="before")
     def validate_tools(cls, value) -> list[ToolConfiguration]:
         if not isinstance(value, list):
             raise ValueError("tools should be a list")
@@ -193,13 +233,20 @@ class ToolProviderConfiguration(BaseModel):
                 raise ValueError("tool path should be a string")
             try:
                 file = load_yaml_file(tool)
-                tools.append(ToolConfiguration(**{
-                    "identity": ToolIdentity(**file["identity"]),
-                    "parameters": [ToolParameter(**param) for param in file.get("parameters", [])],
-                    "description": ToolDescription(**file["description"]),
-                    "extra": ToolConfigurationExtra(**file.get("extra", {}))
-                }))
+                tools.append(
+                    ToolConfiguration(
+                        **{
+                            "identity": ToolIdentity(**file["identity"]),
+                            "parameters": [
+                                ToolParameter(**param)
+                                for param in file.get("parameters", [])
+                            ],
+                            "description": ToolDescription(**file["description"]),
+                            "extra": ToolConfigurationExtra(**file.get("extra", {})),
+                        }
+                    )
+                )
             except Exception as e:
                 raise ValueError(f"Error loading tool configuration: {str(e)}")
-            
+
         return tools

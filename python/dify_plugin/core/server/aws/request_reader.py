@@ -2,7 +2,7 @@ from queue import Queue
 import threading
 from typing import Generator
 from flask import Flask, request
-from dify_plugin.core.runtime.entities.plugin.io import (
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
