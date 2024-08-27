@@ -2,14 +2,15 @@ from setuptools import setup
 
 setup(
     name="dify_plugin",
-    version="0.0.1-beta",
+    version="0.0.1-beta1",
     author="langgenius",
     long_description_content_type="text/markdown",
     url="https://github.com/langgenius/dify-plugin-sdks.git",
+    description="Dify Plugin SDK",
     long_description=open("README.md", encoding="utf-8").read(),
     packages=["dify_plugin"],
     keywords=["dify", "plugin", "sdk"],
-    requires=[
+    install_requires=[
         "pydantic~=2.8.2",
         "pydantic_settings~=2.3.4",
         "pyyaml~=6.0.1",
@@ -21,4 +22,5 @@ setup(
         "awslambdaric~=2.1.0",
         "yarl~=1.9.4",
     ],
+    python_requires='>=3.12'
 )
