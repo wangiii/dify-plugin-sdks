@@ -13,21 +13,21 @@ from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
 
 class IOServer(ABC):
-    io_stream: RequestReader
+    request_reader: RequestReader
 
     def __init__(
         self,
         config: DifyPluginEnv,
-        io_stream: RequestReader,
+        request_reader: RequestReader,
         default_writer: Optional[ResponseWriter],
     ) -> None:
         self.config = config
         self.default_writer = default_writer
         self.executer = ThreadPoolExecutor(max_workers=self.config.MAX_WORKER)
-        self.io_stream = io_stream
+        self.request_reader = request_reader
 
     def close(self, *args):
-        self.io_stream.close()
+        self.request_reader.close()
 
     @abstractmethod
     def _execute_request(
@@ -47,16 +47,16 @@ class IOServer(ABC):
                 return True
             return False
 
-        for data in self.io_stream.read(filter).read():
+        for data in self.request_reader.read(filter).read():
             self.executer.submit(
-                self._execute_request_thread,
+                self._execute_request_in_thread,
                 data.session_id,
                 data.data,
                 data.reader,
                 data.writer,
             )
 
-    def _execute_request_thread(
+    def _execute_request_in_thread(
         self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
     ):
         """
@@ -93,7 +93,7 @@ class IOServer(ABC):
 
     def _run(self):
         th1 = Thread(target=self._setup_instruction_listener)
-        th2 = Thread(target=self.io_stream.event_loop)
+        th2 = Thread(target=self.request_reader.event_loop)
 
         if self.default_writer:
             th3 = Thread(target=self._heartbeat)
