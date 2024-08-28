@@ -3,7 +3,11 @@ from pydantic import BaseModel, Field, RootModel, field_validator, model_validat
 from enum import Enum
 
 from dify_plugin.core.entities.plugin.common import I18nObject
-from dify_plugin.core.entities.plugin.parameter_type import CommonParameterType
+from dify_plugin.core.entities.plugin.parameter_type import (
+    AppSelectorScope,
+    CommonParameterType,
+    ModelConfigScope,
+)
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
 
@@ -67,9 +71,7 @@ class ToolParameter(BaseModel):
         SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
         FILE = CommonParameterType.FILE.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
-        CHAT_APP_ID = CommonParameterType.CHAT_APP.value
-        COMPLETION_APP_ID = CommonParameterType.COMPLETION_APP.value
-        WORKFLOW_APP_ID = CommonParameterType.WORKFLOW_APP.value
+        APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
 
     class ToolParameterForm(Enum):
         SCHEMA = "schema"  # should be set while adding tool
@@ -82,6 +84,7 @@ class ToolParameter(BaseModel):
         ..., description="The description presented to the user"
     )
     type: ToolParameterType = Field(..., description="The type of the parameter")
+    scope: Optional[AppSelectorScope | ModelConfigScope] = None
     form: ToolParameterForm = Field(
         ..., description="The form of the parameter, schema/form/llm"
     )
@@ -150,9 +153,7 @@ class ProviderConfig(BaseModel):
         SELECT = CommonParameterType.SELECT.value
         BOOLEAN = CommonParameterType.BOOLEAN.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
-        CHAT_APP_ID = CommonParameterType.CHAT_APP.value
-        COMPLETION_APP_ID = CommonParameterType.COMPLETION_APP.value
-        WORKFLOW_APP_ID = CommonParameterType.WORKFLOW_APP.value
+        APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
 
         @classmethod
         def value_of(cls, value: str) -> "ProviderConfig.Config":
@@ -169,6 +170,7 @@ class ProviderConfig(BaseModel):
 
     name: str = Field(..., description="The name of the credentials")
     type: Config = Field(..., description="The type of the credentials")
+    scope: Optional[AppSelectorScope | ModelConfigScope] = None
     required: bool = False
     default: Optional[Union[int, float, str]] = None
     options: Optional[list[ToolCredentialsOption]] = None

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CommonParameterType(Enum):
     SECRET_INPUT = "secret-input"
     TEXT_INPUT = "text-input"
@@ -8,7 +9,21 @@ class CommonParameterType(Enum):
     NUMBER = "number"
     FILE = "file"
     BOOLEAN = "boolean"
-    CHAT_APP = "chat-app"
-    COMPLETION_APP = "completion-app"
-    WORKFLOW_APP = "workflow-app"
+    APP_SELECTOR = "app-selector"
     MODEL_CONFIG = "model-config"
+
+
+class AppSelectorScope(Enum):
+    ALL = "all"
+    CHAT = "chat"
+    WORKFLOW = "workflow"
+    COMPLETION = "completion"
+
+
+class ModelConfigScope(Enum):
+    LLM = "llm"
+    TEXT_EMBEDDING = "text-embedding"
+    RERANK = "rerank"
+    TTS = "tts"
+    SPEECH2TEXT = "speech2text"
+    MODERATION = "moderation"
