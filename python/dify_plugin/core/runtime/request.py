@@ -116,10 +116,7 @@ class RequestInterface(AbstractRequestInterface):
 
             empty_response_count = 0
             try:
-                if data_type == dict:
-                    event.data
-                else:
-                    yield data_type(**event.data)
+                yield data_type(**event.data)
             except Exception as e:
                 raise Exception(f"Failed to parse response: {str(e)}")
 
@@ -203,7 +200,7 @@ class RequestInterface(AbstractRequestInterface):
             )
 
         with self.session.reader.read(filter) as reader:
-            return self._line_converter_wrapper(
+            yield from self._line_converter_wrapper(
                 reader.read(timeout_for_round=1), data_type
             )
 
@@ -580,6 +577,8 @@ class RequestInterface(AbstractRequestInterface):
 
             raise Exception("unexpected data")
 
+        Exception("no data found")
+
     def storage_get(self, key: str):
         for data in self._backwards_invoke(
             InvokeType.STORAGE,
@@ -590,6 +589,8 @@ class RequestInterface(AbstractRequestInterface):
             },
         ):
             return unhexlify(data["data"])
+
+        raise Exception("no data found")
 
     def storage_del(self, key: str):
         for data in self._backwards_invoke(
@@ -604,3 +605,5 @@ class RequestInterface(AbstractRequestInterface):
                 return
 
             raise Exception("unexpected data")
+
+        raise Exception("no data found")

@@ -37,6 +37,7 @@ class RequestReader(ABC):
                 for reader in self.readers:
                     if reader.filter(data):
                         readers.append(reader)
+
             for reader in readers:
                 reader.write(data)
         except Exception as e:

@@ -5,7 +5,6 @@ name: "openai"
 created_at: "2024-07-12T08:03:44.658609186Z"
 resource:
   memory: 1048576
-  storage: 1048576
   permission:
     tool:
       enabled: true
