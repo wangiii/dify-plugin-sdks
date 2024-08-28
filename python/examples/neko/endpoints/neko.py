@@ -38,7 +38,7 @@ class Neko(Endpoint):
             except Exception:
                 pass
 
-            yield f"it's your {visitors} times visit this page! <br>"
+            yield f"it's your {visitors} time visit this page! <br>"
 
             for i in range(0, len(text), 2):
                 time.sleep(0.05)
