@@ -27,3 +27,4 @@ class ModelConfigScope(Enum):
     TTS = "tts"
     SPEECH2TEXT = "speech2text"
     MODERATION = "moderation"
+    VISION = "vision"
