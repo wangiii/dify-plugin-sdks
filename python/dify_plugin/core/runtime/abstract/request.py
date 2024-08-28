@@ -144,3 +144,35 @@ class AbstractRequestInterface(ABC):
         """
         Invoke knowledge retrieval
         """
+
+    @abstractmethod
+    def storage_set(self, key: str, val: bytes):
+        """
+        set a value into persistence storage.
+        
+        the namespace of key is under workspace and plugin
+        which means all your data stored are isolated by workspace id
+        to different scenarios, you need to use different id to generate the key.
+        when using plugin in workflows or agents, app_id is what you need.
+        """
+    
+    @abstractmethod
+    def storage_get(self, key: str):
+        """
+        get a value from persistence.
+
+        the namespace of key is under workspace and plugin
+        which means all your data stored are isolated by workspace id
+        to different scenarios, you need to use different id to generate the key.
+        when using plugin in workflows or agents, app_id is what you need.
+        """
+    @abstractmethod
+    def storage_del(self, key: str):
+        """
+        del a value from persistence.
+
+        the namespace of key is under workspace and plugin
+        which means all your data stored are isolated by workspace id
+        to different scenarios, you need to use different id to generate the key.
+        when using plugin in workflows or agents, app_id is what you need.
+        """

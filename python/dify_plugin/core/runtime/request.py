@@ -565,3 +565,42 @@ class RequestInterface(AbstractRequestInterface):
         Invoke knowledge retrieval
         """
         return super().invoke_knowledge_retrieval(node_data, inputs)
+
+    def storage_set(self, key: str, val: bytes):
+        """
+        set a value into persistence storage.
+        """
+        for data in self._backwards_invoke(
+            InvokeType.STORAGE,
+            dict,
+            {"opt": "set", "key": key, "value": hexlify(val).decode()},
+        ):
+            if data["data"] == "ok":
+                return
+
+            raise Exception("unexpected data")
+
+    def storage_get(self, key: str):
+        for data in self._backwards_invoke(
+            InvokeType.STORAGE,
+            dict,
+            {
+                "opt": "get",
+                "key": key,
+            },
+        ):
+            return unhexlify(data["data"])
+
+    def storage_del(self, key: str):
+        for data in self._backwards_invoke(
+            InvokeType.STORAGE,
+            dict,
+            {
+                "opt": "del",
+                "key": key,
+            },
+        ):
+            if data["data"] == "ok":
+                return
+
+            raise Exception("unexpected data")
