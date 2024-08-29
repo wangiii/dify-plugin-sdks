@@ -3,6 +3,7 @@ from typing import Optional
 from dify_plugin.config.config import InstallMethod
 from concurrent.futures import ThreadPoolExecutor
 
+from dify_plugin.core.runtime.requests.storage import StorageRequest
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
 from dify_plugin.core.runtime.requests.app.chat import ChatAppRequest
@@ -79,6 +80,13 @@ class Session:
 
         # register request handlers
         self._register_request_handlers()
+    
+    def _register_request_handlers(self) -> None:
+        self.model = ModelRequests(self)
+        self.tool = ToolRequest(self)
+        self.app = AppRequests(self)
+        self.workflow_node = WorkflowNodeRequests(self)
+        self.storage = StorageRequest(self)
 
     @classmethod
     def empty_session(cls) -> "Session":
@@ -90,12 +98,6 @@ class Session:
             install_method=None,
             dify_plugin_daemon_url=None,
         )
-
-    def _register_request_handlers(self) -> None:
-        self.model = ModelRequests(self)
-        self.tool = ToolRequest(self)
-        self.app = AppRequests(self)
-        self.workflow_node = WorkflowNodeRequests(self)
 
     def __del__(self) -> None:
         self._session_pool.remove(self)

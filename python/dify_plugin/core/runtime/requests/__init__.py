@@ -87,10 +87,7 @@ class DifyRequest(Generic[T], ABC):
 
             empty_response_count = 0
             try:
-                if data_type is dict:
-                    event.data
-                else:
-                    yield data_type(**event.data)
+                yield data_type(**event.data)
             except Exception as e:
                 raise Exception(f"Failed to parse response: {str(e)}")
 
@@ -174,6 +171,6 @@ class DifyRequest(Generic[T], ABC):
             )
 
         with self.session.reader.read(filter) as reader:
-            return self._line_converter_wrapper(
+            yield from self._line_converter_wrapper(
                 reader.read(timeout_for_round=1), data_type
             )

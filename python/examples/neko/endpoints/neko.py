@@ -27,14 +27,14 @@ class Neko(Endpoint):
 
         def generator():
             try:
-                visitors = int(self.storage_get("visitors").decode())
+                visitors = int(self.session.storage.get("visitors").decode())
             except Exception:
                 visitors = 0
 
             visitors += 1
 
             try:
-                self.storage_set("visitors", str(visitors).encode())
+                self.session.storage.set("visitors", str(visitors).encode())
             except Exception:
                 pass
 
