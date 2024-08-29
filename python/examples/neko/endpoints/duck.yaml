@@ -1,6 +1,6 @@
 type: endpoint
 provider:
-  path: "/duck/<id>"
+  path: "/duck/<app_id>"
   method: "GET"
   extra:
     python:

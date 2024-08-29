@@ -13,6 +13,8 @@ resource:
       llm: true
     endpoint:
       enabled: true
+    app:
+      enabled: true
     storage: 
       enabled: true
       size: 1048576

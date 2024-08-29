@@ -1,3 +1,4 @@
+import json
 from typing import Mapping
 from werkzeug import Request, Response
 from dify_plugin import Endpoint
@@ -8,4 +9,14 @@ class Duck(Endpoint):
         """
         Invokes the endpoint with the given request.
         """
-        return Response("quack", status=200)
+        app_id = values["app_id"]
+
+        def generator():
+            response = self.invoke_workflow(
+                app_id=app_id, inputs={}, response_mode="streaming", files=[]
+            )
+
+            for data in response:
+                yield f"{json.dumps(data)} <br>"
+
+        return Response(generator(), status=200, content_type="text/html")
