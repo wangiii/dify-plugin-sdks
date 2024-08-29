@@ -2,7 +2,7 @@ import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PluginArch(Enum):
@@ -20,7 +20,6 @@ class PluginType(Enum):
 
 class PluginResourceRequirements(BaseModel):
     memory: int
-    storage: int
 
     class Permission(BaseModel):
         class Tool(BaseModel):
@@ -41,10 +40,15 @@ class PluginResourceRequirements(BaseModel):
         class Endpoint(BaseModel):
             enabled: bool
 
+        class Storage(BaseModel):
+            enabled: bool
+            size: int = Field(ge=1024, le=1073741824)
+
         tool: Optional[Tool]
         model: Optional[Model]
         node: Optional[Node]
         endpoint: Optional[Endpoint]
+        storage: Storage
 
     permission: Permission
 

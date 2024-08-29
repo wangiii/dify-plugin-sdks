@@ -90,9 +90,10 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             self.sock.connect((self.host, self.port))
             self.alive = True
             self.sock.sendall(self.key.encode() + b"\n")
+            logger.info(f"Connected to {self.host}:{self.port}")
             if self.on_connected:
                 self.on_connected()
-            logger.info(f"Connected to {self.host}:{self.port}")
+            logger.info(f"Sent key to {self.host}:{self.port}")
         except socket.error as e:
             logger.error(f"Failed to connect to {self.host}:{self.port}, {e}")
             raise e

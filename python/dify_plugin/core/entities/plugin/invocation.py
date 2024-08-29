@@ -11,6 +11,7 @@ class InvokeType(Enum):
     Moderation = 'moderation'
     Node = 'node'
     App = 'app'
+    STORAGE = "storage"
 
     @classmethod
     def value_of(cls, value: str) -> 'InvokeType':

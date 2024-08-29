@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from werkzeug import Request, Response
 
+from dify_plugin.core.runtime.request import RequestInterface
 
-class Endpoint(ABC):
+
+class Endpoint(RequestInterface, ABC):
     def invoke(self, r: Request, values: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.

@@ -71,9 +71,7 @@ class ToolParameter(BaseModel):
         SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
         FILE = CommonParameterType.FILE.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
-        CHAT_APP_ID = CommonParameterType.CHAT_APP.value
-        COMPLETION_APP_ID = CommonParameterType.COMPLETION_APP.value
-        WORKFLOW_APP_ID = CommonParameterType.WORKFLOW_APP.value
+        APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
 
     class ToolParameterForm(Enum):
         SCHEMA = "schema"  # should be set while adding tool
@@ -155,9 +153,7 @@ class ProviderConfig(BaseModel):
         SELECT = CommonParameterType.SELECT.value
         BOOLEAN = CommonParameterType.BOOLEAN.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
-        CHAT_APP_ID = CommonParameterType.CHAT_APP.value
-        COMPLETION_APP_ID = CommonParameterType.COMPLETION_APP.value
-        WORKFLOW_APP_ID = CommonParameterType.WORKFLOW_APP.value
+        APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
 
         @classmethod
         def value_of(cls, value: str) -> "ProviderConfig.Config":
@@ -174,6 +170,7 @@ class ProviderConfig(BaseModel):
 
     name: str = Field(..., description="The name of the credentials")
     type: Config = Field(..., description="The type of the credentials")
+    scope: Optional[AppSelectorScope | ModelConfigScope] = None
     required: bool = False
     default: Optional[Union[int, float, str]] = None
     options: Optional[list[ToolCredentialsOption]] = None

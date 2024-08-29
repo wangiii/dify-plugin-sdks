@@ -2,3 +2,8 @@ __pycache__
 .env
 **/*.env
 .installed
+.ruff_cache
+.vscode
+dist/
+dify_plugin.egg-info/
+build/
