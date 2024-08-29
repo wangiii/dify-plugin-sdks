@@ -2,7 +2,7 @@ import time
 from abc import abstractmethod
 from typing import Optional
 
-from dify_plugin.core.entities.model_runtime.rerank import RerankResult
+from dify_plugin.core.entities.model.rerank import RerankResult
 from dify_plugin.model.ai_model import AIModel
 from dify_plugin.model.model_entities import ModelType
 

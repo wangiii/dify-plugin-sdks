@@ -1,14 +1,14 @@
 from collections.abc import Generator
 from typing import Any
 
-from dify_plugin.core.runtime.entities.model_runtime.message import SystemPromptMessage, UserPromptMessage
-from dify_plugin.core.runtime.entities.model_runtime.model_config import LLMModelConfig
 from dify_plugin.tool.entities import ToolInvokeMessage
 from dify_plugin.tool.tool import Tool
+from dify_plugin.core.entities.model.message import SystemPromptMessage, UserPromptMessage
+from dify_plugin.core.runtime.requests.model.llm import LLMModelConfig
 
 class LLMTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
-        response = self.invoke_llm(
+        response = self.session.model.llm.invoke(
             model_config=LLMModelConfig(
                 provider='openai',
                 model='gpt-4o-mini',

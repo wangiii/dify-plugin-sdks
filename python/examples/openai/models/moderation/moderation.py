@@ -3,10 +3,10 @@ from typing import Optional
 from openai import OpenAI
 from openai.types import ModerationCreateResponse
 
-from dify_plugin.core.runtime.entities.model_runtime.errors import CredentialsValidateFailedError
-from dify_plugin.model.common_openai import _CommonOpenAI
+from dify_plugin.core.entities.model.errors import CredentialsValidateFailedError
 from dify_plugin.model.model_entities import ModelPropertyKey
 from dify_plugin.model.moderation_model import ModerationModel
+from python.examples.openai.models.common_openai import _CommonOpenAI
 
 class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
     """

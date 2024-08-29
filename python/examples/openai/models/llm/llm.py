@@ -17,18 +17,20 @@ from openai.types.chat.chat_completion_chunk import (
 )
 from openai.types.chat.chat_completion_message import FunctionCall
 
+from dify_plugin.core.entities.plugin.common import I18nObject
+from python.examples.openai.models.common_openai import _CommonOpenAI
 import tiktoken
 
-from dify_plugin.core.runtime.entities.model_runtime.errors import (
+from dify_plugin.core.entities.model.errors import (
     CredentialsValidateFailedError,
 )
-from dify_plugin.core.runtime.entities.model_runtime.llm import (
+from dify_plugin.core.entities.model.llm import (
     LLMMode,
     LLMResult,
     LLMResultChunk,
     LLMResultChunkDelta,
 )
-from dify_plugin.core.runtime.entities.model_runtime.message import (
+from dify_plugin.core.entities.model.message import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
     PromptMessage,
@@ -39,8 +41,6 @@ from dify_plugin.core.runtime.entities.model_runtime.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from dify_plugin.core.runtime.entities.plugin.common import I18nObject
-from dify_plugin.model.common_openai import _CommonOpenAI
 from dify_plugin.model.large_language_model import LargeLanguageModel
 from dify_plugin.model.model_entities import (
     AIModelEntity,

@@ -7,12 +7,12 @@ from typing import Optional
 from openai import OpenAI
 from pydub import AudioSegment
 
-from dify_plugin.core.runtime.entities.model_runtime.errors import (
+from dify_plugin.core.entities.model.errors import (
     CredentialsValidateFailedError,
 )
-from dify_plugin.model.common_openai import _CommonOpenAI
 from dify_plugin.model.errors import InvokeBadRequestError
 from dify_plugin.model.tts_model import TTSModel
+from python.examples.openai.models.common_openai import _CommonOpenAI
 
 
 class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):

@@ -1,9 +1,8 @@
 import base64
 import time
 from typing import Optional, Union
-from dify_plugin.core.runtime.entities.model_runtime.errors import CredentialsValidateFailedError
-from dify_plugin.core.runtime.entities.model_runtime.text_embedding import EmbeddingUsage, TextEmbeddingResult
-from dify_plugin.model.common_openai import _CommonOpenAI
+from dify_plugin.core.entities.model.errors import CredentialsValidateFailedError
+from dify_plugin.core.entities.model.text_embedding import EmbeddingUsage, TextEmbeddingResult
 
 import numpy as np
 import tiktoken
@@ -11,6 +10,7 @@ from openai import OpenAI
 
 from dify_plugin.model.model_entities import PriceType
 from dify_plugin.model.text_embedding_model import TextEmbeddingModel
+from python.examples.openai.models.common_openai import _CommonOpenAI
 
 
 class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):

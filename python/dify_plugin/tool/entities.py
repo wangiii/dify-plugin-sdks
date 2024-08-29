@@ -3,7 +3,11 @@ from pydantic import BaseModel, Field, RootModel, field_validator, model_validat
 from enum import Enum
 
 from dify_plugin.core.entities.plugin.common import I18nObject
-from dify_plugin.core.entities.plugin.parameter_type import CommonParameterType
+from dify_plugin.core.entities.plugin.parameter_type import (
+    AppSelectorScope,
+    CommonParameterType,
+    ModelConfigScope,
+)
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
 
@@ -82,6 +86,7 @@ class ToolParameter(BaseModel):
         ..., description="The description presented to the user"
     )
     type: ToolParameterType = Field(..., description="The type of the parameter")
+    scope: Optional[AppSelectorScope | ModelConfigScope] = None
     form: ToolParameterForm = Field(
         ..., description="The form of the parameter, schema/form/llm"
     )

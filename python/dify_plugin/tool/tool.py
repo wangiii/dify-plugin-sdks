@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-from typing import Optional
 
-from dify_plugin.core.runtime.request import RequestInterface
-from dify_plugin.core.runtime.session import Session
 from dify_plugin.tool.entities import ToolInvokeMessage, ToolRuntime
+from dify_plugin.core.runtime import Session
 
 
 class ToolProvider(ABC):
@@ -16,16 +14,16 @@ class ToolProvider(ABC):
         pass
 
 
-class Tool(RequestInterface, ABC):
+class Tool(ABC):
     runtime: ToolRuntime
 
     def __init__(
         self,
         runtime: ToolRuntime,
-        session: Optional[Session] = None,
+        session: Session,
     ):
         self.runtime = runtime
-        RequestInterface.__init__(self, session)
+        self.session = session
 
     @classmethod
     def from_credentials(
@@ -33,7 +31,8 @@ class Tool(RequestInterface, ABC):
         credentials: dict,
     ) -> "Tool":
         return cls(
-            ToolRuntime(credentials=credentials, user_id=None, session_id=None),
+            runtime=ToolRuntime(credentials=credentials, user_id=None, session_id=None),
+            session=Session.empty_session(),
         )
 
     def create_text_message(self, text: str) -> ToolInvokeMessage:

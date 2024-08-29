@@ -16,21 +16,21 @@ from .model.speech2text_model import Speech2TextModel  # noqa
 from .model.moderation_model import ModerationModel  # noqa
 from .model.errors import *  # noqa
 from .model.model_entities import *  # noqa
-from .core.entities.model_runtime.errors import CredentialsValidateFailedError  # noqa
+from .core.entities.model.errors import CredentialsValidateFailedError  # noqa
 from .tool.errors import ToolProviderCredentialValidationError  # noqa
 
 from .core.entities.plugin.common import I18nObject  # noqa
 
 from .tool.entities import ToolInvokeMessage  # noqa
-from .core.entities.model_runtime.llm import (  # noqa
+from .core.entities.model.llm import (  # noqa
     LLMResult,
     LLMResultChunk,
     LLMResultChunkDelta,
     LLMMode,
     LLMUsage,
 )
-from .core.entities.model_runtime.rerank import RerankDocument, RerankResult  # noqa
-from .core.entities.model_runtime.text_embedding import (  # noqa
+from .core.entities.model.rerank import RerankDocument, RerankResult  # noqa
+from .core.entities.model.text_embedding import (  # noqa
     TextEmbeddingResult,
     EmbeddingUsage,
 )

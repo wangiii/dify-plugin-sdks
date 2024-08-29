@@ -18,7 +18,6 @@ from dify_plugin.core.entities.plugin.request import (
     ToolValidateCredentialsRequest,
     EndpointInvokeRequest,
 )
-from dify_plugin.core.runtime.session import Session
 from dify_plugin.model.large_language_model import LargeLanguageModel
 from dify_plugin.model.moderation_model import ModerationModel
 from dify_plugin.model.rerank_model import RerankModel
@@ -28,6 +27,7 @@ from dify_plugin.model.tts_model import TTSModel
 from dify_plugin.plugin_registration import PluginRegistration
 from dify_plugin.tool.entities import ToolRuntime
 from dify_plugin.utils.http_parser import parse_raw_request
+from dify_plugin.core.runtime import Session
 
 
 class PluginExecutor:
@@ -70,7 +70,8 @@ class PluginExecutor:
                 credentials=request.credentials,
                 user_id=request.user_id,
                 session_id=session.session_id,
-            )
+            ),
+            session=session,
         )
 
         # invoke tool

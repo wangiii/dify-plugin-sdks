@@ -15,13 +15,13 @@ from dify_plugin.core.entities.plugin.request import (  # noqa: E402
     ToolActions,
     EndpointActions,
 )
-from dify_plugin.core.runtime.session import Session  # noqa: E402
 from dify_plugin.core.server.io_server import IOServer  # noqa: E402
 from dify_plugin.core.server.router import Router  # noqa: E402
 from dify_plugin.logger_format import plugin_logger_handler  # noqa: E402
 
 from dify_plugin.plugin_executor import PluginExecutor  # noqa: E402
-from dify_plugin.plugin_registration import PluginRegistration  # noqa: E402
+from dify_plugin.plugin_registration import PluginRegistration
+from dify_plugin.core.runtime import Session  # noqa: E402
 
 
 logger = logging.getLogger(__name__)
