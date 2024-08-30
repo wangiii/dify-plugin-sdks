@@ -19,8 +19,7 @@ resource:
       enabled: true
       size: 1048576
 plugins:
-  - "endpoints/neko.yaml"
-  - "endpoints/duck.yaml"
+  - "provider/neko.yaml"
 execution:
   install: install.sh
   launch: launch.sh

@@ -1,7 +1,5 @@
-type: endpoint
-provider:
-  path: "/duck/<app_id>"
-  method: "GET"
-  extra:
-    python:
-      source: "endpoints/duck.py"
+path: "/duck/<app_id>"
+method: "GET"
+extra:
+  python:
+    source: "endpoints/duck.py"

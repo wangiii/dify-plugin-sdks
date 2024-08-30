@@ -2,7 +2,9 @@ import importlib
 import importlib.util
 import sys
 from types import ModuleType
-from typing import AnyStr
+from typing import AnyStr, TypeVar
+
+T = TypeVar("T")
 
 def import_module_from_source(*, module_name: str, py_file_path: AnyStr, use_lazy_loader: bool = False) -> ModuleType:
     """
@@ -30,7 +32,7 @@ def import_module_from_source(*, module_name: str, py_file_path: AnyStr, use_laz
     except Exception as e:
         raise e
     
-def get_subclasses_from_module(mod: ModuleType, parent_type: type) -> list[type]:
+def get_subclasses_from_module(mod: ModuleType, parent_type: type[T]) -> list[type[T]]:
     """
     Get all the subclasses of the parent type from the module
     """
@@ -38,9 +40,10 @@ def get_subclasses_from_module(mod: ModuleType, parent_type: type) -> list[type]
                if isinstance(x, type) and x != parent_type and issubclass(x, parent_type)]
     return classes
 
+
 def load_multi_subclasses_from_source(
-    *, module_name: str, script_path: AnyStr, parent_type: type, use_lazy_loader: bool = False
-) -> list[type]:
+    *, module_name: str, script_path: AnyStr, parent_type: type[T], use_lazy_loader: bool = False
+) -> list[type[T]]:
     """
     Load multiple subclasses from the source
     """
@@ -51,8 +54,8 @@ def load_multi_subclasses_from_source(
     return subclasses
 
 def load_single_subclass_from_source(
-    *, module_name: str, script_path: AnyStr, parent_type: type, use_lazy_loader: bool = False
-) -> type:
+    *, module_name: str, script_path: AnyStr, parent_type: type[T], use_lazy_loader: bool = False
+) -> type[T]:
     """
     Load a single subclass from the source
     """

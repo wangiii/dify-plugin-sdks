@@ -1,7 +1,8 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from dify_plugin.model.provider_entities import ProviderConfig
+from dify_plugin.utils.yaml_loader import load_yaml_file
 
 
 class EndpointConfigurationExtra(BaseModel):
@@ -10,9 +11,32 @@ class EndpointConfigurationExtra(BaseModel):
 
     python: Python
 
-
 class EndpointConfiguration(BaseModel):
     path: str
     method: str
-    settings: Optional[ProviderConfig] = None
     extra: EndpointConfigurationExtra
+
+class EndpointProviderConfiguration(BaseModel):
+    settings: Optional[ProviderConfig] = Field(default_factory=list)
+    endpoints: list[EndpointConfiguration] = Field(default_factory=list)
+
+    @field_validator("endpoints", mode="before")
+    def validate_endpoints(cls, value) -> list[EndpointConfiguration]:
+        if not isinstance(value, list):
+            raise ValueError("endpoints should be a list")
+
+        endpoints: list[EndpointConfiguration] = []
+
+        for endpoint in value:
+            # read from yaml
+            if not isinstance(endpoint, str):
+                raise ValueError("endpoint path should be a string")
+            try:
+                file = load_yaml_file(endpoint)
+                endpoints.append(EndpointConfiguration(**file))
+            except Exception as e:
+                raise ValueError(f"Error loading endpoint configuration: {str(e)}")
+
+        return endpoints
+
+

@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 import os
-from typing import Type
+from typing import Type, TypeVar
 
 from werkzeug import Request
 from werkzeug.routing import Map, Rule
@@ -27,8 +27,10 @@ from dify_plugin.utils.class_loader import (
     load_single_subclass_from_source,
 )
 from dify_plugin.utils.yaml_loader import load_yaml_file
-from dify_plugin.endpoint.entities import EndpointConfiguration
+from dify_plugin.endpoint.entities import EndpointProviderConfiguration
 from dify_plugin.endpoint.endpoint import Endpoint
+
+T = TypeVar("T")
 
 
 class PluginRegistration:
@@ -52,7 +54,7 @@ class PluginRegistration:
             dict[ModelType, AIModel],
         ],
     ]
-    endpoints_configuration: list[EndpointConfiguration]
+    endpoints_configuration: list[EndpointProviderConfiguration]
     endpoints: Map
 
     def __init__(self, config: DifyPluginEnv) -> None:
@@ -93,7 +95,7 @@ class PluginRegistration:
                     )
                     self.models_configuration.append(model_provider_configuration)
                 elif fs.get("type") == PluginProviderType.Endpoint.value:
-                    endpoint_configuration = EndpointConfiguration(
+                    endpoint_configuration = EndpointProviderConfiguration(
                         **fs.get("provider", {})
                     )
                     self.endpoints_configuration.append(endpoint_configuration)
@@ -135,7 +137,7 @@ class PluginRegistration:
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)
 
-    def _is_strict_subclass(self, cls: Type, *parent_cls: Type) -> bool:
+    def _is_strict_subclass(self, cls: Type[T], *parent_cls: Type[T]) -> bool:
         """
         check if the class is a strict subclass of one of the parent classes
         """
@@ -183,9 +185,9 @@ class PluginRegistration:
                         Speech2TextModel,
                         ModerationModel,
                     ):
-                        models[model_cls.model_type] = model_cls(provider.models)
+                        models[model_cls.model_type] = model_cls(provider.models)  # type: ignore
 
-            provider_instance = cls(provider, models)
+            provider_instance = cls(provider, models)  # type: ignore
             self.models_mapping[provider.provider] = (
                 provider,
                 provider_instance,
@@ -196,20 +198,24 @@ class PluginRegistration:
         """
         load endpoints
         """
-        for endpoint in self.endpoints_configuration:
-            # remove extension
-            module_source = os.path.splitext(endpoint.extra.python.source)[0]
-            # replace / with .
-            module_source = module_source.replace("/", ".")
-            endpoint_cls = load_single_subclass_from_source(
-                module_name=module_source,
-                script_path=os.path.join(os.getcwd(), endpoint.extra.python.source),
-                parent_type=Endpoint,
-            )
+        for endpoint_provider in self.endpoints_configuration:
+            # load endpoints
+            for endpoint in endpoint_provider.endpoints:
+                # remove extension
+                module_source = os.path.splitext(endpoint.extra.python.source)[0]
+                # replace / with .
+                module_source = module_source.replace("/", ".")
+                endpoint_cls = load_single_subclass_from_source(
+                    module_name=module_source,
+                    script_path=os.path.join(os.getcwd(), endpoint.extra.python.source),
+                    parent_type=Endpoint,
+                )
 
-            self.endpoints.add(
-                Rule(endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls)
-            )
+                self.endpoints.add(
+                    Rule(
+                        endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls
+                    )
+                )
 
     def _resolve_plugin_cls(self):
         """
