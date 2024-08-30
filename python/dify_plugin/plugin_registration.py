@@ -207,7 +207,9 @@ class PluginRegistration:
                 parent_type=Endpoint,
             )
 
-            self.endpoints.add(Rule(endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls))
+            self.endpoints.add(
+                Rule(endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls)
+            )
 
     def _resolve_plugin_cls(self):
         """
@@ -270,7 +272,9 @@ class PluginRegistration:
                 if registration:
                     return registration
 
-    def dispatch_endpoint_request(self, request: Request) -> tuple[Type[Endpoint], Mapping]:
+    def dispatch_endpoint_request(
+        self, request: Request
+    ) -> tuple[Type[Endpoint], Mapping]:
         """
         dispatch endpoint request, match the request to the registered endpoints
 

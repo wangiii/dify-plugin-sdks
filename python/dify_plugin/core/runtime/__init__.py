@@ -16,9 +16,15 @@ from dify_plugin.core.runtime.requests.model.speech2text import Speech2TextReque
 from dify_plugin.core.runtime.requests.model.text_embedding import TextEmbeddingRequest
 from dify_plugin.core.runtime.requests.model.tts import TTSRequest
 from dify_plugin.core.runtime.requests.tool import ToolRequest
-from dify_plugin.core.runtime.requests.workflow_node.knowledge_retrieval import KnowledgeRetrievalNodeRequest
-from dify_plugin.core.runtime.requests.workflow_node.parameter_extractor import ParameterExtractorNodeRequest
-from dify_plugin.core.runtime.requests.workflow_node.question_classifier import QuestionClassifierNodeRequest
+from dify_plugin.core.runtime.requests.workflow_node.knowledge_retrieval import (
+    KnowledgeRetrievalNodeRequest,
+)
+from dify_plugin.core.runtime.requests.workflow_node.parameter_extractor import (
+    ParameterExtractorNodeRequest,
+)
+from dify_plugin.core.runtime.requests.workflow_node.question_classifier import (
+    QuestionClassifierNodeRequest,
+)
 from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
 
 
@@ -80,7 +86,7 @@ class Session:
 
         # register request handlers
         self._register_request_handlers()
-    
+
     def _register_request_handlers(self) -> None:
         self.model = ModelRequests(self)
         self.tool = ToolRequest(self)

@@ -16,6 +16,7 @@ class DifyPluginLoggerFormatter(logging.Formatter):
             }
         )
 
+
 plugin_logger_handler = logging.StreamHandler(sys.stdout)
 plugin_logger_handler.setLevel(logging.INFO)
 plugin_logger_handler.setFormatter(DifyPluginLoggerFormatter())
