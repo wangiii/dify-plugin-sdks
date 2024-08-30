@@ -5,14 +5,14 @@ from dify_plugin import Endpoint
 
 
 class Duck(Endpoint):
-    def _invoke(self, r: Request, values: Mapping) -> Response:
+    def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
         """
         app_id = values["app_id"]
 
         def generator():
-            response = self.invoke_workflow(
+            response = self.session.app.workflow.invoke(
                 app_id=app_id, inputs={}, response_mode="streaming", files=[]
             )
 

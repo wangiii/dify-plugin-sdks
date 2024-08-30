@@ -164,4 +164,5 @@ class ModelValidateModelCredentialsRequest(BaseModel):
 class EndpointInvokeRequest(BaseModel):
     type: PluginInvokeType = PluginInvokeType.Endpoint
     action: EndpointActions = EndpointActions.InvokeEndpoint
+    settings: dict
     raw_http_request: str

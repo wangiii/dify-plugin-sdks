@@ -6,7 +6,7 @@ from openai.types import ModerationCreateResponse
 from dify_plugin.core.entities.model.errors import CredentialsValidateFailedError
 from dify_plugin.model.model_entities import ModelPropertyKey
 from dify_plugin.model.moderation_model import ModerationModel
-from python.examples.openai.models.common_openai import _CommonOpenAI
+from ..common_openai import _CommonOpenAI
 
 class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
     """

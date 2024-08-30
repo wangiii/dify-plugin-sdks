@@ -10,7 +10,7 @@ from openai import OpenAI
 
 from dify_plugin.model.model_entities import PriceType
 from dify_plugin.model.text_embedding_model import TextEmbeddingModel
-from python.examples.openai.models.common_openai import _CommonOpenAI
+from ..common_openai import _CommonOpenAI
 
 
 class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):

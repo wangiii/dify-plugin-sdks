@@ -2,6 +2,7 @@ from decimal import Decimal
 import logging
 from collections.abc import Generator
 from typing import Optional, Union, cast
+import tiktoken
 
 from openai import OpenAI
 from openai import Stream
@@ -18,8 +19,7 @@ from openai.types.chat.chat_completion_chunk import (
 from openai.types.chat.chat_completion_message import FunctionCall
 
 from dify_plugin.core.entities.plugin.common import I18nObject
-from python.examples.openai.models.common_openai import _CommonOpenAI
-import tiktoken
+from ..common_openai import _CommonOpenAI
 
 from dify_plugin.core.entities.model.errors import (
     CredentialsValidateFailedError,

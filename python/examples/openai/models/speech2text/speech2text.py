@@ -4,7 +4,7 @@ from openai import OpenAI
 
 from dify_plugin.core.entities.model.errors import CredentialsValidateFailedError
 from dify_plugin.model.speech2text_model import Speech2TextModel
-from python.examples.openai.models.common_openai import _CommonOpenAI
+from ..common_openai import _CommonOpenAI
 
 class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
     """

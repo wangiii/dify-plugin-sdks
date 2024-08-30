@@ -229,7 +229,7 @@ class PluginExecutor:
             endpoint, values = self.registration.dispatch_endpoint_request(request)
             # construct response
             endpoint_instance = endpoint(session)
-            response = endpoint_instance.invoke(request, values)
+            response = endpoint_instance.invoke(request, values, data.settings)
         except Exception:
             response = Response("Not Found", status=404)
 

@@ -12,7 +12,7 @@ from dify_plugin.core.entities.model.errors import (
 )
 from dify_plugin.model.errors import InvokeBadRequestError
 from dify_plugin.model.tts_model import TTSModel
-from python.examples.openai.models.common_openai import _CommonOpenAI
+from ..common_openai import _CommonOpenAI
 
 
 class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
