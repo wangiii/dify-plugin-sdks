@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from dify_plugin.core.entities.plugin.common import I18nObject
+
 
 class PluginArch(Enum):
     AMD64 = "amd64"
@@ -68,6 +70,7 @@ class PluginConfiguration(BaseModel):
     type: PluginType
     author: str
     name: str
+    label: I18nObject
     created_at: datetime.datetime
     resource: dict
     plugins: list[str]
