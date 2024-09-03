@@ -1,7 +1,8 @@
-from typing import Optional
+from os import name
+from typing import Mapping
 from pydantic import BaseModel, Field, field_validator
+from dify_plugin.tool.entities import ProviderConfig
 
-from dify_plugin.model.provider_entities import ProviderConfig
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
 
@@ -17,7 +18,7 @@ class EndpointConfiguration(BaseModel):
     extra: EndpointConfigurationExtra
 
 class EndpointProviderConfiguration(BaseModel):
-    settings: Optional[ProviderConfig] = Field(default_factory=list)
+    settings: Mapping[str, ProviderConfig] = Field(default_factory=dict)
     endpoints: list[EndpointConfiguration] = Field(default_factory=list)
 
     @field_validator("endpoints", mode="before")
@@ -39,4 +40,13 @@ class EndpointProviderConfiguration(BaseModel):
 
         return endpoints
 
-
+    @field_validator("settings", mode="before")
+    def validate_settings(cls, value: dict[str, dict]) -> Mapping[str, dict]:
+        if not isinstance(value, dict):
+            raise ValueError("settings should be a dict")
+        
+        # add name field for each provider config
+        for key, v in value.items():
+            v['name'] = key
+        
+        return value

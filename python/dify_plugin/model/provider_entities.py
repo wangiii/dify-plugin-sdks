@@ -176,10 +176,10 @@ class ProviderEntity(BaseModel):
         return model_entities
 
 
-class ProviderConfig(BaseModel):
-    """
-    Model class for provider config.
-    """
+# class ProviderConfig(BaseModel):
+#     """
+#     Model class for provider config.
+#     """
 
-    provider: str
-    credentials: dict
+#     provider: str
+#     credentials: dict
