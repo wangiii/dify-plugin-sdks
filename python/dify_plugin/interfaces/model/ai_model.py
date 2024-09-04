@@ -8,6 +8,7 @@ from pydantic import ConfigDict
 from dify_plugin.entities import I18nObject
 from dify_plugin.errors.model import InvokeAuthorizationError, InvokeError
 from dify_plugin.entities.model import (
+    PARAMETER_RULE_TEMPLATE,
     AIModelEntity,
     DefaultParameterName,
     ModelType,
@@ -15,7 +16,6 @@ from dify_plugin.entities.model import (
     PriceInfo,
     PriceType,
 )
-from .parameter_template import PARAMETER_RULE_TEMPLATE
 from .tokenizer.gpt2_tokenizer import GPT2Tokenizer
 
 
