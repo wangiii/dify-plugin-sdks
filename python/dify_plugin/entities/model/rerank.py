@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from dify_plugin.entities.model import BaseModelConfig, ModelType
 
@@ -28,3 +28,5 @@ class RerankModelConfig(BaseModelConfig):
     model_type: ModelType = ModelType.RERANK
     score_threshold: float
     top_n: int
+
+    model_config = ConfigDict(protected_namespaces=())

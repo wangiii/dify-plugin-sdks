@@ -289,3 +289,5 @@ class BaseModelConfig(BaseModel):
     provider: str
     model: str
     model_type: ModelType
+
+    model_config = ConfigDict(protected_namespaces=())

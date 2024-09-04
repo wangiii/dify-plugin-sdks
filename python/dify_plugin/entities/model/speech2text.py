@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from dify_plugin.entities.model import BaseModelConfig, ModelType
 
 
@@ -8,6 +8,8 @@ class Speech2TextModelConfig(BaseModelConfig):
     """
 
     model_type: ModelType = ModelType.SPEECH2TEXT
+
+    model_config = ConfigDict(protected_namespaces=())
 
     
 class Speech2TextResult(BaseModel):

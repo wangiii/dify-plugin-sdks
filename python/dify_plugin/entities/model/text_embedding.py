@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from dify_plugin.entities.model import BaseModelConfig, ModelType, ModelUsage
 
@@ -33,3 +33,5 @@ class TextEmbeddingModelConfig(BaseModelConfig):
     """
 
     model_type: ModelType = ModelType.TEXT_EMBEDDING
+
+    model_config = ConfigDict(protected_namespaces=())
