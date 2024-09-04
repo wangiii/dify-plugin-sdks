@@ -6,30 +6,6 @@ from pydantic import BaseModel
 from dify_plugin.config.config import InstallMethod
 from concurrent.futures import ThreadPoolExecutor
 
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
-from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
-from dify_plugin.invocations.app.chat import ChatAppInvocation
-from dify_plugin.invocations.app.completion import CompletionAppInvocation
-from dify_plugin.invocations.app.workflow import WorkflowAppInvocation
-from dify_plugin.invocations.model.llm import LLMInvocation
-from dify_plugin.invocations.model.moderation import ModerationInvocation
-from dify_plugin.invocations.model.rerank import RerankInvocation
-from dify_plugin.invocations.model.speech2text import Speech2TextInvocation
-from dify_plugin.invocations.model.text_embedding import TextEmbeddingInvocation
-from dify_plugin.invocations.model.tts import TTSInvocation
-from dify_plugin.invocations.tool import ToolInvocation
-from dify_plugin.invocations.workflow_node.knowledge_retrieval import (
-    KnowledgeRetrievalNodeInvocation,
-)
-from dify_plugin.invocations.workflow_node.parameter_extractor import (
-    ParameterExtractorNodeInvocation,
-)
-from dify_plugin.invocations.workflow_node.question_classifier import (
-    QuestionClassifierNodeInvocation,
-)
-from dify_plugin.invocations.storage import StorageInvocation
-
 from abc import ABC
 from collections.abc import Generator
 import json
@@ -39,6 +15,9 @@ import uuid
 import httpx
 from yarl import URL
 
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
 from dify_plugin.core.entities.invocation import InvokeType
 from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
@@ -53,6 +32,13 @@ from dify_plugin.core.entities.plugin.io import (
 
 class ModelInvocations:
     def __init__(self, session: "Session") -> None:
+        from dify_plugin.invocations.model.llm import LLMInvocation
+        from dify_plugin.invocations.model.moderation import ModerationInvocation
+        from dify_plugin.invocations.model.rerank import RerankInvocation
+        from dify_plugin.invocations.model.speech2text import Speech2TextInvocation
+        from dify_plugin.invocations.model.text_embedding import TextEmbeddingInvocation
+        from dify_plugin.invocations.model.tts import TTSInvocation
+        
         self.llm = LLMInvocation(session)
         self.text_embedding = TextEmbeddingInvocation(session)
         self.rerank = RerankInvocation(session)
@@ -63,6 +49,10 @@ class ModelInvocations:
 
 class AppInvocations:
     def __init__(self, session: "Session"):
+        from dify_plugin.invocations.app.chat import ChatAppInvocation
+        from dify_plugin.invocations.app.completion import CompletionAppInvocation
+        from dify_plugin.invocations.app.workflow import WorkflowAppInvocation
+
         self.chat = ChatAppInvocation(session)
         self.completion = CompletionAppInvocation(session)
         self.workflow = WorkflowAppInvocation(session)
@@ -70,6 +60,16 @@ class AppInvocations:
 
 class WorkflowNodeInvocations:
     def __init__(self, session: "Session"):
+        from dify_plugin.invocations.workflow_node.knowledge_retrieval import (
+            KnowledgeRetrievalNodeInvocation,
+        )
+        from dify_plugin.invocations.workflow_node.parameter_extractor import (
+            ParameterExtractorNodeInvocation,
+        )
+        from dify_plugin.invocations.workflow_node.question_classifier import (
+            QuestionClassifierNodeInvocation,
+        )
+
         self.question_classifier = QuestionClassifierNodeInvocation(session)
         self.parameter_extractor = ParameterExtractorNodeInvocation(session)
         self.knowledge_retrieval = KnowledgeRetrievalNodeInvocation(session)
@@ -111,6 +111,9 @@ class Session:
         self._register_invocations()
 
     def _register_invocations(self) -> None:
+        from dify_plugin.invocations.tool import ToolInvocation
+        from dify_plugin.invocations.storage import StorageInvocation
+
         self.model = ModelInvocations(self)
         self.tool = ToolInvocation(self)
         self.app = AppInvocations(self)
