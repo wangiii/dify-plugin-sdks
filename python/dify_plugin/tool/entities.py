@@ -73,6 +73,7 @@ class ToolParameter(BaseModel):
         FILE = CommonParameterType.FILE.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
+        TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
     class ToolParameterForm(Enum):
         SCHEMA = "schema"  # should be set while adding tool
