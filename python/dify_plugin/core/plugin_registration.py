@@ -91,19 +91,6 @@ class PluginRegistration:
                             PluginAsset(filename=entry.name, data=f.read().hex())
                         )
 
-    def _load_plugin_assets(self):
-        """
-        load plugin assets
-        """
-        # open _assets folder
-        with os.scandir("_assets") as entries:
-            for entry in entries:
-                if entry.is_file():
-                    with open(entry, "rb") as f:
-                        self.files.append(
-                            PluginAsset(filename=entry.name, data=f.read().hex())
-                        )
-
     def _load_plugin_configuration(self):
         """
         load basic plugin configuration from manifest.yaml

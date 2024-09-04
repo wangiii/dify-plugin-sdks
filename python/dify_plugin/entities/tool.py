@@ -16,6 +16,7 @@ class CommonParameterType(Enum):
     BOOLEAN = "boolean"
     APP_SELECTOR = "app-selector"
     MODEL_CONFIG = "model-config"
+    TOOL_SELECTOR = "tool-selector"
 
 
 class AppSelectorScope(Enum):
@@ -34,6 +35,11 @@ class ModelConfigScope(Enum):
     MODERATION = "moderation"
     VISION = "vision"
 
+class ToolSelectorScope(Enum):
+    ALL = "all"
+    PLUGIN = "plugin"
+    API = "api"
+    WORKFLOW = "workflow"
 
 class ToolRuntime(BaseModel):
     credentials: dict[str, str]
@@ -96,6 +102,7 @@ class ToolParameter(BaseModel):
         FILE = CommonParameterType.FILE.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
+        TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
     class ToolParameterForm(Enum):
         SCHEMA = "schema"  # should be set while adding tool
@@ -108,7 +115,7 @@ class ToolParameter(BaseModel):
         ..., description="The description presented to the user"
     )
     type: ToolParameterType = Field(..., description="The type of the parameter")
-    scope: Optional[AppSelectorScope | ModelConfigScope] = None
+    scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
     form: ToolParameterForm = Field(
         ..., description="The form of the parameter, schema/form/llm"
     )
@@ -178,6 +185,7 @@ class ProviderConfig(BaseModel):
         BOOLEAN = CommonParameterType.BOOLEAN.value
         MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
+        TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
         @classmethod
         def value_of(cls, value: str) -> "ProviderConfig.Config":
@@ -194,7 +202,7 @@ class ProviderConfig(BaseModel):
 
     name: str = Field(..., description="The name of the credentials")
     type: Config = Field(..., description="The type of the credentials")
-    scope: Optional[AppSelectorScope | ModelConfigScope] = None
+    scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
     required: bool = False
     default: Optional[Union[int, float, str]] = None
     options: Optional[list[ToolCredentialsOption]] = None
