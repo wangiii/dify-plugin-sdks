@@ -7,6 +7,7 @@ from dify_plugin.core.entities.plugin.parameter_type import (
     AppSelectorScope,
     CommonParameterType,
     ModelConfigScope,
+    ToolSelectorScope,
 )
 from dify_plugin.utils.yaml_loader import load_yaml_file
 
@@ -84,7 +85,7 @@ class ToolParameter(BaseModel):
         ..., description="The description presented to the user"
     )
     type: ToolParameterType = Field(..., description="The type of the parameter")
-    scope: Optional[AppSelectorScope | ModelConfigScope] = None
+    scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
     form: ToolParameterForm = Field(
         ..., description="The form of the parameter, schema/form/llm"
     )
@@ -170,7 +171,7 @@ class ProviderConfig(BaseModel):
 
     name: str = Field(..., description="The name of the credentials")
     type: Config = Field(..., description="The type of the credentials")
-    scope: Optional[AppSelectorScope | ModelConfigScope] = None
+    scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
     required: bool = False
     default: Optional[Union[int, float, str]] = None
     options: Optional[list[ToolCredentialsOption]] = None

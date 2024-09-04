@@ -1,4 +1,6 @@
-from typing import Optional
+import json
+from typing import Any, Optional
+from pydantic import BaseModel, RootModel
 
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
@@ -18,6 +20,7 @@ from dify_plugin.core.entities.plugin.request import (
 from dify_plugin.core.runtime import Session
 from dify_plugin.core.server.io_server import IOServer
 from dify_plugin.core.server.router import Router
+from dify_plugin.endpoint.entities import EndpointProviderConfiguration
 from dify_plugin.logger_format import plugin_logger_handler
 
 from dify_plugin.plugin_executor import PluginExecutor
@@ -79,13 +82,23 @@ class Plugin(IOServer, Router):
         """
         if not config.REMOTE_INSTALL_KEY:
             raise ValueError("Missing remote install key")
+        
+        class List(RootModel):
+            root: list[Any]
 
         tcp_stream = TCPReaderWriter(
             config.REMOTE_INSTALL_HOST,
             config.REMOTE_INSTALL_PORT,
             config.REMOTE_INSTALL_KEY,
             on_connected=lambda: tcp_stream.write(
-                self.registration.configuration.model_dump_json() + "\n\n"
+                self.registration.configuration.model_dump_json()
+                + "\n\n"
+                + List(root=self.registration.tools_configuration).model_dump_json()
+                + "\n\n"
+                + List(root=self.registration.models_configuration).model_dump_json()
+                + "\n\n"
+                + List(root=self.registration.endpoints_configuration).model_dump_json()
+                + "\n\n"
             )
             and self._log_configuration(),
         )

@@ -11,6 +11,7 @@ class CommonParameterType(Enum):
     BOOLEAN = "boolean"
     APP_SELECTOR = "app-selector"
     MODEL_CONFIG = "model-config"
+    TOOL_SELECTOR = "tool-selector"
 
 
 class AppSelectorScope(Enum):
@@ -21,6 +22,7 @@ class AppSelectorScope(Enum):
 
 
 class ModelConfigScope(Enum):
+    ALL = "all"
     LLM = "llm"
     TEXT_EMBEDDING = "text-embedding"
     RERANK = "rerank"
@@ -28,3 +30,9 @@ class ModelConfigScope(Enum):
     SPEECH2TEXT = "speech2text"
     MODERATION = "moderation"
     VISION = "vision"
+
+class ToolSelectorScope(Enum):
+    ALL = "all"
+    PLUGIN = "plugin"
+    API = "api"
+    WORKFLOW = "workflow"
