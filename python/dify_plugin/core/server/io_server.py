@@ -8,8 +8,8 @@ from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from .__base.request_reader import RequestReader
+from .__base.response_writer import ResponseWriter
 
 
 class IOServer(ABC):

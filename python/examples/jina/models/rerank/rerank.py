@@ -2,24 +2,22 @@ from typing import Optional
 
 import httpx
 
-from dify_plugin import (
+from dify_plugin import RerankModel
+from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
+from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
-    RerankDocument,
-    RerankResult,
-    I18nObject,
     InvokeAuthorizationError,
     InvokeBadRequestError,
     InvokeConnectionError,
     InvokeError,
     InvokeRateLimitError,
     InvokeServerUnavailableError,
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-    RerankModel,
 )
-
+from dify_plugin.entities.model.rerank import (
+    RerankDocument,
+    RerankResult,
+)
 
 class JinaRerankModel(RerankModel):
     """

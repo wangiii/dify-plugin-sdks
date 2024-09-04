@@ -3,9 +3,9 @@ from typing import Optional
 from openai import OpenAI
 from openai.types import ModerationCreateResponse
 
-from dify_plugin.core.entities.model.errors import CredentialsValidateFailedError
-from dify_plugin.model.model_entities import ModelPropertyKey
-from dify_plugin.model.moderation_model import ModerationModel
+from dify_plugin.entities.model import ModelPropertyKey
+from dify_plugin.errors.model import CredentialsValidateFailedError
+from dify_plugin import ModerationModel
 from ..common_openai import _CommonOpenAI
 
 class OpenAIModerationModel(_CommonOpenAI, ModerationModel):

@@ -3,8 +3,8 @@ import inspect
 import logging
 from typing import Any, Optional
 
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from .__base.request_reader import RequestReader
+from .__base.response_writer import ResponseWriter
 from dify_plugin.core.runtime import Session
 
 logger = logging.getLogger(__file__)

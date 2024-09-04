@@ -9,7 +9,7 @@ from dify_plugin.core.entities.plugin.io import (
 from gevent.os import tp_read
 
 from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.stdio.response_writer import StdioResponseWriter
+from .response_writer import StdioResponseWriter
 
 
 class StdioRequestReader(RequestReader):

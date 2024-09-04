@@ -7,7 +7,7 @@ from dify_plugin.core.entities.plugin.io import (
     PluginInStreamEvent,
 )
 from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.aws.response_writer import AWSResponseWriter
+from .response_writer import AWSResponseWriter
 
 
 class AWSLambdaRequestReader(RequestReader):

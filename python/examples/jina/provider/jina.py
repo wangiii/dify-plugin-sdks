@@ -1,4 +1,6 @@
-from dify_plugin import ModelProvider, ModelType, CredentialsValidateFailedError
+from dify_plugin import ModelProvider
+from dify_plugin.entities.model import ModelType
+from dify_plugin.errors.model import CredentialsValidateFailedError
 
 
 class JinaProvider(ModelProvider):

@@ -19,10 +19,10 @@ from dify_plugin.core.entities.plugin.request import (
 from dify_plugin.core.runtime import Session
 from dify_plugin.core.server.io_server import IOServer
 from dify_plugin.core.server.router import Router
-from dify_plugin.logger_format import plugin_logger_handler
+from dify_plugin.config.logger_format import plugin_logger_handler
 
-from dify_plugin.plugin_executor import PluginExecutor
-from dify_plugin.plugin_registration import PluginRegistration
+from dify_plugin.core.plugin_executor import PluginExecutor
+from dify_plugin.core.plugin_registration import PluginRegistration
 
 
 logger = logging.getLogger(__name__)

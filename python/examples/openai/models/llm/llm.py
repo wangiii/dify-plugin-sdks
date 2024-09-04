@@ -18,19 +18,26 @@ from openai.types.chat.chat_completion_chunk import (
 )
 from openai.types.chat.chat_completion_message import FunctionCall
 
-from dify_plugin.core.entities.plugin.common import I18nObject
 from ..common_openai import _CommonOpenAI
 
-from dify_plugin.core.entities.model.errors import (
+from dify_plugin import LargeLanguageModel
+from dify_plugin.entities import I18nObject
+from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
 )
-from dify_plugin.core.entities.model.llm import (
+from dify_plugin.entities.model import (
+    AIModelEntity,
+    FetchFrom,
+    ModelType,
+    PriceConfig,
+)
+from dify_plugin.entities.model.llm import (
     LLMMode,
     LLMResult,
     LLMResultChunk,
     LLMResultChunkDelta,
 )
-from dify_plugin.core.entities.model.message import (
+from dify_plugin.entities.model.message import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
     PromptMessage,
@@ -40,13 +47,6 @@ from dify_plugin.core.entities.model.message import (
     TextPromptMessageContent,
     ToolPromptMessage,
     UserPromptMessage,
-)
-from dify_plugin.model.large_language_model import LargeLanguageModel
-from dify_plugin.model.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-    PriceConfig,
 )
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from collections.abc import Mapping
 import openai
 from httpx import Timeout
 
-from dify_plugin.model.errors import InvokeAuthorizationError, InvokeBadRequestError, InvokeConnectionError, InvokeError, InvokeRateLimitError, InvokeServerUnavailableError
+from dify_plugin.errors.model import InvokeAuthorizationError, InvokeBadRequestError, InvokeConnectionError, InvokeError, InvokeRateLimitError, InvokeServerUnavailableError
 
 
 class _CommonOpenAI:

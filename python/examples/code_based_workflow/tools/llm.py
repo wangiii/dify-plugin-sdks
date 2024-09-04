@@ -1,10 +1,10 @@
 from collections.abc import Generator
 from typing import Any
 
-from dify_plugin.tool.entities import ToolInvokeMessage
-from dify_plugin.tool.tool import Tool
-from dify_plugin.core.entities.model.message import SystemPromptMessage, UserPromptMessage
-from dify_plugin.core.runtime.requests.model.llm import LLMModelConfig
+from dify_plugin import Tool
+from dify_plugin.entities.model.llm import LLMModelConfig
+from dify_plugin.entities.tool import ToolInvokeMessage
+from dify_plugin.entities.model.message import SystemPromptMessage, UserPromptMessage
 
 class LLMTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:

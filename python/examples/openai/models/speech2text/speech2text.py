@@ -2,8 +2,8 @@ from typing import IO, Optional
 
 from openai import OpenAI
 
-from dify_plugin.core.entities.model.errors import CredentialsValidateFailedError
-from dify_plugin.model.speech2text_model import Speech2TextModel
+from dify_plugin import Speech2TextModel
+from dify_plugin.errors.model import CredentialsValidateFailedError
 from ..common_openai import _CommonOpenAI
 
 class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):

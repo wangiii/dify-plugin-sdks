@@ -4,24 +4,11 @@ from typing import Optional
 
 from requests import post
 
-from dify_plugin import (
-    CredentialsValidateFailedError,
-    EmbeddingUsage,
-    TextEmbeddingResult,
-    I18nObject,
-    InvokeAuthorizationError,
-    InvokeBadRequestError,
-    InvokeConnectionError,
-    InvokeError,
-    InvokeRateLimitError,
-    InvokeServerUnavailableError,
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-    PriceType,
-    TextEmbeddingModel,
-)
+from dify_plugin import TextEmbeddingModel
+from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType, PriceType
+from dify_plugin.entities.model.text_embedding import EmbeddingUsage, TextEmbeddingResult
+from dify_plugin.errors.model import CredentialsValidateFailedError, InvokeAuthorizationError, InvokeBadRequestError, InvokeConnectionError, InvokeError, InvokeRateLimitError, InvokeServerUnavailableError
 from models.text_embedding.jina_tokenizer import JinaTokenizer
 
 
