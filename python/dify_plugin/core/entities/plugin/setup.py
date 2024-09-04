@@ -70,6 +70,7 @@ class PluginConfiguration(BaseModel):
     type: PluginType
     author: str
     name: str
+    icon: str
     label: I18nObject
     created_at: datetime.datetime
     resource: dict
@@ -81,3 +82,9 @@ class PluginProviderType(Enum):
     Tool = "tool"
     Model = "model"
     Endpoint = "endpoint"
+
+
+class PluginAsset(BaseModel):
+    filename: str
+    data: str # hex encoded file data
+    
