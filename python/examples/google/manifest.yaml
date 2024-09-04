@@ -15,9 +15,6 @@ resource:
       llm: true
 plugins:
   - "provider/google.yaml"
-execution:
-  install: install.sh
-  launch: launch.sh
 meta:
   version: 0.0.1
   arch:
