@@ -7,6 +7,7 @@ from werkzeug.routing import Map, Rule
 
 from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.entities.plugin.setup import (
+    PluginAsset,
     PluginConfiguration,
     PluginProviderType,
 )
@@ -56,6 +57,7 @@ class PluginRegistration:
     ]
     endpoints_configuration: list[EndpointProviderConfiguration]
     endpoints: Map
+    files: list[PluginAsset]
 
     def __init__(self, config: DifyPluginEnv) -> None:
         """
@@ -67,11 +69,25 @@ class PluginRegistration:
         self.models_mapping = {}
         self.endpoints_configuration = []
         self.endpoints = Map()
+        self.files = []
 
         # load plugin configuration
         self._load_plugin_configuration()
         # load plugin class
         self._resolve_plugin_cls()
+
+    def _load_plugin_assets(self):
+        """
+        load plugin assets
+        """
+        # open _assets folder
+        with os.scandir("_assets") as entries:
+            for entry in entries:
+                if entry.is_file():
+                    with open(entry, "rb") as f:
+                        self.files.append(
+                            PluginAsset(filename=entry.name, data=f.read().hex())
+                        )
 
     def _load_plugin_configuration(self):
         """
