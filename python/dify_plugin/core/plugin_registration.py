@@ -12,7 +12,7 @@ from dify_plugin.core.entities.plugin.setup import (
     PluginProviderType,
 )
 from dify_plugin.interfaces.model.ai_model import AIModel
-from dify_plugin.entities.model import ModelProviderConfiguration
+from dify_plugin.entities.model.provider import ModelProviderConfiguration
 from dify_plugin.interfaces.model.large_language_model import LargeLanguageModel
 from dify_plugin.interfaces.model import ModelProvider
 from dify_plugin.entities.model import ModelType

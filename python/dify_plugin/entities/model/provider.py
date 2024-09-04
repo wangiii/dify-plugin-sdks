@@ -174,6 +174,19 @@ class ProviderEntity(BaseModel):
                 model_entities.append(provider_model)
 
         return model_entities
+    
+
+class ModelProviderConfigurationExtra(BaseModel):
+    class Python(BaseModel):
+        provider_source: str
+        model_sources: list[str] = Field(default_factory=list)
+
+        model_config = ConfigDict(protected_namespaces=())
+
+    python: Python
+
+class ModelProviderConfiguration(ProviderEntity):
+    extra: ModelProviderConfigurationExtra
 
 
 # class ProviderConfig(BaseModel):
