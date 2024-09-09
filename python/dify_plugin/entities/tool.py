@@ -15,7 +15,7 @@ class CommonParameterType(Enum):
     FILE = "file"
     BOOLEAN = "boolean"
     APP_SELECTOR = "app-selector"
-    MODEL_CONFIG = "model-config"
+    MODEL_SELECTOR = "model-selector"
     TOOL_SELECTOR = "tool-selector"
 
 
@@ -100,7 +100,7 @@ class ToolParameter(BaseModel):
         SELECT = CommonParameterType.SELECT.value
         SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
         FILE = CommonParameterType.FILE.value
-        MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
+        MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
         TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
@@ -183,7 +183,7 @@ class ProviderConfig(BaseModel):
         TEXT_INPUT = CommonParameterType.TEXT_INPUT.value
         SELECT = CommonParameterType.SELECT.value
         BOOLEAN = CommonParameterType.BOOLEAN.value
-        MODEL_CONFIG = CommonParameterType.MODEL_CONFIG.value
+        MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
         TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
