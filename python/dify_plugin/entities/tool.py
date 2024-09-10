@@ -1,5 +1,6 @@
+import base64
 from typing import Any, Optional, Union
-from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
+from pydantic import BaseModel, Field, RootModel, field_serializer, field_validator, model_validator
 from enum import Enum
 
 from dify_plugin.entities import I18nObject
@@ -59,18 +60,54 @@ class ToolInvokeMessage(BaseModel):
 
         def to_dict(self):
             return {"json_object": self.json_object}
+        
+    class BlobMessage(BaseModel):
+        blob: bytes
 
     class MessageType(Enum):
         TEXT = "text"
         FILE = "file"
         BLOB = "blob"
         JSON = "json"
+        LINK = "link"
+        IMAGE = "image"
+        IMAGE_LINK = "image_link"
+        VARIABLE = "variable"
+
+    class VariableMessage(BaseModel):
+        variable_name: str = Field(..., description="The name of the variable, only supports root-level variables")
+        variable_value: Any = Field(..., description="The value of the variable")
+        stream: bool = Field(default=False, description="Whether the variable is streamed")
+
+        @field_validator('variable_value', 'stream')
+        @classmethod
+        def validate_variable_value_and_stream(cls, v, values):
+            if 'stream' in values and values['stream']:
+                if not isinstance(v, str):
+                    raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
+            return v
 
     type: MessageType
-    message: TextMessage | JsonMessage
+    message: TextMessage | JsonMessage | VariableMessage | BlobMessage | None
+    meta: Optional[dict] = None
 
-    def to_dict(self):
-        return {"type": self.type.value, "message": self.message.to_dict()}
+    @field_validator('message', mode='before')
+    @classmethod
+    def decode_blob_message(cls, v):
+        if isinstance(v, dict) and 'blob' in v:
+            try:
+                v['blob'] = base64.b64decode(v['blob'])
+            except Exception:
+                pass
+        return v
+
+    @field_serializer('message')
+    def serialize_message(self, v):
+        if isinstance(v, self.BlobMessage):
+            return {
+                'blob': base64.b64encode(v.blob).decode('utf-8')
+            }
+        return v
 
 
 class ToolIdentity(BaseModel):

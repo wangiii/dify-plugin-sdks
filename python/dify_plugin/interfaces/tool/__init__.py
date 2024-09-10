@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
+from typing import Optional
 
 from dify_plugin.entities.tool import ToolInvokeMessage, ToolRuntime
 from dify_plugin.core.runtime import Session
@@ -45,6 +46,43 @@ class Tool(ABC):
         return ToolInvokeMessage(
             type=ToolInvokeMessage.MessageType.JSON,
             message=ToolInvokeMessage.JsonMessage(json_object=json),
+        )
+
+    def create_image_message(self, image_url: str) -> ToolInvokeMessage:
+        """
+        create an image message
+
+        :param image: the url of the image
+        :return: the image message
+        """
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.IMAGE,
+            message=ToolInvokeMessage.TextMessage(text=image_url),
+        )
+
+    def create_link_message(self, link: str) -> ToolInvokeMessage:
+        """
+        create a link message
+
+        :param link: the url of the link
+        :return: the link message
+        """
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.LINK,
+            message=ToolInvokeMessage.TextMessage(text=link),
+        )
+    
+    def create_blob_message(self, blob: bytes, meta: Optional[dict] = None) -> ToolInvokeMessage:
+        """
+        create a blob message
+
+        :param blob: the blob
+        :return: the blob message
+        """
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.BLOB, 
+            message=ToolInvokeMessage.BlobMessage(blob=blob), 
+            meta=meta, 
         )
 
     @abstractmethod
