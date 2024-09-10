@@ -1,6 +1,13 @@
 import base64
 from typing import Any, Optional, Union
-from pydantic import BaseModel, Field, RootModel, field_serializer, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    RootModel,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 from enum import Enum
 
 from dify_plugin.entities import I18nObject
@@ -36,11 +43,13 @@ class ModelConfigScope(Enum):
     MODERATION = "moderation"
     VISION = "vision"
 
+
 class ToolSelectorScope(Enum):
     ALL = "all"
     PLUGIN = "plugin"
     API = "api"
     WORKFLOW = "workflow"
+
 
 class ToolRuntime(BaseModel):
     credentials: dict[str, str]
@@ -60,7 +69,7 @@ class ToolInvokeMessage(BaseModel):
 
         def to_dict(self):
             return {"json_object": self.json_object}
-        
+
     class BlobMessage(BaseModel):
         blob: bytes
 
@@ -75,38 +84,43 @@ class ToolInvokeMessage(BaseModel):
         VARIABLE = "variable"
 
     class VariableMessage(BaseModel):
-        variable_name: str = Field(..., description="The name of the variable, only supports root-level variables")
+        variable_name: str = Field(
+            ...,
+            description="The name of the variable, only supports root-level variables",
+        )
         variable_value: Any = Field(..., description="The value of the variable")
-        stream: bool = Field(default=False, description="Whether the variable is streamed")
+        stream: bool = Field(
+            default=False, description="Whether the variable is streamed"
+        )
 
-        @field_validator('variable_value', 'stream')
+        @field_validator("variable_value", "stream")
         @classmethod
         def validate_variable_value_and_stream(cls, v, values):
-            if 'stream' in values and values['stream']:
+            if "stream" in values and values["stream"]:
                 if not isinstance(v, str):
-                    raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
+                    raise ValueError(
+                        "When 'stream' is True, 'variable_value' must be a string."
+                    )
             return v
 
     type: MessageType
     message: TextMessage | JsonMessage | VariableMessage | BlobMessage | None
     meta: Optional[dict] = None
 
-    @field_validator('message', mode='before')
+    @field_validator("message", mode="before")
     @classmethod
     def decode_blob_message(cls, v):
-        if isinstance(v, dict) and 'blob' in v:
+        if isinstance(v, dict) and "blob" in v:
             try:
-                v['blob'] = base64.b64decode(v['blob'])
+                v["blob"] = base64.b64decode(v["blob"])
             except Exception:
                 pass
         return v
 
-    @field_serializer('message')
+    @field_serializer("message")
     def serialize_message(self, v):
         if isinstance(v, self.BlobMessage):
-            return {
-                'blob': base64.b64encode(v.blob).decode('utf-8')
-            }
+            return {"blob": base64.b64encode(v.blob).decode("utf-8")}
         return v
 
 
@@ -325,8 +339,9 @@ class ToolProviderConfiguration(BaseModel):
 
 class ToolProviderType(Enum):
     """
-        Enum class for tool provider
+    Enum class for tool provider
     """
+
     BUILT_IN = "builtin"
     WORKFLOW = "workflow"
     API = "api"
@@ -334,7 +349,7 @@ class ToolProviderType(Enum):
     DATASET_RETRIEVAL = "dataset-retrieval"
 
     @classmethod
-    def value_of(cls, value: str) -> 'ToolProviderType':
+    def value_of(cls, value: str) -> "ToolProviderType":
         """
         Get value of given mode.
 
@@ -344,4 +359,4 @@ class ToolProviderType(Enum):
         for mode in cls:
             if mode.value == value:
                 return mode
-        raise ValueError(f'invalid mode value {value}')
+        raise ValueError(f"invalid mode value {value}")
