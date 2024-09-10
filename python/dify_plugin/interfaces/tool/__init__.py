@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-from typing import Optional
+from typing import Any, Optional
 
 from dify_plugin.entities.tool import ToolInvokeMessage, ToolRuntime
 from dify_plugin.core.runtime import Session
@@ -71,8 +71,10 @@ class Tool(ABC):
             type=ToolInvokeMessage.MessageType.LINK,
             message=ToolInvokeMessage.TextMessage(text=link),
         )
-    
-    def create_blob_message(self, blob: bytes, meta: Optional[dict] = None) -> ToolInvokeMessage:
+
+    def create_blob_message(
+        self, blob: bytes, meta: Optional[dict] = None
+    ) -> ToolInvokeMessage:
         """
         create a blob message
 
@@ -80,9 +82,47 @@ class Tool(ABC):
         :return: the blob message
         """
         return ToolInvokeMessage(
-            type=ToolInvokeMessage.MessageType.BLOB, 
-            message=ToolInvokeMessage.BlobMessage(blob=blob), 
-            meta=meta, 
+            type=ToolInvokeMessage.MessageType.BLOB,
+            message=ToolInvokeMessage.BlobMessage(blob=blob),
+            meta=meta,
+        )
+
+    def create_variable_message(
+        self, variable_name: str, variable_value: Any
+    ) -> ToolInvokeMessage:
+        """
+        create a variable message
+
+        :param variable_name: the name of the variable
+        :param variable_value: the value of the variable
+        :return: the variable message
+        """
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.VARIABLE,
+            message=ToolInvokeMessage.VariableMessage(
+                variable_name=variable_name, variable_value=variable_value
+            ),
+        )
+
+    def stream_variable_message(
+        self, variable_name: str, variable_value: str
+    ) -> ToolInvokeMessage:
+        """
+        create a variable message that will be streamed to the frontend
+
+        NOTE: variable value should be a string, only string is streaming supported now
+
+        :param variable_name: the name of the variable
+        :param variable_value: the value of the variable
+        :return: the variable message
+        """
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.VARIABLE,
+            message=ToolInvokeMessage.VariableMessage(
+                variable_name=variable_name,
+                variable_value=variable_value,
+                stream=True,
+            ),
         )
 
     @abstractmethod
