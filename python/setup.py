@@ -1,14 +1,14 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="dify_plugin",
-    version="0.0.1-beta2",
+    version="0.0.1-beta3",
     author="langgenius",
     long_description_content_type="text/markdown",
     url="https://github.com/langgenius/dify-plugin-sdks.git",
     description="Dify Plugin SDK",
     long_description=open("README.md", encoding="utf-8").read(),
-    packages=["dify_plugin"],
+    packages=find_packages(where="."),
     keywords=["dify", "plugin", "sdk"],
     install_requires=[
         "pydantic~=2.8.2",
@@ -20,6 +20,8 @@ setup(
         "Werkzeug~=3.0.3",
         "dpkt~=1.9.8",
         "yarl~=1.9.4",
+        "httpx~=0.27.0",
     ],
     python_requires='>=3.10'
 )
+
