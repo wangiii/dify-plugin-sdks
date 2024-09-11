@@ -10,8 +10,8 @@ from typing import Any, Optional
 from pydantic import ConfigDict
 
 from .ai_model import AIModel
-from dify_plugin.errors.model import InvokeBadRequestError
-from dify_plugin.entities.model import ModelPropertyKey, ModelType
+from ...errors.model import InvokeBadRequestError
+from ...entities.model import ModelPropertyKey, ModelType
 
 
 logger = logging.getLogger(__name__)

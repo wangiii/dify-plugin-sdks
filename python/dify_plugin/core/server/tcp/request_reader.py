@@ -5,12 +5,12 @@ from typing import Callable, Generator, Optional
 
 from gevent.select import select
 
-from dify_plugin.core.entities.plugin.io import (
+from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from ....core.server.__base.request_reader import RequestReader
+from ....core.server.__base.response_writer import ResponseWriter
 
 import logging
 

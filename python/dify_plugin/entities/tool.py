@@ -10,8 +10,8 @@ from pydantic import (
 )
 from enum import Enum
 
-from dify_plugin.entities import I18nObject
-from dify_plugin.core.utils.yaml_loader import load_yaml_file
+from ..entities import I18nObject
+from ..core.utils.yaml_loader import load_yaml_file
 
 
 class CommonParameterType(Enum):

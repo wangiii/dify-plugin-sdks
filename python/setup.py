@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="dify_plugin",
-    version="0.0.1-beta1",
+    version="0.0.1-beta2",
     author="langgenius",
     long_description_content_type="text/markdown",
     url="https://github.com/langgenius/dify-plugin-sdks.git",
@@ -19,8 +19,7 @@ setup(
         "gevent~=24.2.1",
         "Werkzeug~=3.0.3",
         "dpkt~=1.9.8",
-        "awslambdaric~=2.1.0",
         "yarl~=1.9.4",
     ],
-    python_requires='>=3.12'
+    python_requires='>=3.10'
 )

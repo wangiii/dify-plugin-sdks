@@ -2,9 +2,9 @@ import time
 from abc import abstractmethod
 from typing import Optional
 
-from dify_plugin.entities.model.rerank import RerankResult
+from ...entities.model.rerank import RerankResult
 from .ai_model import AIModel
-from dify_plugin.entities.model import ModelType
+from ...entities.model import ModelType
 
 
 class RerankModel(AIModel):

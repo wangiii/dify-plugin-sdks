@@ -1,14 +1,14 @@
 from json import loads
 import sys
 from typing import Generator
-from dify_plugin.core.entities.plugin.io import (
+from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
 
 from gevent.os import tp_read
 
-from dify_plugin.core.server.__base.request_reader import RequestReader
+from ....core.server.__base.request_reader import RequestReader
 from .response_writer import StdioResponseWriter
 
 

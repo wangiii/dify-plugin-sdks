@@ -1,6 +1,6 @@
-from dify_plugin.core.entities.invocation import InvokeType
-from dify_plugin.core.runtime import BackwardsInvocation
-from dify_plugin.entities.workflow_node import NodeResponse, NodeType, QuestionClassifierNodeData
+from ...core.entities.invocation import InvokeType
+from ...core.runtime import BackwardsInvocation
+from ...entities.workflow_node import NodeResponse, NodeType, QuestionClassifierNodeData
 
 
 class QuestionClassifierNodeInvocation(BackwardsInvocation[NodeResponse]):

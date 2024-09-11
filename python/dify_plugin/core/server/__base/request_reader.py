@@ -5,7 +5,7 @@ from typing import Callable
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from dify_plugin.core.entities.plugin.io import PluginInStream
+    from ....core.entities.plugin.io import PluginInStream
 
 from .filter_reader import (
     FilterReader,

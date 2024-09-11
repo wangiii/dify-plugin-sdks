@@ -2,11 +2,11 @@ from queue import Queue
 import threading
 from typing import Generator
 from flask import Flask, request
-from dify_plugin.core.entities.plugin.io import (
+from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-from dify_plugin.core.server.__base.request_reader import RequestReader
+from ....core.server.__base.request_reader import RequestReader
 from .response_writer import AWSResponseWriter
 
 

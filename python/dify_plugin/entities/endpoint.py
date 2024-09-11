@@ -1,8 +1,8 @@
 from typing import Mapping
 from pydantic import BaseModel, Field, field_validator
-from dify_plugin.entities.tool import ProviderConfig
+from ..entities.tool import ProviderConfig
 
-from dify_plugin.core.utils.yaml_loader import load_yaml_file
+from ..core.utils.yaml_loader import load_yaml_file
 
 
 class EndpointConfigurationExtra(BaseModel):
@@ -11,10 +11,12 @@ class EndpointConfigurationExtra(BaseModel):
 
     python: Python
 
+
 class EndpointConfiguration(BaseModel):
     path: str
     method: str
     extra: EndpointConfigurationExtra
+
 
 class EndpointProviderConfiguration(BaseModel):
     settings: Mapping[str, ProviderConfig] = Field(default_factory=dict)
@@ -43,9 +45,9 @@ class EndpointProviderConfiguration(BaseModel):
     def validate_settings(cls, value: dict[str, dict]) -> Mapping[str, dict]:
         if not isinstance(value, dict):
             raise ValueError("settings should be a dict")
-        
+
         # add name field for each provider config
         for key, v in value.items():
-            v['name'] = key
-        
+            v["name"] = key
+
         return value

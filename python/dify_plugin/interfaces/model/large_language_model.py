@@ -7,14 +7,14 @@ from typing import Optional, Union
 
 from pydantic import ConfigDict
 
-from dify_plugin.entities.model.llm import (
+from ...entities.model.llm import (
     LLMMode,
     LLMResult,
     LLMResultChunk,
     LLMResultChunkDelta,
     LLMUsage,
 )
-from dify_plugin.entities.model.message import (
+from ...entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
     PromptMessageContentType,
@@ -23,7 +23,7 @@ from dify_plugin.entities.model.message import (
     UserPromptMessage,
 )
 from .ai_model import AIModel
-from dify_plugin.entities.model import (
+from ...entities.model import (
     ModelPropertyKey,
     ModelType,
     ParameterRule,

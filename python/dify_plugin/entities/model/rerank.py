@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from dify_plugin.entities.model import BaseModelConfig, ModelType
+from ...entities.model import BaseModelConfig, ModelType
 
 
 class RerankDocument(BaseModel):

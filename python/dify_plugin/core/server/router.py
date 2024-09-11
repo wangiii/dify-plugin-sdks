@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from .__base.request_reader import RequestReader
 from .__base.response_writer import ResponseWriter
-from dify_plugin.core.runtime import Session
+from ...core.runtime import Session
 
 logger = logging.getLogger(__file__)
 

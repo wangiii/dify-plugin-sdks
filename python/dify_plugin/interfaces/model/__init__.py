@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
 from .ai_model import AIModel
-from dify_plugin.entities.model import AIModelEntity, ModelType
-from dify_plugin.entities.model.provider import ProviderEntity
+from ...entities.model import AIModelEntity, ModelType
+from ...entities.model.provider import ProviderEntity
 
 
 class ModelProvider(ABC):

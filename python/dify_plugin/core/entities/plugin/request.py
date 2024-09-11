@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Any, Optional
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from dify_plugin.entities.model.message import (
+from ....entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
     PromptMessageRole,
@@ -11,7 +11,7 @@ from dify_plugin.entities.model.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from dify_plugin.entities.model import ModelType
+from ....entities.model import ModelType
 
 
 class PluginInvokeType(Enum):

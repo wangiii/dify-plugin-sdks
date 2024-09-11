@@ -4,11 +4,11 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from dify_plugin.entities.model.message import (
+from ...entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
 )
-from dify_plugin.entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
+from ...entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
 
 
 class LLMMode(Enum):

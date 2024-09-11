@@ -3,9 +3,9 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from dify_plugin.core.server.__base.request_reader import RequestReader
+    from ....core.server.__base.request_reader import RequestReader
 
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
+from ....core.server.__base.response_writer import ResponseWriter
 
 
 class PluginInStreamEvent(Enum):

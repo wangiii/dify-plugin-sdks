@@ -1,9 +1,9 @@
 from binascii import hexlify
 from typing import IO
 
-from dify_plugin.core.entities.invocation import InvokeType
-from dify_plugin.core.runtime import BackwardsInvocation
-from dify_plugin.entities.model.speech2text import Speech2TextModelConfig, Speech2TextResult
+from ...core.entities.invocation import InvokeType
+from ...core.runtime import BackwardsInvocation
+from ...entities.model.speech2text import Speech2TextModelConfig, Speech2TextResult
 
     
 class Speech2TextInvocation(BackwardsInvocation[Speech2TextResult]):

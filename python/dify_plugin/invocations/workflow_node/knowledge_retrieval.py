@@ -1,6 +1,6 @@
-from dify_plugin.entities.workflow_node import KnowledgeRetrievalNodeData, NodeResponse, NodeType
-from dify_plugin.core.entities.invocation import InvokeType
-from dify_plugin.core.runtime import BackwardsInvocation
+from ...entities.workflow_node import KnowledgeRetrievalNodeData, NodeResponse, NodeType
+from ...core.entities.invocation import InvokeType
+from ...core.runtime import BackwardsInvocation
 
 
 class KnowledgeRetrievalNodeInvocation(BackwardsInvocation[NodeResponse]):

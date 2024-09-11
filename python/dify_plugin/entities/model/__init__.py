@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from dify_plugin.entities import I18nObject
+from ...entities import I18nObject
 
 
 class DefaultParameterName(Enum):

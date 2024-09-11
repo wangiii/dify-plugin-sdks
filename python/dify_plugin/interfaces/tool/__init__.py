@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import Any, Optional
 
-from dify_plugin.entities.tool import ToolInvokeMessage, ToolRuntime
-from dify_plugin.core.runtime import Session
+from ...entities.tool import ToolInvokeMessage, ToolRuntime
+from ...core.runtime import Session
 
 
 class ToolProvider(ABC):

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from werkzeug import Request, Response
 
-from dify_plugin.core.runtime import Session
+from ...core.runtime import Session
 
 
 

@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from dify_plugin.config.config import InstallMethod
+from ..config.config import InstallMethod
 from concurrent.futures import ThreadPoolExecutor
 
 from abc import ABC
@@ -15,11 +15,11 @@ import uuid
 import httpx
 from yarl import URL
 
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
-from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
-from dify_plugin.core.entities.invocation import InvokeType
-from dify_plugin.core.entities.plugin.io import (
+from ..core.server.__base.request_reader import RequestReader
+from ..core.server.__base.response_writer import ResponseWriter
+from ..core.server.tcp.request_reader import TCPReaderWriter
+from ..core.entities.invocation import InvokeType
+from ..core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamBase,
     PluginInStreamEvent,
@@ -30,15 +30,16 @@ from dify_plugin.core.entities.plugin.io import (
 # Session
 #################################################
 
+
 class ModelInvocations:
     def __init__(self, session: "Session") -> None:
-        from dify_plugin.invocations.model.llm import LLMInvocation
-        from dify_plugin.invocations.model.moderation import ModerationInvocation
-        from dify_plugin.invocations.model.rerank import RerankInvocation
-        from dify_plugin.invocations.model.speech2text import Speech2TextInvocation
-        from dify_plugin.invocations.model.text_embedding import TextEmbeddingInvocation
-        from dify_plugin.invocations.model.tts import TTSInvocation
-        
+        from ..invocations.model.llm import LLMInvocation
+        from ..invocations.model.moderation import ModerationInvocation
+        from ..invocations.model.rerank import RerankInvocation
+        from ..invocations.model.speech2text import Speech2TextInvocation
+        from ..invocations.model.text_embedding import TextEmbeddingInvocation
+        from ..invocations.model.tts import TTSInvocation
+
         self.llm = LLMInvocation(session)
         self.text_embedding = TextEmbeddingInvocation(session)
         self.rerank = RerankInvocation(session)
@@ -49,9 +50,9 @@ class ModelInvocations:
 
 class AppInvocations:
     def __init__(self, session: "Session"):
-        from dify_plugin.invocations.app.chat import ChatAppInvocation
-        from dify_plugin.invocations.app.completion import CompletionAppInvocation
-        from dify_plugin.invocations.app.workflow import WorkflowAppInvocation
+        from ..invocations.app.chat import ChatAppInvocation
+        from ..invocations.app.completion import CompletionAppInvocation
+        from ..invocations.app.workflow import WorkflowAppInvocation
 
         self.chat = ChatAppInvocation(session)
         self.completion = CompletionAppInvocation(session)
@@ -60,13 +61,13 @@ class AppInvocations:
 
 class WorkflowNodeInvocations:
     def __init__(self, session: "Session"):
-        from dify_plugin.invocations.workflow_node.knowledge_retrieval import (
+        from ..invocations.workflow_node.knowledge_retrieval import (
             KnowledgeRetrievalNodeInvocation,
         )
-        from dify_plugin.invocations.workflow_node.parameter_extractor import (
+        from ..invocations.workflow_node.parameter_extractor import (
             ParameterExtractorNodeInvocation,
         )
-        from dify_plugin.invocations.workflow_node.question_classifier import (
+        from ..invocations.workflow_node.question_classifier import (
             QuestionClassifierNodeInvocation,
         )
 
@@ -111,8 +112,8 @@ class Session:
         self._register_invocations()
 
     def _register_invocations(self) -> None:
-        from dify_plugin.invocations.tool import ToolInvocation
-        from dify_plugin.invocations.storage import StorageInvocation
+        from ..invocations.tool import ToolInvocation
+        from ..invocations.storage import StorageInvocation
 
         self.model = ModelInvocations(self)
         self.tool = ToolInvocation(self)
@@ -149,6 +150,7 @@ class Session:
 # Backwards Invocation Request
 #################################################
 
+
 class BackwardsInvocationResponseEvent(BaseModel):
     class Event(Enum):
         response = "response"
@@ -161,7 +163,8 @@ class BackwardsInvocationResponseEvent(BaseModel):
     data: Optional[dict]
 
 
-T = TypeVar('T', bound=Union[BaseModel, dict, str])
+T = TypeVar("T", bound=Union[BaseModel, dict, str])
+
 
 class BackwardsInvocation(Generic[T], ABC):
     def __init__(

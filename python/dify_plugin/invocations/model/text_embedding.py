@@ -1,6 +1,6 @@
-from dify_plugin.entities.model.text_embedding import TextEmbeddingResult
-from dify_plugin.core.entities.invocation import InvokeType
-from dify_plugin.core.runtime import BackwardsInvocation
+from ...entities.model.text_embedding import TextEmbeddingResult
+from ...core.entities.invocation import InvokeType
+from ...core.runtime import BackwardsInvocation
 
 
 class TextEmbeddingInvocation(BackwardsInvocation[TextEmbeddingResult]):

@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from typing import Literal, overload
-from dify_plugin.core.entities.invocation import InvokeType
-from dify_plugin.core.runtime import BackwardsInvocation
+from ...core.entities.invocation import InvokeType
+from ...core.runtime import BackwardsInvocation
 
 
 class CompletionAppInvocation(BackwardsInvocation[dict]):

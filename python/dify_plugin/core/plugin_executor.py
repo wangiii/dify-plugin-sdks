@@ -4,8 +4,8 @@ import tempfile
 
 from werkzeug import Response
 
-from dify_plugin.config.config import DifyPluginEnv
-from dify_plugin.core.entities.plugin.request import (
+from ..config.config import DifyPluginEnv
+from .entities.plugin.request import (
     ModelInvokeLLMRequest,
     ModelInvokeModerationRequest,
     ModelInvokeRerankRequest,
@@ -18,16 +18,16 @@ from dify_plugin.core.entities.plugin.request import (
     ToolValidateCredentialsRequest,
     EndpointInvokeRequest,
 )
-from dify_plugin.interfaces.model.large_language_model import LargeLanguageModel
-from dify_plugin.interfaces.model.moderation_model import ModerationModel
-from dify_plugin.interfaces.model.rerank_model import RerankModel
-from dify_plugin.interfaces.model.speech2text_model import Speech2TextModel
-from dify_plugin.interfaces.model.text_embedding_model import TextEmbeddingModel
-from dify_plugin.interfaces.model.tts_model import TTSModel
-from dify_plugin.core.plugin_registration import PluginRegistration
-from dify_plugin.entities.tool import ToolRuntime
-from dify_plugin.core.utils.http_parser import parse_raw_request
-from dify_plugin.core.runtime import Session
+from ..interfaces.model.large_language_model import LargeLanguageModel
+from ..interfaces.model.moderation_model import ModerationModel
+from ..interfaces.model.rerank_model import RerankModel
+from ..interfaces.model.speech2text_model import Speech2TextModel
+from ..interfaces.model.text_embedding_model import TextEmbeddingModel
+from ..interfaces.model.tts_model import TTSModel
+from ..core.plugin_registration import PluginRegistration
+from ..entities.tool import ToolRuntime
+from ..core.utils.http_parser import parse_raw_request
+from ..core.runtime import Session
 
 
 class PluginExecutor:

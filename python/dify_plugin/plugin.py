@@ -1,28 +1,28 @@
 from typing import Any, Optional
 from pydantic import RootModel
 
-from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.__base.response_writer import ResponseWriter
-from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader
-from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
-from dify_plugin.core.server.stdio.response_writer import StdioResponseWriter
-from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
+from .core.server.__base.request_reader import RequestReader
+from .core.server.__base.response_writer import ResponseWriter
+from .core.server.aws.request_reader import AWSLambdaRequestReader
+from .core.server.stdio.request_reader import StdioRequestReader
+from .core.server.stdio.response_writer import StdioResponseWriter
+from .core.server.tcp.request_reader import TCPReaderWriter
 from collections.abc import Generator
 import logging
-from dify_plugin.config.config import DifyPluginEnv, InstallMethod
-from dify_plugin.core.entities.plugin.request import (
+from .config.config import DifyPluginEnv, InstallMethod
+from .core.entities.plugin.request import (
     ModelActions,
     PluginInvokeType,
     ToolActions,
     EndpointActions,
 )
-from dify_plugin.core.runtime import Session
-from dify_plugin.core.server.io_server import IOServer
-from dify_plugin.core.server.router import Router
-from dify_plugin.config.logger_format import plugin_logger_handler
+from .core.runtime import Session
+from .core.server.io_server import IOServer
+from .core.server.router import Router
+from .config.logger_format import plugin_logger_handler
 
-from dify_plugin.core.plugin_executor import PluginExecutor
-from dify_plugin.core.plugin_registration import PluginRegistration
+from .core.plugin_executor import PluginExecutor
+from .core.plugin_registration import PluginRegistration
 
 
 logger = logging.getLogger(__name__)

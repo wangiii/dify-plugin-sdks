@@ -4,23 +4,28 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from dify_plugin.entities.model.text_embedding import TextEmbeddingResult
+from ...entities.model.text_embedding import TextEmbeddingResult
 from .ai_model import AIModel
-from dify_plugin.entities.model import ModelPropertyKey, ModelType
+from ...entities.model import ModelPropertyKey, ModelType
 
 
 class TextEmbeddingModel(AIModel):
     """
     Model class for text embedding model.
     """
+
     model_type: ModelType = ModelType.TEXT_EMBEDDING
 
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def _invoke(self, model: str, credentials: dict,
-               texts: list[str], user: Optional[str] = None) \
-            -> TextEmbeddingResult:
+    def _invoke(
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+    ) -> TextEmbeddingResult:
         """
         Invoke large language model
 
@@ -38,9 +43,13 @@ class TextEmbeddingModel(AIModel):
             raise self._transform_invoke_error(e)
 
     @abstractmethod
-    def invoke(self, model: str, credentials: dict,
-                texts: list[str], user: Optional[str] = None) \
-            -> TextEmbeddingResult:
+    def invoke(
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+    ) -> TextEmbeddingResult:
         """
         Invoke large language model
 
@@ -74,7 +83,10 @@ class TextEmbeddingModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.CONTEXT_SIZE in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.CONTEXT_SIZE in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.CONTEXT_SIZE]
 
         return 1000
@@ -89,7 +101,10 @@ class TextEmbeddingModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.MAX_CHUNKS]
 
         return 1

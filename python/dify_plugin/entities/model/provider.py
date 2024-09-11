@@ -6,9 +6,9 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from dify_plugin.entities import I18nObject
-from dify_plugin.entities.model import AIModelEntity, ModelType
-from dify_plugin.core.utils.yaml_loader import load_yaml_file
+from ...entities import I18nObject
+from ...entities.model import AIModelEntity, ModelType
+from ...core.utils.yaml_loader import load_yaml_file
 
 
 class ConfigurateMethod(Enum):

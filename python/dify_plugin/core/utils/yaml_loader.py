@@ -1,5 +1,5 @@
 import yaml
-from dify_plugin.config.logger_format import plugin_logger_handler
+from ...config.logger_format import plugin_logger_handler
 
 import logging
 import os

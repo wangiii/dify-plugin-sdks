@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from dify_plugin.core.entities.message import SessionMessage
+from ....core.entities.message import SessionMessage
 from .writer_entities import Event, StreamOutputMessage
 
 
