@@ -44,7 +44,7 @@ class LargeLanguageModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -92,7 +92,7 @@ class LargeLanguageModel(AIModel):
                     user=user,
                 )
             else:
-                result = self._invoke(
+                result = self.invoke(
                     model,
                     credentials,
                     prompt_messages,
@@ -144,7 +144,7 @@ if you are not sure about the structure.
 
         code_block = model_parameters.get("response_format", "")
         if not code_block:
-            return self._invoke(
+            return self.invoke(
                 model=model,
                 credentials=credentials,
                 prompt_messages=prompt_messages,
@@ -200,7 +200,7 @@ if you are not sure about the structure.
             # append a user message
             prompt_messages.append(UserPromptMessage(content=f"```{code_block}\n"))
 
-        response = self._invoke(
+        response = self.invoke(
             model=model,
             credentials=credentials,
             prompt_messages=prompt_messages,
@@ -375,7 +375,7 @@ if you are not sure about the structure.
                 )
 
     @abstractmethod
-    def _invoke(
+    def invoke(
         self,
         model: str,
         credentials: dict,

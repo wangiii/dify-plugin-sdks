@@ -10,14 +10,14 @@ class Endpoint(ABC):
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
+    def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
         """
         return self._invoke(r, values, settings)
 
     @abstractmethod
-    def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
+    def invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
 

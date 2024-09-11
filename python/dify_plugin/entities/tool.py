@@ -73,16 +73,6 @@ class ToolInvokeMessage(BaseModel):
     class BlobMessage(BaseModel):
         blob: bytes
 
-    class MessageType(Enum):
-        TEXT = "text"
-        FILE = "file"
-        BLOB = "blob"
-        JSON = "json"
-        LINK = "link"
-        IMAGE = "image"
-        IMAGE_LINK = "image_link"
-        VARIABLE = "variable"
-
     class VariableMessage(BaseModel):
         variable_name: str = Field(
             ...,
@@ -102,6 +92,15 @@ class ToolInvokeMessage(BaseModel):
                         "When 'stream' is True, 'variable_value' must be a string."
                     )
             return v
+    class MessageType(Enum):
+        TEXT = "text"
+        FILE = "file"
+        BLOB = "blob"
+        JSON = "json"
+        LINK = "link"
+        IMAGE = "image"
+        IMAGE_LINK = "image_link"
+        VARIABLE = "variable"
 
     type: MessageType
     message: TextMessage | JsonMessage | VariableMessage | BlobMessage | None

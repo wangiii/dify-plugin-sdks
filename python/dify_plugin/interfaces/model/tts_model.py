@@ -27,7 +27,7 @@ class TTSModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -50,7 +50,7 @@ class TTSModel(AIModel):
         try:
             logger.info(f"Invoke TTS model: {model} , invoke content : {content_text}")
             self._is_ffmpeg_installed()
-            return self._invoke(
+            return self.invoke(
                 model=model,
                 credentials=credentials,
                 user=user,
@@ -61,7 +61,7 @@ class TTSModel(AIModel):
             raise self._transform_invoke_error(e)
 
     @abstractmethod
-    def _invoke(
+    def invoke(
         self,
         model: str,
         credentials: dict,

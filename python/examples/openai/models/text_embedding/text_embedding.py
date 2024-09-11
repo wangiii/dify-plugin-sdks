@@ -18,7 +18,7 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
     Model class for OpenAI text embedding model.
     """
 
-    def _invoke(self, model: str, credentials: dict,
+    def invoke(self, model: str, credentials: dict,
                 texts: list[str], user: Optional[str] = None) \
             -> TextEmbeddingResult:
         """

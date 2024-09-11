@@ -25,7 +25,7 @@ class GoogleSearchTool(Tool):
             ]
         return result
 
-    def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
+    def invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
         params = {
             "api_key": self.runtime.credentials["serpapi_api_key"],
             "q": tool_parameters["query"],

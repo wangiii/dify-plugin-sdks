@@ -18,7 +18,7 @@ class Speech2TextModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def invoke(self, model: str, credentials: dict,
+    def _invoke(self, model: str, credentials: dict,
                file: IO[bytes], user: Optional[str] = None) \
             -> str:
         """
@@ -31,12 +31,12 @@ class Speech2TextModel(AIModel):
         :return: text for given audio file
         """
         try:
-            return self._invoke(model, credentials, file, user)
+            return self.invoke(model, credentials, file, user)
         except Exception as e:
             raise self._transform_invoke_error(e)
 
     @abstractmethod
-    def _invoke(self, model: str, credentials: dict,
+    def invoke(self, model: str, credentials: dict,
                 file: IO[bytes], user: Optional[str] = None) \
             -> str:
         """

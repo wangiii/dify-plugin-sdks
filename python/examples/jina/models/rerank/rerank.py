@@ -24,7 +24,7 @@ class JinaRerankModel(RerankModel):
     Model class for Jina rerank model.
     """
 
-    def _invoke(
+    def invoke(
         self,
         model: str,
         credentials: dict,

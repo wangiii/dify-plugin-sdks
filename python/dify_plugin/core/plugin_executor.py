@@ -125,7 +125,7 @@ class PluginExecutor:
             data.provider, data.model_type
         )
         if isinstance(model_instance, LargeLanguageModel):
-            return model_instance.invoke(
+            return model_instance._invoke(
                 data.model,
                 data.credentials,
                 data.prompt_messages,

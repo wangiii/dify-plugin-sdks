@@ -66,7 +66,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
     Model class for OpenAI large language model.
     """
 
-    def _invoke(
+    def invoke(
         self,
         model: str,
         credentials: dict,

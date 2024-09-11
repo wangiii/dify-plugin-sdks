@@ -13,7 +13,7 @@ class RerankModel(AIModel):
     """
     model_type: ModelType = ModelType.RERANK
 
-    def invoke(self, model: str, credentials: dict,
+    def _invoke(self, model: str, credentials: dict,
                query: str, docs: list[str], score_threshold: Optional[float] = None, top_n: Optional[int] = None,
                user: Optional[str] = None) \
             -> RerankResult:
@@ -32,12 +32,12 @@ class RerankModel(AIModel):
         self.started_at = time.perf_counter()
 
         try:
-            return self._invoke(model, credentials, query, docs, score_threshold, top_n, user)
+            return self.invoke(model, credentials, query, docs, score_threshold, top_n, user)
         except Exception as e:
             raise self._transform_invoke_error(e)
 
     @abstractmethod
-    def _invoke(self, model: str, credentials: dict,
+    def invoke(self, model: str, credentials: dict,
                 query: str, docs: list[str], score_threshold: Optional[float] = None, top_n: Optional[int] = None,
                 user: Optional[str] = None) \
             -> RerankResult:

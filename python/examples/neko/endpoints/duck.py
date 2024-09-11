@@ -5,7 +5,7 @@ from dify_plugin import Endpoint
 
 
 class Duck(Endpoint):
-    def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
+    def invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
         """

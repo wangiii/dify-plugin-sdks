@@ -7,7 +7,7 @@ from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin.entities.model.message import SystemPromptMessage, UserPromptMessage
 
 class LLMTool(Tool):
-    def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
+    def invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
         response = self.session.model.llm.invoke(
             model_config=LLMModelConfig(
                 provider='openai',

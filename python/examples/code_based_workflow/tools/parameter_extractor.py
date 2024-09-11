@@ -4,5 +4,5 @@ from dify_plugin import Tool
 
 
 class ParameterExtractorTool(Tool):
-    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None, None]:
+    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None, None]:
         return super()._invoke(tool_parameters)

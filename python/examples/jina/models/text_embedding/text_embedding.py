@@ -19,7 +19,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
     api_base: str = "https://api.jina.ai/v1"
 
-    def _invoke(
+    def invoke(
         self,
         model: str,
         credentials: dict,

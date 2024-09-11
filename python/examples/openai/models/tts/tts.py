@@ -20,7 +20,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
     Model class for OpenAI Speech to text model.
     """
 
-    def _invoke(
+    def invoke(
         self,
         model: str,
         credentials: dict,

@@ -126,8 +126,8 @@ class Tool(ABC):
         )
 
     @abstractmethod
-    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
         pass
 
-    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
-        return self._invoke(tool_parameters)
+    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+        return self.invoke(tool_parameters)
