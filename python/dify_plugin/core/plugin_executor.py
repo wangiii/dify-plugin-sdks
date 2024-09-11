@@ -249,7 +249,7 @@ class PluginExecutor:
                 "voices": model_instance.get_tts_model_voices(
                     data.model, data.credentials, data.language
                 )
-            } 
+            }
         else:
             raise ValueError(
                 f"Model `{data.model_type}` not found for provider `{data.provider}`"
@@ -287,7 +287,9 @@ class PluginExecutor:
         )
         if isinstance(model_instance, LargeLanguageModel):
             return {
-                "model_schema": model_instance.get_model_schema(data.model, data.credentials)
+                "model_schema": model_instance.get_model_schema(
+                    data.model, data.credentials
+                )
             }
         else:
             raise ValueError(
@@ -308,6 +310,10 @@ class PluginExecutor:
                     data.user_id,
                 )
             }
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
 
     def invoke_endpoint(self, session: Session, data: EndpointInvokeRequest):
         bytes_data = binascii.unhexlify(data.raw_http_request)
