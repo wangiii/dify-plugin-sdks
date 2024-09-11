@@ -44,17 +44,22 @@ class LargeLanguageModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def _invoke(
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
+
+    @abstractmethod
+    def invoke(
         self,
         model: str,
         credentials: dict,
         prompt_messages: list[PromptMessage],
-        model_parameters: Optional[dict] = None,
+        model_parameters: dict,
         tools: Optional[list[PromptMessageTool]] = None,
         stop: Optional[list[str]] = None,
         stream: bool = True,
         user: Optional[str] = None,
-    ) -> Union[LLMResult, Generator]:
+    ) -> Union[LLMResult, Generator[LLMResultChunk]]:
         """
         Invoke large language model
 
@@ -66,46 +71,242 @@ class LargeLanguageModel(AIModel):
         :param stop: stop words
         :param stream: is stream response
         :param user: unique user id
-        :param callbacks: callbacks
         :return: full response or stream response chunk generator result
         """
-        # validate and filter model parameters
-        if model_parameters is None:
-            model_parameters = {}
+        raise NotImplementedError
 
-        model_parameters = self._validate_and_filter_model_parameters(
-            model, model_parameters, credentials
+    @abstractmethod
+    def get_num_tokens(
+        self,
+        model: str,
+        credentials: dict,
+        prompt_messages: list[PromptMessage],
+        tools: Optional[list[PromptMessageTool]] = None,
+    ) -> int:
+        """
+        Get number of tokens for given prompt messages
+
+        :param model: model name
+        :param credentials: model credentials
+        :param prompt_messages: prompt messages
+        :param tools: tools for tool calling
+        :return:
+        """
+        raise NotImplementedError
+
+    ############################################################
+    #            For plugin implementation use only            #
+    ############################################################
+
+    def enforce_stop_tokens(self, text: str, stop: list[str]) -> str:
+        """Cut off the text as soon as any stop words occur."""
+        return re.split("|".join(stop), text, maxsplit=1)[0]
+
+    def get_parameter_rules(self, model: str, credentials: dict) -> list[ParameterRule]:
+        """
+        Get parameter rules
+
+        :param model: model name
+        :param credentials: model credentials
+        :return: parameter rules
+        """
+        model_schema = self.get_model_schema(model, credentials)
+        if model_schema:
+            return model_schema.parameter_rules
+
+        return []
+
+    def get_model_mode(
+        self, model: str, credentials: Optional[Mapping] = None
+    ) -> LLMMode:
+        """
+        Get model mode
+
+        :param model: model name
+        :param credentials: model credentials
+        :return: model mode
+        """
+        model_schema = self.get_model_schema(model, credentials)
+
+        mode = LLMMode.CHAT
+        if model_schema and model_schema.model_properties.get(ModelPropertyKey.MODE):
+            mode = LLMMode.value_of(
+                model_schema.model_properties[ModelPropertyKey.MODE]
+            )
+
+        return mode
+
+    def _calc_response_usage(
+        self, model: str, credentials: dict, prompt_tokens: int, completion_tokens: int
+    ) -> LLMUsage:
+        """
+        Calculate response usage
+
+        :param model: model name
+        :param credentials: model credentials
+        :param prompt_tokens: prompt tokens
+        :param completion_tokens: completion tokens
+        :return: usage
+        """
+        # get prompt price info
+        prompt_price_info = self.get_price(
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=prompt_tokens,
         )
 
-        self.started_at = time.perf_counter()
+        # get completion price info
+        completion_price_info = self.get_price(
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.OUTPUT,
+            tokens=completion_tokens,
+        )
 
-        try:
-            if "response_format" in model_parameters:
-                result = self._code_block_mode_wrapper(
-                    model=model,
-                    credentials=credentials,
-                    prompt_messages=prompt_messages,
-                    model_parameters=model_parameters,
-                    tools=tools,
-                    stop=stop,
-                    stream=stream,
-                    user=user,
-                )
+        # transform usage
+        usage = LLMUsage(
+            prompt_tokens=prompt_tokens,
+            prompt_unit_price=prompt_price_info.unit_price,
+            prompt_price_unit=prompt_price_info.unit,
+            prompt_price=prompt_price_info.total_amount,
+            completion_tokens=completion_tokens,
+            completion_unit_price=completion_price_info.unit_price,
+            completion_price_unit=completion_price_info.unit,
+            completion_price=completion_price_info.total_amount,
+            total_tokens=prompt_tokens + completion_tokens,
+            total_price=prompt_price_info.total_amount
+            + completion_price_info.total_amount,
+            currency=prompt_price_info.currency,
+            latency=time.perf_counter() - self.started_at,
+        )
+
+        return usage
+
+    def _validate_and_filter_model_parameters(
+        self, model: str, model_parameters: dict, credentials: dict
+    ) -> dict:
+        """
+        Validate model parameters
+
+        :param model: model name
+        :param model_parameters: model parameters
+        :param credentials: model credentials
+        :return:
+        """
+        parameter_rules = self.get_parameter_rules(model, credentials)
+
+        # validate model parameters
+        filtered_model_parameters = {}
+        for parameter_rule in parameter_rules:
+            parameter_name = parameter_rule.name
+            parameter_value = model_parameters.get(parameter_name)
+            if parameter_value is None:
+                if (
+                    parameter_rule.use_template
+                    and parameter_rule.use_template in model_parameters
+                ):
+                    # if parameter value is None, use template value variable name instead
+                    parameter_value = model_parameters[parameter_rule.use_template]
+                else:
+                    if parameter_rule.required:
+                        if parameter_rule.default is not None:
+                            filtered_model_parameters[parameter_name] = (
+                                parameter_rule.default
+                            )
+                            continue
+                        else:
+                            raise ValueError(
+                                f"Model Parameter {parameter_name} is required."
+                            )
+                    else:
+                        continue
+
+            # validate parameter value type
+            if parameter_rule.type == ParameterType.INT:
+                if not isinstance(parameter_value, int):
+                    raise ValueError(f"Model Parameter {parameter_name} should be int.")
+
+                # validate parameter value range
+                if (
+                    parameter_rule.min is not None
+                    and parameter_value < parameter_rule.min
+                ):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be greater than or equal to {parameter_rule.min}."
+                    )
+
+                if (
+                    parameter_rule.max is not None
+                    and parameter_value > parameter_rule.max
+                ):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be less than or equal to {parameter_rule.max}."
+                    )
+            elif parameter_rule.type == ParameterType.FLOAT:
+                if not isinstance(parameter_value, float | int):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be float."
+                    )
+
+                # validate parameter value precision
+                if parameter_rule.precision is not None:
+                    if parameter_rule.precision == 0:
+                        if parameter_value != int(parameter_value):
+                            raise ValueError(
+                                f"Model Parameter {parameter_name} should be int."
+                            )
+                    else:
+                        if parameter_value != round(
+                            parameter_value, parameter_rule.precision
+                        ):
+                            raise ValueError(
+                                f"Model Parameter {parameter_name} should be round to {parameter_rule.precision} decimal places."
+                            )
+
+                # validate parameter value range
+                if (
+                    parameter_rule.min is not None
+                    and parameter_value < parameter_rule.min
+                ):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be greater than or equal to {parameter_rule.min}."
+                    )
+
+                if (
+                    parameter_rule.max is not None
+                    and parameter_value > parameter_rule.max
+                ):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be less than or equal to {parameter_rule.max}."
+                    )
+            elif parameter_rule.type == ParameterType.BOOLEAN:
+                if not isinstance(parameter_value, bool):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be bool."
+                    )
+            elif parameter_rule.type == ParameterType.STRING:
+                if not isinstance(parameter_value, str):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be string."
+                    )
+
+                # validate options
+                if (
+                    parameter_rule.options
+                    and parameter_value not in parameter_rule.options
+                ):
+                    raise ValueError(
+                        f"Model Parameter {parameter_name} should be one of {parameter_rule.options}."
+                    )
             else:
-                result = self.invoke(
-                    model,
-                    credentials,
-                    prompt_messages,
-                    model_parameters,
-                    tools,
-                    stop,
-                    stream,
-                    user,
+                raise ValueError(
+                    f"Model Parameter {parameter_name} type {parameter_rule.type} is not supported."
                 )
-        except Exception as e:
-            raise self._transform_invoke_error(e)
 
-        return result
+            filtered_model_parameters[parameter_name] = parameter_value
+
+        return filtered_model_parameters
 
     def _code_block_mode_wrapper(
         self,
@@ -374,18 +575,21 @@ if you are not sure about the structure.
                     ),
                 )
 
-    @abstractmethod
-    def invoke(
+    ############################################################
+    #                 For executor use only                    #
+    ############################################################
+
+    def invoke_from_executor(
         self,
         model: str,
         credentials: dict,
         prompt_messages: list[PromptMessage],
-        model_parameters: dict,
+        model_parameters: Optional[dict] = None,
         tools: Optional[list[PromptMessageTool]] = None,
         stop: Optional[list[str]] = None,
         stream: bool = True,
         user: Optional[str] = None,
-    ) -> Union[LLMResult, Generator[LLMResultChunk]]:
+    ) -> Union[LLMResult, Generator]:
         """
         Invoke large language model
 
@@ -397,235 +601,43 @@ if you are not sure about the structure.
         :param stop: stop words
         :param stream: is stream response
         :param user: unique user id
+        :param callbacks: callbacks
         :return: full response or stream response chunk generator result
         """
-        raise NotImplementedError
+        # validate and filter model parameters
+        if model_parameters is None:
+            model_parameters = {}
 
-    @abstractmethod
-    def get_num_tokens(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        tools: Optional[list[PromptMessageTool]] = None,
-    ) -> int:
-        """
-        Get number of tokens for given prompt messages
-
-        :param model: model name
-        :param credentials: model credentials
-        :param prompt_messages: prompt messages
-        :param tools: tools for tool calling
-        :return:
-        """
-        raise NotImplementedError
-
-    def enforce_stop_tokens(self, text: str, stop: list[str]) -> str:
-        """Cut off the text as soon as any stop words occur."""
-        return re.split("|".join(stop), text, maxsplit=1)[0]
-
-    def get_parameter_rules(self, model: str, credentials: dict) -> list[ParameterRule]:
-        """
-        Get parameter rules
-
-        :param model: model name
-        :param credentials: model credentials
-        :return: parameter rules
-        """
-        model_schema = self.get_model_schema(model, credentials)
-        if model_schema:
-            return model_schema.parameter_rules
-
-        return []
-
-    def get_model_mode(
-        self, model: str, credentials: Optional[Mapping] = None
-    ) -> LLMMode:
-        """
-        Get model mode
-
-        :param model: model name
-        :param credentials: model credentials
-        :return: model mode
-        """
-        model_schema = self.get_model_schema(model, credentials)
-
-        mode = LLMMode.CHAT
-        if model_schema and model_schema.model_properties.get(ModelPropertyKey.MODE):
-            mode = LLMMode.value_of(
-                model_schema.model_properties[ModelPropertyKey.MODE]
-            )
-
-        return mode
-
-    def _calc_response_usage(
-        self, model: str, credentials: dict, prompt_tokens: int, completion_tokens: int
-    ) -> LLMUsage:
-        """
-        Calculate response usage
-
-        :param model: model name
-        :param credentials: model credentials
-        :param prompt_tokens: prompt tokens
-        :param completion_tokens: completion tokens
-        :return: usage
-        """
-        # get prompt price info
-        prompt_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=prompt_tokens,
+        model_parameters = self._validate_and_filter_model_parameters(
+            model, model_parameters, credentials
         )
 
-        # get completion price info
-        completion_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.OUTPUT,
-            tokens=completion_tokens,
-        )
+        self.started_at = time.perf_counter()
 
-        # transform usage
-        usage = LLMUsage(
-            prompt_tokens=prompt_tokens,
-            prompt_unit_price=prompt_price_info.unit_price,
-            prompt_price_unit=prompt_price_info.unit,
-            prompt_price=prompt_price_info.total_amount,
-            completion_tokens=completion_tokens,
-            completion_unit_price=completion_price_info.unit_price,
-            completion_price_unit=completion_price_info.unit,
-            completion_price=completion_price_info.total_amount,
-            total_tokens=prompt_tokens + completion_tokens,
-            total_price=prompt_price_info.total_amount
-            + completion_price_info.total_amount,
-            currency=prompt_price_info.currency,
-            latency=time.perf_counter() - self.started_at,
-        )
-
-        return usage
-
-    def _validate_and_filter_model_parameters(
-        self, model: str, model_parameters: dict, credentials: dict
-    ) -> dict:
-        """
-        Validate model parameters
-
-        :param model: model name
-        :param model_parameters: model parameters
-        :param credentials: model credentials
-        :return:
-        """
-        parameter_rules = self.get_parameter_rules(model, credentials)
-
-        # validate model parameters
-        filtered_model_parameters = {}
-        for parameter_rule in parameter_rules:
-            parameter_name = parameter_rule.name
-            parameter_value = model_parameters.get(parameter_name)
-            if parameter_value is None:
-                if (
-                    parameter_rule.use_template
-                    and parameter_rule.use_template in model_parameters
-                ):
-                    # if parameter value is None, use template value variable name instead
-                    parameter_value = model_parameters[parameter_rule.use_template]
-                else:
-                    if parameter_rule.required:
-                        if parameter_rule.default is not None:
-                            filtered_model_parameters[parameter_name] = (
-                                parameter_rule.default
-                            )
-                            continue
-                        else:
-                            raise ValueError(
-                                f"Model Parameter {parameter_name} is required."
-                            )
-                    else:
-                        continue
-
-            # validate parameter value type
-            if parameter_rule.type == ParameterType.INT:
-                if not isinstance(parameter_value, int):
-                    raise ValueError(f"Model Parameter {parameter_name} should be int.")
-
-                # validate parameter value range
-                if (
-                    parameter_rule.min is not None
-                    and parameter_value < parameter_rule.min
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be greater than or equal to {parameter_rule.min}."
-                    )
-
-                if (
-                    parameter_rule.max is not None
-                    and parameter_value > parameter_rule.max
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be less than or equal to {parameter_rule.max}."
-                    )
-            elif parameter_rule.type == ParameterType.FLOAT:
-                if not isinstance(parameter_value, float | int):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be float."
-                    )
-
-                # validate parameter value precision
-                if parameter_rule.precision is not None:
-                    if parameter_rule.precision == 0:
-                        if parameter_value != int(parameter_value):
-                            raise ValueError(
-                                f"Model Parameter {parameter_name} should be int."
-                            )
-                    else:
-                        if parameter_value != round(
-                            parameter_value, parameter_rule.precision
-                        ):
-                            raise ValueError(
-                                f"Model Parameter {parameter_name} should be round to {parameter_rule.precision} decimal places."
-                            )
-
-                # validate parameter value range
-                if (
-                    parameter_rule.min is not None
-                    and parameter_value < parameter_rule.min
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be greater than or equal to {parameter_rule.min}."
-                    )
-
-                if (
-                    parameter_rule.max is not None
-                    and parameter_value > parameter_rule.max
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be less than or equal to {parameter_rule.max}."
-                    )
-            elif parameter_rule.type == ParameterType.BOOLEAN:
-                if not isinstance(parameter_value, bool):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be bool."
-                    )
-            elif parameter_rule.type == ParameterType.STRING:
-                if not isinstance(parameter_value, str):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be string."
-                    )
-
-                # validate options
-                if (
-                    parameter_rule.options
-                    and parameter_value not in parameter_rule.options
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be one of {parameter_rule.options}."
-                    )
-            else:
-                raise ValueError(
-                    f"Model Parameter {parameter_name} type {parameter_rule.type} is not supported."
+        try:
+            if "response_format" in model_parameters:
+                result = self._code_block_mode_wrapper(
+                    model=model,
+                    credentials=credentials,
+                    prompt_messages=prompt_messages,
+                    model_parameters=model_parameters,
+                    tools=tools,
+                    stop=stop,
+                    stream=stream,
+                    user=user,
                 )
+            else:
+                result = self.invoke(
+                    model,
+                    credentials,
+                    prompt_messages,
+                    model_parameters,
+                    tools,
+                    stop,
+                    stream,
+                    user,
+                )
+        except Exception as e:
+            raise self._transform_invoke_error(e)
 
-            filtered_model_parameters[parameter_name] = parameter_value
-
-        return filtered_model_parameters
+        return result

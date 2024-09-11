@@ -76,7 +76,7 @@ class PluginExecutor:
 
         # invoke tool
         try:
-            yield from tool.invoke(request.tool_parameters)
+            yield from tool.invoke_from_executor(request.tool_parameters)
         except Exception as e:
             raise ValueError(f"Failed to invoke tool: {type(e).__name__}: {str(e)}")
 
@@ -125,7 +125,7 @@ class PluginExecutor:
             data.provider, data.model_type
         )
         if isinstance(model_instance, LargeLanguageModel):
-            return model_instance._invoke(
+            return model_instance.invoke_from_executor(
                 data.model,
                 data.credentials,
                 data.prompt_messages,
@@ -143,7 +143,7 @@ class PluginExecutor:
             data.provider, data.model_type
         )
         if isinstance(model_instance, TextEmbeddingModel):
-            return model_instance.invoke(
+            return model_instance.invoke_from_executor(
                 data.model,
                 data.credentials,
                 data.texts,
@@ -155,7 +155,7 @@ class PluginExecutor:
             data.provider, data.model_type
         )
         if isinstance(model_instance, RerankModel):
-            return model_instance.invoke(
+            return model_instance.invoke_from_executor(
                 data.model,
                 data.credentials,
                 data.query,
@@ -170,7 +170,7 @@ class PluginExecutor:
             data.provider, data.model_type
         )
         if isinstance(model_instance, TTSModel):
-            b = model_instance.invoke(
+            b = model_instance.invoke_from_executor(
                 data.model,
                 data.credentials,
                 data.content_text,
@@ -197,7 +197,7 @@ class PluginExecutor:
             with open(temp.name, "rb") as f:
                 if isinstance(model_instance, Speech2TextModel):
                     return {
-                        "result": model_instance.invoke(
+                        "result": model_instance.invoke_from_executor(
                             data.model,
                             data.credentials,
                             f,
@@ -212,7 +212,7 @@ class PluginExecutor:
 
         if isinstance(model_instance, ModerationModel):
             return {
-                "result": model_instance.invoke(
+                "result": model_instance.invoke_from_executor(
                     data.model,
                     data.credentials,
                     data.text,
@@ -229,7 +229,7 @@ class PluginExecutor:
             endpoint, values = self.registration.dispatch_endpoint_request(request)
             # construct response
             endpoint_instance = endpoint(session)
-            response = endpoint_instance.invoke(request, values, data.settings)
+            response = endpoint_instance.invoke_from_executor(request, values, data.settings)
         except Exception:
             response = Response("Not Found", status=404)
 

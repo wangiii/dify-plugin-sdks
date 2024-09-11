@@ -93,7 +93,7 @@ class JinaRerankModel(RerankModel):
         :return:
         """
         try:
-            self._invoke(
+            self.invoke(
                 model=model,
                 credentials=credentials,
                 query="What is the capital of the United States?",

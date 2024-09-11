@@ -18,22 +18,9 @@ class Speech2TextModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def _invoke(self, model: str, credentials: dict,
-               file: IO[bytes], user: Optional[str] = None) \
-            -> str:
-        """
-        Invoke large language model
-
-        :param model: model name
-        :param credentials: model credentials
-        :param file: audio file
-        :param user: unique user id
-        :return: text for given audio file
-        """
-        try:
-            return self.invoke(model, credentials, file, user)
-        except Exception as e:
-            raise self._transform_invoke_error(e)
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
 
     @abstractmethod
     def invoke(self, model: str, credentials: dict,
@@ -49,6 +36,10 @@ class Speech2TextModel(AIModel):
         :return: text for given audio file
         """
         raise NotImplementedError
+    
+    ############################################################
+    #            For plugin implementation use only            #
+    ############################################################
 
     def _get_demo_file_path(self) -> str:
         """
@@ -61,3 +52,24 @@ class Speech2TextModel(AIModel):
 
         # Construct the path to the audio file
         return os.path.join(current_dir, 'audio.mp3')
+    
+    ############################################################
+    #                 For executor use only                    #
+    ############################################################
+
+    def invoke_from_executor(self, model: str, credentials: dict,
+               file: IO[bytes], user: Optional[str] = None) \
+            -> str:
+        """
+        Invoke large language model
+
+        :param model: model name
+        :param credentials: model credentials
+        :param file: audio file
+        :param user: unique user id
+        :return: text for given audio file
+        """
+        try:
+            return self.invoke(model, credentials, file, user)
+        except Exception as e:
+            raise self._transform_invoke_error(e)

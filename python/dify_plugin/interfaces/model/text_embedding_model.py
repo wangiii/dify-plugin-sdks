@@ -18,29 +18,10 @@ class TextEmbeddingModel(AIModel):
 
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
-
-    def _invoke(
-        self,
-        model: str,
-        credentials: dict,
-        texts: list[str],
-        user: Optional[str] = None,
-    ) -> TextEmbeddingResult:
-        """
-        Invoke large language model
-
-        :param model: model name
-        :param credentials: model credentials
-        :param texts: texts to embed
-        :param user: unique user id
-        :return: embeddings result
-        """
-        self.started_at = time.perf_counter()
-
-        try:
-            return self.invoke(model, credentials, texts, user)
-        except Exception as e:
-            raise self._transform_invoke_error(e)
+        
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
 
     @abstractmethod
     def invoke(
@@ -72,6 +53,10 @@ class TextEmbeddingModel(AIModel):
         :return:
         """
         raise NotImplementedError
+    
+    ############################################################
+    #            For plugin implementation use only            #
+    ############################################################
 
     def _get_context_size(self, model: str, credentials: dict) -> int:
         """
@@ -108,3 +93,26 @@ class TextEmbeddingModel(AIModel):
             return model_schema.model_properties[ModelPropertyKey.MAX_CHUNKS]
 
         return 1
+
+    ############################################################
+    #                 For executor use only                    #
+    ############################################################
+
+    def invoke_from_executor(self, model: str, credentials: dict,
+               texts: list[str], user: Optional[str] = None) \
+            -> TextEmbeddingResult:
+        """
+        Invoke large language model
+
+        :param model: model name
+        :param credentials: model credentials
+        :param texts: texts to embed
+        :param user: unique user id
+        :return: embeddings result
+        """
+        self.started_at = time.perf_counter()
+
+        try:
+            return self.invoke(model, credentials, texts, user)
+        except Exception as e:
+            raise self._transform_invoke_error(e)

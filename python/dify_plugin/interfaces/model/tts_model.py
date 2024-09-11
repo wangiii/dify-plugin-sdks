@@ -2,7 +2,6 @@ from collections.abc import Generator
 import hashlib
 import logging
 import re
-import subprocess
 import uuid
 from abc import abstractmethod
 from typing import Any, Optional
@@ -10,7 +9,6 @@ from typing import Any, Optional
 from pydantic import ConfigDict
 
 from .ai_model import AIModel
-from ...errors.model import InvokeBadRequestError
 from ...entities.model import ModelPropertyKey, ModelType
 
 
@@ -27,38 +25,9 @@ class TTSModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def _invoke(
-        self,
-        model: str,
-        credentials: dict,
-        content_text: str,
-        voice: str,
-        user: Optional[str] = None,
-    ) -> bytes | Generator[bytes, None, None]:
-        """
-        Invoke large language model
-
-        :param model: model name
-        :param tenant_id: user tenant id
-        :param credentials: model credentials
-        :param voice: model timbre
-        :param content_text: text content to be translated
-        :param streaming: output is streaming
-        :param user: unique user id
-        :return: translated audio file
-        """
-        try:
-            logger.info(f"Invoke TTS model: {model} , invoke content : {content_text}")
-            self._is_ffmpeg_installed()
-            return self.invoke(
-                model=model,
-                credentials=credentials,
-                user=user,
-                content_text=content_text,
-                voice=voice,
-            )
-        except Exception as e:
-            raise self._transform_invoke_error(e)
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
 
     @abstractmethod
     def invoke(
@@ -106,6 +75,10 @@ class TTSModel(AIModel):
                 ]
             else:
                 return [{"name": d["name"], "value": d["mode"]} for d in voices]
+
+    ############################################################
+    #            For plugin implementation use only            #
+    ############################################################
 
     def _get_model_default_voice(self, model: str, credentials: dict) -> Any:
         """
@@ -187,25 +160,6 @@ class TTSModel(AIModel):
             result.append(one_sentence)
         return result
 
-    @staticmethod
-    def _is_ffmpeg_installed():
-        try:
-            output = subprocess.check_output("ffmpeg -version", shell=True)
-            if "ffmpeg version" in output.decode("utf-8"):
-                return True
-            else:
-                raise InvokeBadRequestError(
-                    "ffmpeg is not installed, "
-                    "details: https://docs.dify.ai/getting-started/install-self-hosted"
-                    "/install-faq#id-14.-what-to-do-if-this-error-occurs-in-text-to-speech"
-                )
-        except Exception:
-            raise InvokeBadRequestError(
-                "ffmpeg is not installed, "
-                "details: https://docs.dify.ai/getting-started/install-self-hosted"
-                "/install-faq#id-14.-what-to-do-if-this-error-occurs-in-text-to-speech"
-            )
-
     # Todo: To improve the streaming function
     @staticmethod
     def _get_file_name(file_content: str) -> str:
@@ -215,3 +169,39 @@ class TTSModel(AIModel):
         namespace_uuid = uuid.UUID("a5da6ef9-b303-596f-8e88-bf8fa40f4b31")
         unique_uuid = uuid.uuid5(namespace_uuid, hex_digest)
         return str(unique_uuid)
+
+
+    ############################################################
+    #                 For executor use only                    #
+    ############################################################
+
+    def invoke_from_executor(
+        self,
+        model: str,
+        credentials: dict,
+        content_text: str,
+        voice: str,
+        user: Optional[str] = None,
+    ) -> bytes | Generator[bytes, None, None]:
+        """
+        Invoke large language model
+
+        :param model: model name
+        :param tenant_id: user tenant id
+        :param credentials: model credentials
+        :param voice: model timbre
+        :param content_text: text content to be translated
+        :param streaming: output is streaming
+        :param user: unique user id
+        :return: translated audio file
+        """
+        try:
+            return self.invoke(
+                model=model,
+                credentials=credentials,
+                user=user,
+                content_text=content_text,
+                voice=voice,
+            )
+        except Exception as e:
+            raise self._transform_invoke_error(e)

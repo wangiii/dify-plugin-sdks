@@ -26,6 +26,14 @@ class Tool(ABC):
         self.runtime = runtime
         self.session = session
 
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
+
+    @abstractmethod
+    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+        pass
+
     @classmethod
     def from_credentials(
         cls,
@@ -35,6 +43,10 @@ class Tool(ABC):
             runtime=ToolRuntime(credentials=credentials, user_id=None, session_id=None),
             session=Session.empty_session(),  # TODO could not fetch session here
         )
+
+    ############################################################
+    #            For plugin implementation use only            #
+    ############################################################
 
     def create_text_message(self, text: str) -> ToolInvokeMessage:
         return ToolInvokeMessage(
@@ -104,7 +116,7 @@ class Tool(ABC):
             ),
         )
 
-    def stream_variable_message(
+    def create_stream_variable_message(
         self, variable_name: str, variable_value: str
     ) -> ToolInvokeMessage:
         """
@@ -125,9 +137,12 @@ class Tool(ABC):
             ),
         )
 
-    @abstractmethod
-    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
-        pass
+    ############################################################
+    #                 For executor use only                    #
+    ############################################################
 
-    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+    def invoke_from_executor(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+        if type(self) is not Tool:
+            raise RuntimeError("Subclasses cannot call this method.")
+
         return self.invoke(tool_parameters)

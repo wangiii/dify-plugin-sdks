@@ -126,7 +126,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         :return:
         """
         try:
-            self._invoke(model=model, credentials=credentials, texts=["ping"])
+            self.invoke(model=model, credentials=credentials, texts=["ping"])
         except Exception as e:
             raise CredentialsValidateFailedError(f"Credentials validation failed: {e}")
 

@@ -176,7 +176,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
                 )
             model_parameters.pop("response_format")
 
-        return self._invoke(
+        return self.invoke(
             model=model,
             credentials=credentials,
             prompt_messages=prompt_messages,

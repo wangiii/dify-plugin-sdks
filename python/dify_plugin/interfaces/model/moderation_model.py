@@ -17,7 +17,30 @@ class ModerationModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def _invoke(self, model: str, credentials: dict,
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
+
+    @abstractmethod
+    def invoke(self, model: str, credentials: dict,
+                text: str, user: Optional[str] = None) \
+            -> bool:
+        """
+        Invoke large language model
+
+        :param model: model name
+        :param credentials: model credentials
+        :param text: text to moderate
+        :param user: unique user id
+        :return: false if text is safe, true otherwise
+        """
+        raise NotImplementedError
+    
+    ############################################################
+    #                 For executor use only                    #
+    ############################################################
+
+    def invoke_from_executor(self, model: str, credentials: dict,
                text: str, user: Optional[str] = None) \
             -> bool:
         """
@@ -35,19 +58,3 @@ class ModerationModel(AIModel):
             return self.invoke(model, credentials, text, user)
         except Exception as e:
             raise self._transform_invoke_error(e)
-
-    @abstractmethod
-    def invoke(self, model: str, credentials: dict,
-                text: str, user: Optional[str] = None) \
-            -> bool:
-        """
-        Invoke large language model
-
-        :param model: model name
-        :param credentials: model credentials
-        :param text: text to moderate
-        :param user: unique user id
-        :return: false if text is safe, true otherwise
-        """
-        raise NotImplementedError
-
