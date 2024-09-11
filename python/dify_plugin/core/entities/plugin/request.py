@@ -29,11 +29,15 @@ class ModelActions(Enum):
     ValidateProviderCredentials = "validate_provider_credentials"
     ValidateModelCredentials = "validate_model_credentials"
     InvokeLLM = "invoke_llm"
+    GetLLMNumTokens = "get_llm_num_tokens"
     InvokeTextEmbedding = "invoke_text_embedding"
+    GetTextEmbeddingNumTokens = "get_text_embedding_num_tokens"
     InvokeRerank = "invoke_rerank"
     InvokeTTS = "invoke_tts"
+    GetTTSVoices = "get_tts_model_voices"
     InvokeSpeech2Text = "invoke_speech2text"
     InvokeModeration = "invoke_moderation"
+    GetAIModelSchemas = "get_ai_model_schemas"
 
 
 class EndpointActions(Enum):
@@ -102,12 +106,22 @@ class ModelInvokeLLMRequest(PluginAccessModelRequest):
 
         return v
 
+class ModelGetLLMNumTokens(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.GetLLMNumTokens
+
+    prompt_messages: list[PromptMessage]
+    tools: Optional[list[PromptMessageTool]]
 
 class ModelInvokeTextEmbeddingRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeTextEmbedding
 
     texts: list[str]
 
+
+class ModelGetTextEmbeddingNumTokens(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.GetTextEmbeddingNumTokens
+
+    texts: list[str]
 
 class ModelInvokeRerankRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeRerank
@@ -123,6 +137,11 @@ class ModelInvokeTTSRequest(PluginAccessModelRequest):
 
     content_text: str
     voice: str
+
+class ModelGetTTSVoices(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.GetTTSVoices
+
+    language: Optional[str]
 
 
 class ModelInvokeSpeech2TextRequest(PluginAccessModelRequest):
@@ -159,6 +178,9 @@ class ModelValidateModelCredentialsRequest(BaseModel):
     action: ModelActions = ModelActions.ValidateModelCredentials
 
     model_config = ConfigDict(protected_namespaces=())
+
+class ModelGetAIModelSchemas(PluginAccessModelRequest):
+    action: ModelActions = ModelActions.GetAIModelSchemas
 
 
 class EndpointInvokeRequest(BaseModel):

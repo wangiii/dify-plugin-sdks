@@ -6,6 +6,10 @@ from werkzeug import Response
 
 from ..config.config import DifyPluginEnv
 from .entities.plugin.request import (
+    ModelGetAIModelSchemas,
+    ModelGetLLMNumTokens,
+    ModelGetTTSVoices,
+    ModelGetTextEmbeddingNumTokens,
     ModelInvokeLLMRequest,
     ModelInvokeModerationRequest,
     ModelInvokeRerankRequest,
@@ -135,6 +139,28 @@ class PluginExecutor:
                 data.stream,
                 data.user_id,
             )
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
+
+    def get_llm_num_tokens(self, session: Session, data: ModelGetLLMNumTokens):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, LargeLanguageModel):
+            return {
+                "num_tokens": model_instance.get_num_tokens(
+                    data.model,
+                    data.credentials,
+                    data.prompt_messages,
+                    data.tools,
+                )
+            }
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
 
     def invoke_text_embedding(
         self, session: Session, data: ModelInvokeTextEmbeddingRequest
@@ -148,6 +174,29 @@ class PluginExecutor:
                 data.credentials,
                 data.texts,
                 data.user_id,
+            )
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
+
+    def get_text_embedding_num_tokens(
+        self, session: Session, data: ModelGetTextEmbeddingNumTokens
+    ):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, TextEmbeddingModel):
+            return {
+                "num_tokens": model_instance.get_num_tokens(
+                    data.model,
+                    data.credentials,
+                    data.texts,
+                )
+            }
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
             )
 
     def invoke_rerank(self, session: Session, data: ModelInvokeRerankRequest):
@@ -163,6 +212,10 @@ class PluginExecutor:
                 data.score_threshold,
                 data.top_n,
                 data.user_id,
+            )
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
             )
 
     def invoke_tts(self, session: Session, data: ModelInvokeTTSRequest):
@@ -182,6 +235,25 @@ class PluginExecutor:
 
             for chunk in b:
                 yield {"result": binascii.hexlify(chunk).decode()}
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
+
+    def get_tts_model_voices(self, session: Session, data: ModelGetTTSVoices):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, TTSModel):
+            return {
+                "voices": model_instance.get_tts_model_voices(
+                    data.model, data.credentials, data.language
+                )
+            } 
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
 
     def invoke_speech_to_text(
         self, session: Session, data: ModelInvokeSpeech2TextRequest
@@ -204,6 +276,23 @@ class PluginExecutor:
                             data.user_id,
                         )
                     }
+                else:
+                    raise ValueError(
+                        f"Model `{data.model_type}` not found for provider `{data.provider}`"
+                    )
+
+    def get_ai_model_schemas(self, session: Session, data: ModelGetAIModelSchemas):
+        model_instance = self.registration.get_model_instance(
+            data.provider, data.model_type
+        )
+        if isinstance(model_instance, LargeLanguageModel):
+            return {
+                "model_schema": model_instance.get_model_schema(data.model, data.credentials)
+            }
+        else:
+            raise ValueError(
+                f"Model `{data.model_type}` not found for provider `{data.provider}`"
+            )
 
     def invoke_moderation(self, session: Session, data: ModelInvokeModerationRequest):
         model_instance = self.registration.get_model_instance(
@@ -229,7 +318,9 @@ class PluginExecutor:
             endpoint, values = self.registration.dispatch_endpoint_request(request)
             # construct response
             endpoint_instance = endpoint(session)
-            response = endpoint_instance.invoke_from_executor(request, values, data.settings)
+            response = endpoint_instance.invoke_from_executor(
+                request, values, data.settings
+            )
         except Exception:
             response = Response("Not Found", status=404)
 
