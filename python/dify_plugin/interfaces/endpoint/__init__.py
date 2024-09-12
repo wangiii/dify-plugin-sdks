@@ -30,7 +30,7 @@ class Endpoint(ABC):
         """
         Invokes the endpoint with the given request.
         """
-        if type(self) is not Endpoint:
+        if type(self) is Endpoint:
             raise RuntimeError("Subclasses cannot call this method.")
 
         return self.invoke(r, values, settings)

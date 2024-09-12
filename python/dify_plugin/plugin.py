@@ -220,14 +220,12 @@ class Plugin(IOServer, Router):
         if response:
             if isinstance(response, Generator):
                 for message in response:
-                    if self.response_writer:
-                        self.response_writer.session_message(
-                            session_id=session_id,
-                            data=self.response_writer.stream_object(data=message),
-                        )
-            else:
-                if self.response_writer:
-                    self.response_writer.session_message(
+                    writer.session_message(
                         session_id=session_id,
-                        data=self.response_writer.stream_object(data=response),
+                        data=writer.stream_object(data=message),
                     )
+            else:
+                writer.session_message(
+                    session_id=session_id,
+                    data=writer.stream_object(data=response),
+                )

@@ -272,9 +272,11 @@ class BackwardsInvocation(Generic[T], ABC):
                 headers=headers,
                 content=payload,
             ) as response:
-
                 def generator():
                     for line in response.iter_lines():
+                        if not line:
+                            continue
+                        
                         data = json.loads(line)
                         yield PluginInStreamBase(
                             session_id=data["session_id"],
@@ -282,7 +284,7 @@ class BackwardsInvocation(Generic[T], ABC):
                             data=data["data"],
                         )
 
-                return self._line_converter_wrapper(generator(), data_type)
+                yield from self._line_converter_wrapper(generator(), data_type)
 
     def _full_duplex_backwards_invoke(
         self,

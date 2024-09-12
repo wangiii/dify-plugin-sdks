@@ -62,6 +62,9 @@ class ResponseWriter(ABC):
     def session_message_text(
         self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None
     ) -> str:
+        if isinstance(data, BaseModel):
+            data = data.model_dump()
+            
         return (
             StreamOutputMessage(
                 event=Event.SESSION, session_id=session_id, data=data

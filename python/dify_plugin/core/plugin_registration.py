@@ -3,6 +3,8 @@ import os
 from typing import Type, TypeVar
 
 from werkzeug import Request
+import werkzeug
+import werkzeug.exceptions
 from werkzeug.routing import Map, Rule
 
 from ..config.config import DifyPluginEnv
@@ -308,5 +310,5 @@ class PluginRegistration:
         try:
             endpoint, values = adapter.match()
             return endpoint, values
-        except Exception as e:
+        except werkzeug.exceptions.HTTPException as e:
             raise ValueError(f"Failed to dispatch endpoint request: {str(e)}")

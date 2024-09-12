@@ -22,6 +22,7 @@ from .entities.plugin.request import (
     ToolValidateCredentialsRequest,
     EndpointInvokeRequest,
 )
+from ..interfaces.endpoint import Endpoint
 from ..interfaces.model.large_language_model import LargeLanguageModel
 from ..interfaces.model.moderation_model import ModerationModel
 from ..interfaces.model.rerank_model import RerankModel
@@ -323,12 +324,14 @@ class PluginExecutor:
             # dispatch request
             endpoint, values = self.registration.dispatch_endpoint_request(request)
             # construct response
-            endpoint_instance = endpoint(session)
+            endpoint_instance: Endpoint = endpoint(session)
             response = endpoint_instance.invoke_from_executor(
                 request, values, data.settings
             )
-        except Exception:
-            response = Response("Not Found", status=404)
+        except ValueError as e:
+            response = Response(str(e), status=404)
+        except Exception as e:
+            response = Response(f"Internal Server Error: {str(e)}", status=500)
 
         # check if response is a generator
         if isinstance(response.response, Generator):
