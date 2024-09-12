@@ -23,7 +23,7 @@ class Speech2TextModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def invoke(self, model: str, credentials: dict,
+    def _invoke(self, model: str, credentials: dict,
                 file: IO[bytes], user: Optional[str] = None) \
             -> str:
         """
@@ -57,7 +57,7 @@ class Speech2TextModel(AIModel):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(self, model: str, credentials: dict,
+    def invoke(self, model: str, credentials: dict,
                file: IO[bytes], user: Optional[str] = None) \
             -> str:
         """
@@ -70,6 +70,6 @@ class Speech2TextModel(AIModel):
         :return: text for given audio file
         """
         try:
-            return self.invoke(model, credentials, file, user)
+            return self._invoke(model, credentials, file, user)
         except Exception as e:
             raise self._transform_invoke_error(e)

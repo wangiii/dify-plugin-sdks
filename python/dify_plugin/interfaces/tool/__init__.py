@@ -31,7 +31,7 @@ class Tool(ABC):
     ############################################################
 
     @abstractmethod
-    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
         pass
 
     @classmethod
@@ -141,8 +141,8 @@ class Tool(ABC):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
         if type(self) is not Tool:
             raise RuntimeError("Subclasses cannot call this method.")
 
-        return self.invoke(tool_parameters)
+        return self._invoke(tool_parameters)

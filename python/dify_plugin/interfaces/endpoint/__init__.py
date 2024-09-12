@@ -15,7 +15,7 @@ class Endpoint(ABC):
     ############################################################
 
     @abstractmethod
-    def invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
+    def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
 
@@ -26,11 +26,11 @@ class Endpoint(ABC):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(self, r: Request, values: Mapping, settings: Mapping) -> Response:
+    def invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
         """
         if type(self) is Endpoint:
             raise RuntimeError("Subclasses cannot call this method.")
 
-        return self.invoke(r, values, settings)
+        return self._invoke(r, values, settings)

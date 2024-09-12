@@ -49,7 +49,7 @@ class LargeLanguageModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -345,7 +345,7 @@ if you are not sure about the structure.
 
         code_block = model_parameters.get("response_format", "")
         if not code_block:
-            return self.invoke(
+            return self._invoke(
                 model=model,
                 credentials=credentials,
                 prompt_messages=prompt_messages,
@@ -401,7 +401,7 @@ if you are not sure about the structure.
             # append a user message
             prompt_messages.append(UserPromptMessage(content=f"```{code_block}\n"))
 
-        response = self.invoke(
+        response = self._invoke(
             model=model,
             credentials=credentials,
             prompt_messages=prompt_messages,
@@ -579,7 +579,7 @@ if you are not sure about the structure.
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(
+    def invoke(
         self,
         model: str,
         credentials: dict,
@@ -627,7 +627,7 @@ if you are not sure about the structure.
                     user=user,
                 )
             else:
-                result = self.invoke(
+                result = self._invoke(
                     model,
                     credentials,
                     prompt_messages,

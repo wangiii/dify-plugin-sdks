@@ -22,7 +22,7 @@ class ModerationModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def invoke(self, model: str, credentials: dict,
+    def _invoke(self, model: str, credentials: dict,
                 text: str, user: Optional[str] = None) \
             -> bool:
         """
@@ -40,7 +40,7 @@ class ModerationModel(AIModel):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(self, model: str, credentials: dict,
+    def invoke(self, model: str, credentials: dict,
                text: str, user: Optional[str] = None) \
             -> bool:
         """
@@ -55,6 +55,6 @@ class ModerationModel(AIModel):
         self.started_at = time.perf_counter()
 
         try:
-            return self.invoke(model, credentials, text, user)
+            return self._invoke(model, credentials, text, user)
         except Exception as e:
             raise self._transform_invoke_error(e)

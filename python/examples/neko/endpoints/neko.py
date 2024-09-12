@@ -20,7 +20,7 @@ text = """<pre>
 
 
 class Neko(Endpoint):
-    def invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
+    def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
         Invokes the endpoint with the given request.
         """

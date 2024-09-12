@@ -13,7 +13,7 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
     Model class for OpenAI text moderation model.
     """
 
-    def invoke(self, model: str, credentials: dict,
+    def _invoke(self, model: str, credentials: dict,
                 text: str, user: Optional[str] = None) \
             -> bool:
         """

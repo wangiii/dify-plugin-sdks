@@ -24,7 +24,7 @@ class JinaRerankModel(RerankModel):
     Model class for Jina rerank model.
     """
 
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -93,7 +93,7 @@ class JinaRerankModel(RerankModel):
         :return:
         """
         try:
-            self.invoke(
+            self._invoke(
                 model=model,
                 credentials=credentials,
                 query="What is the capital of the United States?",

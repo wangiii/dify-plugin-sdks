@@ -30,7 +30,7 @@ class TTSModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -175,7 +175,7 @@ class TTSModel(AIModel):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(
+    def invoke(
         self,
         model: str,
         credentials: dict,
@@ -196,7 +196,7 @@ class TTSModel(AIModel):
         :return: translated audio file
         """
         try:
-            return self.invoke(
+            return self._invoke(
                 model=model,
                 credentials=credentials,
                 user=user,

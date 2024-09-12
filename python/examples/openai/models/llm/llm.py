@@ -66,7 +66,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
     Model class for OpenAI large language model.
     """
 
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -176,7 +176,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
                 )
             model_parameters.pop("response_format")
 
-        return self.invoke(
+        return self._invoke(
             model=model,
             credentials=credentials,
             prompt_messages=prompt_messages,

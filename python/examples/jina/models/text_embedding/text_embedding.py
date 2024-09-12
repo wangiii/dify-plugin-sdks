@@ -19,7 +19,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
     api_base: str = "https://api.jina.ai/v1"
 
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -126,7 +126,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         :return:
         """
         try:
-            self.invoke(model=model, credentials=credentials, texts=["ping"])
+            self._invoke(model=model, credentials=credentials, texts=["ping"])
         except Exception as e:
             raise CredentialsValidateFailedError(f"Credentials validation failed: {e}")
 

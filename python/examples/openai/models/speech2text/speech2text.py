@@ -11,7 +11,7 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
     Model class for OpenAI Speech to text model.
     """
 
-    def invoke(self, model: str, credentials: dict,
+    def _invoke(self, model: str, credentials: dict,
                 file: IO[bytes], user: Optional[str] = None) \
             -> str:
         """

@@ -24,7 +24,7 @@ class TextEmbeddingModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def invoke(
+    def _invoke(
         self,
         model: str,
         credentials: dict,
@@ -98,7 +98,7 @@ class TextEmbeddingModel(AIModel):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke_from_executor(self, model: str, credentials: dict,
+    def invoke(self, model: str, credentials: dict,
                texts: list[str], user: Optional[str] = None) \
             -> TextEmbeddingResult:
         """
@@ -113,6 +113,6 @@ class TextEmbeddingModel(AIModel):
         self.started_at = time.perf_counter()
 
         try:
-            return self.invoke(model, credentials, texts, user)
+            return self._invoke(model, credentials, texts, user)
         except Exception as e:
             raise self._transform_invoke_error(e)
