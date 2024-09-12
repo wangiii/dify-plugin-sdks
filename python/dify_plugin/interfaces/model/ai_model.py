@@ -16,7 +16,6 @@ from ...entities.model import (
     PriceInfo,
     PriceType,
 )
-from .tokenizer.gpt2_tokenizer import GPT2Tokenizer
 
 
 class AIModel(ABC):
@@ -293,4 +292,6 @@ class AIModel(ABC):
         :param text: plain text of prompt. You need to convert the original message to plain text
         :return: number of tokens
         """
+        from .tokenizer.gpt2_tokenizer import GPT2Tokenizer
+        
         return GPT2Tokenizer.get_num_tokens(text)
