@@ -14,7 +14,7 @@ resource:
       enabled: true
       llm: true
 plugins:
-  tools:
+  models:
     - "provider/jina.yaml"
 meta:
   version: 0.0.1
