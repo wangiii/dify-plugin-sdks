@@ -56,6 +56,11 @@ class PluginResourceRequirements(BaseModel):
 
 
 class PluginConfiguration(BaseModel):
+    class Plugins(BaseModel):
+        tools: list[str] = Field(default_factory=list)
+        models: list[str] = Field(default_factory=list)
+        endpoints: list[str] = Field(default_factory=list)
+
     class Meta(BaseModel):
         class PluginRunner(BaseModel):
             language: PluginLanguage
@@ -74,7 +79,7 @@ class PluginConfiguration(BaseModel):
     label: I18nObject
     created_at: datetime.datetime
     resource: dict
-    plugins: list[str]
+    plugins: Plugins
     meta: Meta
 
 

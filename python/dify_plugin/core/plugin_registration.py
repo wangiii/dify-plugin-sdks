@@ -101,26 +101,18 @@ class PluginRegistration:
             file = load_yaml_file("manifest.yaml")
             self.configuration = PluginConfiguration(**file)
 
-            for provider in self.configuration.plugins:
+            for provider in self.configuration.plugins.tools:
                 fs = load_yaml_file(provider)
-                if fs.get("type") == PluginProviderType.Tool.value:
-                    tool_provider_configuration = ToolProviderConfiguration(
-                        **fs.get("provider", {})
-                    )
-
-                    self.tools_configuration.append(tool_provider_configuration)
-                elif fs.get("type") == PluginProviderType.Model.value:
-                    model_provider_configuration = ModelProviderConfiguration(
-                        **fs.get("provider", {})
-                    )
-                    self.models_configuration.append(model_provider_configuration)
-                elif fs.get("type") == PluginProviderType.Endpoint.value:
-                    endpoint_configuration = EndpointProviderConfiguration(
-                        **fs.get("provider", {})
-                    )
-                    self.endpoints_configuration.append(endpoint_configuration)
-                else:
-                    raise ValueError("Unknown provider type")
+                tool_provider_configuration = ToolProviderConfiguration(**fs)
+                self.tools_configuration.append(tool_provider_configuration)
+            for provider in self.configuration.plugins.models:
+                fs = load_yaml_file(provider)
+                model_provider_configuration = ModelProviderConfiguration(**fs)
+                self.models_configuration.append(model_provider_configuration)
+            for provider in self.configuration.plugins.endpoints:
+                fs = load_yaml_file(provider)
+                endpoint_configuration = EndpointProviderConfiguration(**fs)
+                self.endpoints_configuration.append(endpoint_configuration)
         except Exception as e:
             raise ValueError(f"Error loading plugin configuration: {str(e)}")
 

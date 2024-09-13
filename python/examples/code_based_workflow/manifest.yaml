@@ -16,7 +16,8 @@ resource:
       enabled: true
       size: 1048576
 plugins:
-  - "provider/code_based_workflow.yaml"
+  tools:
+    - "provider/code_based_workflow.yaml"
 meta:
   version: 0.0.1
   arch:

@@ -15,7 +15,8 @@ resource:
       enabled: true
       llm: true
 plugins:
-  - "provider/openai.yaml"
+  models:
+    - "provider/openai.yaml"
 execution:
   install: install.sh
   launch: launch.sh

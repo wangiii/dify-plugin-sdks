@@ -22,7 +22,8 @@ resource:
       enabled: true
       size: 1048576
 plugins:
-  - "provider/neko.yaml"
+  endpoints:
+    - "provider/neko.yaml"
 meta:
   version: 0.0.1
   arch:

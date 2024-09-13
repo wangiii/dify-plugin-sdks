@@ -15,7 +15,8 @@ resource:
       enabled: true
       llm: true
 plugins:
-  - "provider/google.yaml"
+  tools:
+    - "provider/google.yaml"
 meta:
   version: 0.0.1
   arch:
