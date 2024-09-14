@@ -71,10 +71,10 @@ class PluginConfiguration(BaseModel):
         arch: list[PluginArch]
         runner: PluginRunner
 
-    version: str
+    version: str = Field(..., pattern=r'^\d{1,4}(\.\d{1,4}){1,3}(-\w{1,16})?$')
     type: PluginType
-    author: str
-    name: str
+    author: Optional[str] = Field(..., pattern=r'^[a-zA-Z0-9_-]{1,64}$')
+    name: str = Field(..., pattern=r'^[a-z0-9_-]{1,128}$')
     icon: str
     label: I18nObject
     created_at: datetime.datetime
