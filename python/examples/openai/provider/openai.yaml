@@ -88,7 +88,26 @@ provider_credential_schema:
         zh_Hans: 在此输入您的 API Base, 如：https://api.openai.com
         en_US: Enter your API Base, e.g. https://api.openai.com
 models:
-  - "models/**/*.yaml"
+  llm:
+    predefined:
+      - "models/llm/*.yaml"
+    position: "models/llm/_position.yaml"
+  text_embedding:
+    predefined:
+      - "models/text_embedding/*.yaml"
+    position: "models/text_embedding/_position.yaml"
+  tts:
+    predefined:
+      - "models/tts/*.yaml"
+    position: "models/tts/_position.yaml"
+  speech2text:
+    predefined:
+      - "models/speech2text/*.yaml"
+    position: "models/speech2text/_position.yaml"
+  moderation:
+    predefined:
+      - "models/moderation/*.yaml"
+    position: "models/moderation/_position.yaml"
 extra:
   python:
     provider_source: provider/openai.py

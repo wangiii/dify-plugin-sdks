@@ -68,7 +68,14 @@ model_credential_schema:
       type: text-input
       default: '8192'
 models:
-  - "models/**/*.yaml"
+  rerank:
+    predefined:
+      - "models/rerank/*.yaml"
+    position: "models/rerank/_position.yaml"
+  text_embedding:
+    predefined:
+      - "models/text_embedding/*.yaml"
+    position: "models/text_embedding/_position.yaml"
 extra:
   python:
     provider_source: provider/jina.py
