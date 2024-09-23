@@ -142,7 +142,4 @@ class Tool(ABC):
     ############################################################
 
     def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
-        if type(self) is not Tool:
-            raise RuntimeError("Subclasses cannot call this method.")
-
         return self._invoke(tool_parameters)

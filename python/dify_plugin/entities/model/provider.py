@@ -115,16 +115,19 @@ class ProviderHelpEntity(BaseModel):
     title: I18nObject
     url: I18nObject
 
+
 class ModelPosition(BaseModel):
     """
     Model class for ai models
     """
+
     llm: Optional[list[str]] = Field(default_factory=list)
     text_embedding: Optional[list[str]] = Field(default_factory=list)
     rerank: Optional[list[str]] = Field(default_factory=list)
     tts: Optional[list[str]] = Field(default_factory=list)
     speech2text: Optional[list[str]] = Field(default_factory=list)
     moderation: Optional[list[str]] = Field(default_factory=list)
+
 
 class ProviderEntity(BaseModel):
     """
@@ -177,16 +180,16 @@ class ProviderEntity(BaseModel):
         def load_models(model_type: str):
             if model_type not in value:
                 return
-            
+
             for path in value[model_type].get("predefined", []):
                 yaml_paths = glob.glob(os.path.join(cwd, path))
                 for yaml_path in yaml_paths:
                     if yaml_path.endswith("_position.yaml"):
-                        if 'position' not in values:
-                            values['position'] = {}
+                        if "position" not in values:
+                            values["position"] = {}
 
                         position = load_yaml_file(yaml_path)
-                        values['position'][model_type] = position
+                        values["position"][model_type] = position
                     else:
                         model_entity = load_yaml_file(yaml_path)
                         if not model_entity:
@@ -194,7 +197,7 @@ class ProviderEntity(BaseModel):
 
                         provider_model = AIModelEntity(**model_entity)
                         model_entities.append(provider_model)
-        
+
         load_models("llm")
         load_models("text_embedding")
         load_models("rerank")
@@ -202,10 +205,11 @@ class ProviderEntity(BaseModel):
         load_models("speech2text")
         load_models("moderation")
 
-        values['models'] = model_entities
+        values["models"] = model_entities
 
         return values
-    
+
+
 class ModelProviderConfigurationExtra(BaseModel):
     class Python(BaseModel):
         provider_source: str
@@ -214,6 +218,7 @@ class ModelProviderConfigurationExtra(BaseModel):
         model_config = ConfigDict(protected_namespaces=())
 
     python: Python
+
 
 class ModelProviderConfiguration(ProviderEntity):
     extra: ModelProviderConfigurationExtra

@@ -92,6 +92,7 @@ class ToolInvokeMessage(BaseModel):
                         "When 'stream' is True, 'variable_value' must be a string."
                     )
             return v
+
     class MessageType(Enum):
         TEXT = "text"
         FILE = "file"
@@ -200,7 +201,7 @@ class ToolConfiguration(BaseModel):
     )
     description: ToolDescription
     extra: ToolConfigurationExtra
-    output_schema: Optional[ToolOutputSchema] = Field(default_factory=dict)
+    output_schema: Optional[ToolOutputSchema] = None
 
 
 class ToolLabelEnum(Enum):
