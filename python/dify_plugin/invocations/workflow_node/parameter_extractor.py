@@ -1,24 +1,27 @@
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
-from ...entities.workflow_node import NodeResponse, NodeType, ParameterExtractorNodeData
+from ...entities.workflow_node import ModelConfig, NodeResponse, ParameterConfig
 
 
 class ParameterExtractorNodeInvocation(BackwardsInvocation[NodeResponse]):
     def invoke(
         self,
-        node_data: ParameterExtractorNodeData, 
-        inputs: dict
+        parameters: list[ParameterConfig],
+        model: ModelConfig,
+        query: str,
+        instruction: str = "",
     ) -> NodeResponse:
         """
         Invoke Parameter Extractor Node
         """
         response = self._backwards_invoke(
-            InvokeType.Node,
+            InvokeType.NodeParameterExtractor,
             NodeResponse,
             {
-                "node_type": NodeType.PARAMETER_EXTRACTOR,
-                "node_data": node_data,
-                "inputs": inputs,
+                "parameters": parameters,
+                "model": model,
+                "query": query,
+                "instruction": instruction,
             },
         )
 

@@ -2,6 +2,8 @@ version: 0.0.1
 type: plugin
 author: "yeuoly"
 name: "code_based_workflow"
+label:
+  en_US: "code_based_workflow"
 created_at: "2024-07-12T08:03:44.658609186Z"
 icon: icon.svg
 resource:
@@ -15,6 +17,8 @@ resource:
     storage: 
       enabled: true
       size: 1048576
+    node:
+      enabled: true
 plugins:
   tools:
     - "provider/code_based_workflow.yaml"

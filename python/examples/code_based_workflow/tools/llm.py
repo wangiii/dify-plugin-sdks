@@ -13,7 +13,7 @@ class LLMTool(Tool):
                 provider='openai',
                 model='gpt-4o-mini',
                 mode='chat',
-                model_parameters={}
+                completion_params={}
             ),
             prompt_messages=[
                 SystemPromptMessage(

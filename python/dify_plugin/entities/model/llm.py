@@ -131,6 +131,6 @@ class LLMModelConfig(BaseModelConfig):
 
     model_type: ModelType = ModelType.LLM
     mode: str
-    model_parameters: dict | None = None
+    completion_params: dict | None = None
 
     model_config = ConfigDict(protected_namespaces=())

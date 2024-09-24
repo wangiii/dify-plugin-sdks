@@ -9,7 +9,8 @@ class InvokeType(Enum):
     TTS = 'tts'
     Speech2Text = 'speech2text'
     Moderation = 'moderation'
-    Node = 'node'
+    NodeParameterExtractor = 'node_parameter_extractor'
+    NodeQuestionClassifier = 'node_question_classifier'
     App = 'app'
     STORAGE = "storage"
 

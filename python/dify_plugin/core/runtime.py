@@ -61,9 +61,6 @@ class AppInvocations:
 
 class WorkflowNodeInvocations:
     def __init__(self, session: "Session"):
-        from ..invocations.workflow_node.knowledge_retrieval import (
-            KnowledgeRetrievalNodeInvocation,
-        )
         from ..invocations.workflow_node.parameter_extractor import (
             ParameterExtractorNodeInvocation,
         )
@@ -73,7 +70,6 @@ class WorkflowNodeInvocations:
 
         self.question_classifier = QuestionClassifierNodeInvocation(session)
         self.parameter_extractor = ParameterExtractorNodeInvocation(session)
-        self.knowledge_retrieval = KnowledgeRetrievalNodeInvocation(session)
 
 
 class Session:
@@ -276,7 +272,7 @@ class BackwardsInvocation(Generic[T], ABC):
                     for line in response.iter_lines():
                         if not line:
                             continue
-                        
+
                         data = json.loads(line)
                         yield PluginInStreamBase(
                             session_id=data["session_id"],

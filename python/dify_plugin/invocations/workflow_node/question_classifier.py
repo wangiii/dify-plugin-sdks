@@ -1,24 +1,27 @@
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
-from ...entities.workflow_node import NodeResponse, NodeType, QuestionClassifierNodeData
+from ...entities.workflow_node import ClassConfig, ModelConfig, NodeResponse
 
 
 class QuestionClassifierNodeInvocation(BackwardsInvocation[NodeResponse]):
     def invoke(
         self,
-        node_data: QuestionClassifierNodeData, 
-        inputs: dict
+        classes: list[ClassConfig],
+        model: ModelConfig,
+        query: str,
+        instruction: str = "",
     ) -> NodeResponse:
         """
         Invoke Question Classifier Node
         """
         response = self._backwards_invoke(
-            InvokeType.Node,
+            InvokeType.NodeQuestionClassifier,
             NodeResponse,
             {
-                "node_type": NodeType.QUESTION_CLASSIFIER,
-                "node_data": node_data,
-                "inputs": inputs,
+                "classes": classes,
+                "model": model,
+                "query": query,
+                "instruction": instruction,
             },
         )
 
