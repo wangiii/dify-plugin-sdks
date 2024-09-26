@@ -17,6 +17,9 @@ tools:
   - tools/question_classifier.yaml
   - tools/llm.yaml
   - tools/tool.yaml
+  - tools/moderation.yaml
+  - tools/rerank.yaml
+  - tools/tts.yaml
 extra:
   python:
     source: provider/code_based_workflow.py

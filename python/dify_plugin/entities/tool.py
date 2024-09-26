@@ -324,7 +324,7 @@ class ToolProviderConfiguration(BaseModel):
                             "identity": ToolIdentity(**file["identity"]),
                             "parameters": [
                                 ToolParameter(**param)
-                                for param in file.get("parameters", [])
+                                for param in file.get("parameters", []) or []
                             ],
                             "description": ToolDescription(**file["description"]),
                             "extra": ToolConfigurationExtra(**file.get("extra", {})),

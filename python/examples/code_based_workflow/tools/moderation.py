@@ -13,7 +13,7 @@ class Moderation(Tool):
                 provider="openai",
                 model="text-moderation-stable",
             ),
-            text="Hello, world!",
+            text=tool_parameters["text"],
         )
 
         yield self.create_json_message({

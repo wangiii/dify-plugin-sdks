@@ -14,6 +14,11 @@ resource:
     model:
       enabled: true
       llm: true
+      rerank: true
+      moderation: true
+      tts: true
+      speech2text: true
+      text_embedding: true
     storage: 
       enabled: true
       size: 1048576
