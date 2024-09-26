@@ -199,6 +199,12 @@ class Plugin(IOServer, Router):
             and data.get("action") == EndpointActions.InvokeEndpoint.value,
         )
 
+        self.register_route(
+            self.plugin_executer.get_ai_model_schemas,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.GetAIModelSchemas.value,
+        )
+
     def _execute_request(
         self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
     ):
