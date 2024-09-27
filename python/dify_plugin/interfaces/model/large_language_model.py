@@ -3,7 +3,7 @@ import re
 import time
 from abc import abstractmethod
 from collections.abc import Generator, Mapping
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 from pydantic import ConfigDict
 
@@ -59,7 +59,7 @@ class LargeLanguageModel(AIModel):
         stop: Optional[list[str]] = None,
         stream: bool = True,
         user: Optional[str] = None,
-    ) -> Union[LLMResult, Generator[LLMResultChunk]]:
+    ) -> Union[LLMResult, Generator[LLMResultChunk, None, None]]:
         """
         Invoke large language model
 
@@ -318,7 +318,7 @@ class LargeLanguageModel(AIModel):
         stop: Optional[list[str]] = None,
         stream: bool = True,
         user: Optional[str] = None,
-    ) -> Union[LLMResult, Generator]:
+    ) -> Union[LLMResult, Generator[LLMResultChunk, None, None]]:
         """
         Code block mode wrapper, ensure the response is a code block with output markdown quote
 
@@ -589,7 +589,7 @@ if you are not sure about the structure.
         stop: Optional[list[str]] = None,
         stream: bool = True,
         user: Optional[str] = None,
-    ) -> Union[LLMResult, Generator]:
+    ) -> Generator[LLMResultChunk, None, None]:
         """
         Invoke large language model
 
@@ -639,5 +639,8 @@ if you are not sure about the structure.
                 )
         except Exception as e:
             raise self._transform_invoke_error(e)
-
-        return result
+        
+        if isinstance(result, LLMResult):
+            yield result.to_llm_result_chunk()
+        else:
+            yield from result
