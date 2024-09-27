@@ -76,16 +76,8 @@ class PluginAccessModelRequest(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
 
-class ModelInvokeLLMRequest(PluginAccessModelRequest):
-    action: ModelActions = ModelActions.InvokeLLM
-
-    model_parameters: dict[str, Any]
+class PromptMessageMixin(BaseModel):
     prompt_messages: list[PromptMessage]
-    stop: Optional[list[str]]
-    tools: Optional[list[PromptMessageTool]]
-    stream: bool = True
-
-    model_config = ConfigDict(protected_namespaces=())
 
     @field_validator("prompt_messages", mode="before")
     def convert_prompt_messages(cls, v):
@@ -106,10 +98,21 @@ class ModelInvokeLLMRequest(PluginAccessModelRequest):
 
         return v
 
-class ModelGetLLMNumTokens(PluginAccessModelRequest):
+
+class ModelInvokeLLMRequest(PluginAccessModelRequest, PromptMessageMixin):
+    action: ModelActions = ModelActions.InvokeLLM
+
+    model_parameters: dict[str, Any]
+    stop: Optional[list[str]]
+    tools: Optional[list[PromptMessageTool]]
+    stream: bool = True
+
+    model_config = ConfigDict(protected_namespaces=())
+
+
+class ModelGetLLMNumTokens(PluginAccessModelRequest, PromptMessageMixin):
     action: ModelActions = ModelActions.GetLLMNumTokens
 
-    prompt_messages: list[PromptMessage]
     tools: Optional[list[PromptMessageTool]]
 
 class ModelInvokeTextEmbeddingRequest(PluginAccessModelRequest):

@@ -152,9 +152,21 @@ class Plugin(IOServer, Router):
         )
 
         self.register_route(
+            self.plugin_executer.get_llm_num_tokens,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.GetLLMNumTokens.value,
+        )
+
+        self.register_route(
             self.plugin_executer.invoke_text_embedding,
             lambda data: data.get("type") == PluginInvokeType.Model.value
             and data.get("action") == ModelActions.InvokeTextEmbedding.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.get_text_embedding_num_tokens,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.GetTextEmbeddingNumTokens.value,
         )
 
         self.register_route(

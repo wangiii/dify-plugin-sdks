@@ -149,6 +149,7 @@ class PluginExecutor:
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
         )
+
         if isinstance(model_instance, LargeLanguageModel):
             return {
                 "num_tokens": model_instance.get_num_tokens(
