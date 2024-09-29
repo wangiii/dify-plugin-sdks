@@ -21,6 +21,7 @@ setup(
         "dpkt~=1.9.8",
         "yarl~=1.9.4",
         "httpx~=0.27.0",
+        "requests~=2.32.3"
     ],
     python_requires='>=3.10'
 )

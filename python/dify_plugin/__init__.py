@@ -16,6 +16,10 @@ from .interfaces.model.speech2text_model import Speech2TextModel  # noqa: E402
 from .interfaces.model.moderation_model import ModerationModel  # noqa: E402
 from .interfaces.tool import Tool, ToolProvider  # noqa: E402
 
+from .interfaces.model.openai_compatible.provider import OAICompatProvider  # noqa: E402
+from .interfaces.model.openai_compatible.llm import OAICompatLargeLanguageModel  # noqa: E402
+from .interfaces.model.openai_compatible.text_embedding import OAICompatEmbeddingModel  # noqa: E402
+from .interfaces.model.openai_compatible.speech2text import OAICompatSpeech2TextModel  # noqa: E402
 
 __all__ = [
     "Plugin",
@@ -30,4 +34,9 @@ __all__ = [
     "TTSModel",
     "Speech2TextModel",
     "ModerationModel",
+
+    "OAICompatProvider",
+    "OAICompatLargeLanguageModel",
+    "OAICompatEmbeddingModel",
+    "OAICompatSpeech2TextModel",
 ]
