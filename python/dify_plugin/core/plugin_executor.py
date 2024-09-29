@@ -48,13 +48,7 @@ class PluginExecutor:
             raise ValueError(f"Provider `{data.provider}` not found")
 
         provider_instance = provider_instance()
-
-        try:
-            provider_instance.validate_credentials(data.credentials)
-        except Exception as e:
-            raise ValueError(
-                f"Failed to validate provider credentials: {type(e).__name__}: {str(e)}"
-            )
+        provider_instance.validate_credentials(data.credentials)
 
         return {"result": True}
 
@@ -80,10 +74,7 @@ class PluginExecutor:
         )
 
         # invoke tool
-        try:
-            yield from tool.invoke(request.tool_parameters)
-        except Exception as e:
-            raise ValueError(f"Failed to invoke tool: {type(e).__name__}: {str(e)}")
+        yield from tool.invoke(request.tool_parameters)
 
     def validate_model_provider_credentials(
         self, session: Session, data: ModelValidateProviderCredentialsRequest
@@ -92,12 +83,7 @@ class PluginExecutor:
         if provider_instance is None:
             raise ValueError(f"Provider `{data.provider}` not found")
 
-        try:
-            provider_instance.validate_provider_credentials(data.credentials)
-        except Exception as e:
-            raise ValueError(
-                f"Failed to validate provider credentials: {type(e).__name__}: {str(e)}"
-            )
+        provider_instance.validate_provider_credentials(data.credentials)
 
         return {"result": True}
 
@@ -116,12 +102,7 @@ class PluginExecutor:
                 f"Model `{data.model_type}` not found for provider `{data.provider}`"
             )
 
-        try:
-            model_instance.validate_credentials(data.model, data.credentials)
-        except Exception as e:
-            raise ValueError(
-                f"Failed to validate model credentials: {type(e).__name__}: {str(e)}"
-            )
+        model_instance.validate_credentials(data.model, data.credentials)
 
         return {"result": True}
 
@@ -326,9 +307,7 @@ class PluginExecutor:
             endpoint, values = self.registration.dispatch_endpoint_request(request)
             # construct response
             endpoint_instance: Endpoint = endpoint(session)
-            response = endpoint_instance.invoke(
-                request, values, data.settings
-            )
+            response = endpoint_instance.invoke(request, values, data.settings)
         except ValueError as e:
             response = Response(str(e), status=404)
         except Exception as e:
