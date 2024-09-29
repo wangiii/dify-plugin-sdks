@@ -144,6 +144,9 @@ class PluginRegistration:
                     parent_type=Tool,
                 )
 
+                if tool_cls._is_get_runtime_parameters_overridden():
+                    tool.has_runtime_parameters = True
+
                 tools[tool.identity.name] = (tool, tool_cls)
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)

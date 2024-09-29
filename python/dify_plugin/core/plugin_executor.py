@@ -18,6 +18,7 @@ from .entities.plugin.request import (
     ModelInvokeTextEmbeddingRequest,
     ModelValidateModelCredentialsRequest,
     ModelValidateProviderCredentialsRequest,
+    ToolGetRuntimeParametersRequest,
     ToolInvokeRequest,
     ToolValidateCredentialsRequest,
     EndpointInvokeRequest,
@@ -75,6 +76,31 @@ class PluginExecutor:
 
         # invoke tool
         yield from tool.invoke(request.tool_parameters)
+
+    def get_tool_runtime_parameters(
+        self, session: Session, data: ToolGetRuntimeParametersRequest
+    ):
+        tool_cls = self.registration.get_tool_cls(data.provider, data.tool)
+        if tool_cls is None:
+            raise ValueError(
+                f"Tool `{data.tool}` not found for provider `{data.provider}`"
+            )
+
+        if not tool_cls._is_get_runtime_parameters_overridden():
+            raise ValueError(f"Tool `{data.tool}` does not implement runtime parameters")
+
+        tool_instance = tool_cls(
+            runtime=ToolRuntime(
+                credentials=data.credentials,
+                user_id=data.user_id,
+                session_id=session.session_id,
+            ),
+            session=session,
+        )
+
+        return {
+            "parameters": tool_instance.get_runtime_parameters(),
+        }
 
     def validate_model_provider_credentials(
         self, session: Session, data: ModelValidateProviderCredentialsRequest

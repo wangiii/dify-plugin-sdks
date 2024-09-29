@@ -201,6 +201,9 @@ class ToolConfiguration(BaseModel):
     )
     description: ToolDescription
     extra: ToolConfigurationExtra
+    has_runtime_parameters: bool = Field(
+        default=False, description="Whether the tool has runtime parameters"
+    )
     output_schema: Optional[ToolOutputSchema] = None
 
 

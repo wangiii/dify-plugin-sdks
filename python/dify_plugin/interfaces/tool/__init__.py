@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import Any, Optional
 
-from ...entities.tool import ToolInvokeMessage, ToolRuntime
+from ...entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
 from ...core.runtime import Session
 
 
@@ -137,9 +137,29 @@ class Tool(ABC):
             ),
         )
 
+    def _get_runtime_parameters(self) -> list[ToolParameter]:
+        """
+        get the runtime parameters of the tool
+
+        :return: the runtime parameters
+        """
+        return []
+
+    @classmethod
+    def _is_get_runtime_parameters_overridden(cls) -> bool:
+        """
+        check if the _get_runtime_parameters method is overridden by subclass
+
+        :return: True if overridden, False otherwise
+        """
+        return "_get_runtime_parameters" in cls.__dict__
+
     ############################################################
     #                 For executor use only                    #
     ############################################################
 
     def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
         return self._invoke(tool_parameters)
+
+    def get_runtime_parameters(self) -> list[ToolParameter]:
+        return self._get_runtime_parameters()
