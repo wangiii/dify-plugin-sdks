@@ -1,12 +1,17 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+import json
 from threading import Thread
 import time
 from typing import Optional
+
 from ...config.config import DifyPluginEnv
 from ...core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
+)
+from ...errors.model import (
+    InvokeError,
 )
 from .__base.request_reader import RequestReader
 from .__base.response_writer import ResponseWriter
@@ -66,11 +71,17 @@ class IOServer(ABC):
         try:
             self._execute_request(session_id, data, reader, writer)
         except Exception as e:
+            args = {}
+            if isinstance(e, InvokeError):
+                args["description"] = e.description
+
             writer.session_message(
                 session_id=session_id,
                 data=writer.stream_error_object(
                     data={
-                        "error": f"Failed to execute request ({type(e).__name__}): {str(e)}"
+                        "error_type": type(e).__name__,
+                        "message": str(e),
+                        "args": args,
                     }
                 ),
             )

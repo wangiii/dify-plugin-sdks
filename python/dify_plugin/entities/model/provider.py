@@ -4,7 +4,7 @@ import glob
 import os
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ...entities import I18nObject
 from ...entities.model import AIModelEntity, ModelType

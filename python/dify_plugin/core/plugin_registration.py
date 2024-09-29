@@ -11,7 +11,6 @@ from ..config.config import DifyPluginEnv
 from .entities.plugin.setup import (
     PluginAsset,
     PluginConfiguration,
-    PluginProviderType,
 )
 from ..interfaces.model.ai_model import AIModel
 from ..entities.model.provider import ModelProviderConfiguration
