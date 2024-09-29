@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-import json
 from threading import Thread
 import time
 from typing import Optional
