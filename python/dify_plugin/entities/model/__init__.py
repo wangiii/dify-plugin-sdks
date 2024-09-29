@@ -291,3 +291,12 @@ class BaseModelConfig(BaseModel):
     model_type: ModelType
 
     model_config = ConfigDict(protected_namespaces=())
+
+
+class EmbeddingInputType(Enum):
+    """
+    Enum for embedding input type.
+    """
+
+    DOCUMENT = "document"
+    QUERY = "query"

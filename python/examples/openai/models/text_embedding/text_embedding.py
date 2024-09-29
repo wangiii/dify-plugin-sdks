@@ -7,9 +7,12 @@ import tiktoken
 from openai import OpenAI
 
 from dify_plugin import TextEmbeddingModel
-from dify_plugin.entities.model import PriceType
+from dify_plugin.entities.model import EmbeddingInputType, PriceType
 from dify_plugin.errors.model import CredentialsValidateFailedError
-from dify_plugin.entities.model.text_embedding import EmbeddingUsage, TextEmbeddingResult
+from dify_plugin.entities.model.text_embedding import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from ..common_openai import _CommonOpenAI
 
 
@@ -18,9 +21,14 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
     Model class for OpenAI text embedding model.
     """
 
-    def _invoke(self, model: str, credentials: dict,
-                texts: list[str], user: Optional[str] = None) \
-            -> TextEmbeddingResult:
+    def _invoke(
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
+    ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
 
@@ -37,9 +45,9 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
 
         extra_model_kwargs = {}
         if user:
-            extra_model_kwargs['user'] = user
+            extra_model_kwargs["user"] = user
 
-        extra_model_kwargs['encoding_format'] = 'base64'
+        extra_model_kwargs["encoding_format"] = "base64"
 
         # get model properties
         context_size = self._get_context_size(model, credentials)
@@ -56,11 +64,9 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             enc = tiktoken.get_encoding("cl100k_base")
 
         for i, text in enumerate(texts):
-            token = enc.encode(
-                text
-            )
+            token = enc.encode(text)
             for j in range(0, len(token), context_size):
-                tokens += [token[j: j + context_size]]
+                tokens += [token[j : j + context_size]]
                 indices += [i]
 
         batched_embeddings = []
@@ -71,8 +77,8 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             embeddings_batch, embedding_used_tokens = self._embedding_invoke(
                 model=model,
                 client=client,
-                texts=tokens[i: i + max_chunks],
-                extra_model_kwargs=extra_model_kwargs
+                texts=tokens[i : i + max_chunks],
+                extra_model_kwargs=extra_model_kwargs,
             )
 
             used_tokens += embedding_used_tokens
@@ -91,27 +97,21 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
                     model=model,
                     client=client,
                     texts="",
-                    extra_model_kwargs=extra_model_kwargs
+                    extra_model_kwargs=extra_model_kwargs,
                 )
 
                 used_tokens += embedding_used_tokens
                 average = embeddings_batch[0]
             else:
                 average = np.average(_result, axis=0, weights=num_tokens_in_batch[i])
-            embeddings[i] = (average / np.linalg.norm(average)).tolist() # type: ignore
+            embeddings[i] = (average / np.linalg.norm(average)).tolist()  # type: ignore
 
         # calc usage
         usage = self._calc_response_usage(
-            model=model,
-            credentials=credentials,
-            tokens=used_tokens
+            model=model, credentials=credentials, tokens=used_tokens
         )
 
-        return TextEmbeddingResult(
-            embeddings=embeddings,
-            usage=usage,
-            model=model
-        )
+        return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
         """
@@ -153,16 +153,18 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
 
             # call embedding model
             self._embedding_invoke(
-                model=model,
-                client=client,
-                texts=['ping'],
-                extra_model_kwargs={}
+                model=model, client=client, texts=["ping"], extra_model_kwargs={}
             )
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _embedding_invoke(self, model: str, client: OpenAI, texts: Union[list[str], str],
-                          extra_model_kwargs: dict) -> tuple[list[list[float]], int]:
+    def _embedding_invoke(
+        self,
+        model: str,
+        client: OpenAI,
+        texts: Union[list[str], str],
+        extra_model_kwargs: dict,
+    ) -> tuple[list[list[float]], int]:
         """
         Invoke embedding model
 
@@ -179,14 +181,26 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             **extra_model_kwargs,
         )
 
-        if 'encoding_format' in extra_model_kwargs and extra_model_kwargs['encoding_format'] == 'base64':
+        if (
+            "encoding_format" in extra_model_kwargs
+            and extra_model_kwargs["encoding_format"] == "base64"
+        ):
             # decode base64 embedding
-            return ([list(np.frombuffer(base64.b64decode(data.embedding), dtype="float32")) for data in response.data], # type: ignore
-                    response.usage.total_tokens) 
+            return (
+                [
+                    list(
+                        np.frombuffer(base64.b64decode(data.embedding), dtype="float32")
+                    )
+                    for data in response.data
+                ],  # type: ignore
+                response.usage.total_tokens,
+            )
 
         return [data.embedding for data in response.data], response.usage.total_tokens
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -200,7 +214,7 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             model=model,
             credentials=credentials,
             price_type=PriceType.INPUT,
-            tokens=tokens
+            tokens=tokens,
         )
 
         # transform usage
@@ -211,7 +225,7 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             price_unit=input_price_info.unit,
             total_price=input_price_info.total_amount,
             currency=input_price_info.currency,
-            latency=time.perf_counter() - self.started_at
+            latency=time.perf_counter() - self.started_at,
         )
 
         return usage

@@ -6,7 +6,7 @@ from pydantic import ConfigDict
 
 from ...entities.model.text_embedding import TextEmbeddingResult
 from .ai_model import AIModel
-from ...entities.model import ModelPropertyKey, ModelType
+from ...entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
 
 
 class TextEmbeddingModel(AIModel):
@@ -18,7 +18,7 @@ class TextEmbeddingModel(AIModel):
 
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
-        
+
     ############################################################
     #        Methods that can be implemented by plugin         #
     ############################################################
@@ -30,6 +30,7 @@ class TextEmbeddingModel(AIModel):
         credentials: dict,
         texts: list[str],
         user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke large language model
@@ -38,6 +39,7 @@ class TextEmbeddingModel(AIModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: embedding input type
         :return: embeddings result
         """
         raise NotImplementedError
@@ -53,7 +55,7 @@ class TextEmbeddingModel(AIModel):
         :return:
         """
         raise NotImplementedError
-    
+
     ############################################################
     #            For plugin implementation use only            #
     ############################################################
@@ -98,9 +100,14 @@ class TextEmbeddingModel(AIModel):
     #                 For executor use only                    #
     ############################################################
 
-    def invoke(self, model: str, credentials: dict,
-               texts: list[str], user: Optional[str] = None) \
-            -> TextEmbeddingResult:
+    def invoke(
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
+    ) -> TextEmbeddingResult:
         """
         Invoke large language model
 
@@ -108,11 +115,12 @@ class TextEmbeddingModel(AIModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: embedding input type
         :return: embeddings result
         """
         self.started_at = time.perf_counter()
 
         try:
-            return self._invoke(model, credentials, texts, user)
+            return self._invoke(model, credentials, texts, user, input_type)
         except Exception as e:
             raise self._transform_invoke_error(e)
