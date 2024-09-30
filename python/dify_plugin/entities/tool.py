@@ -287,9 +287,9 @@ class ToolProviderConfigurationExtra(BaseModel):
 
 class ToolProviderConfiguration(BaseModel):
     identity: ToolProviderIdentity
-    credentials_schema: dict[str, ProviderConfig] = Field(
+    credentials_schema: list[ProviderConfig] = Field(
+        default_factory=list,
         alias="credentials_for_provider",
-        default={},
         description="The credentials schema of the tool provider",
     )
     tools: list[ToolConfiguration] = Field(
@@ -299,11 +299,14 @@ class ToolProviderConfiguration(BaseModel):
 
     @model_validator(mode="before")
     def validate_credentials_schema(cls, data: dict) -> dict:
-        credentials_for_provider: dict[str, Any] = data.get(
+        original_credentials_for_provider: dict[str, dict] = data.get(
             "credentials_for_provider", {}
         )
-        for credential in credentials_for_provider:
-            credentials_for_provider[credential]["name"] = credential
+
+        credentials_for_provider: list[dict[str, Any]] = []
+        for name, credential in original_credentials_for_provider.items():
+            credential["name"] = name
+            credentials_for_provider.append(credential)
 
         data["credentials_for_provider"] = credentials_for_provider
         return data

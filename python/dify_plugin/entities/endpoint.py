@@ -19,7 +19,7 @@ class EndpointConfiguration(BaseModel):
 
 
 class EndpointProviderConfiguration(BaseModel):
-    settings: Mapping[str, ProviderConfig] = Field(default_factory=dict)
+    settings: list[ProviderConfig] = Field(default_factory=list)
     endpoints: list[EndpointConfiguration] = Field(default_factory=list)
 
     @field_validator("endpoints", mode="before")

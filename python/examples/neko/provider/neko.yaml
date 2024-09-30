@@ -1,5 +1,5 @@
 settings:
-  api_key:
+  - name: api_key
     type: secret-input
     required: true
     label:
