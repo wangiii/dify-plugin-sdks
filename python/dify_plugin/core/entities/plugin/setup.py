@@ -25,34 +25,34 @@ class PluginResourceRequirements(BaseModel):
 
     class Permission(BaseModel):
         class Tool(BaseModel):
-            enabled: bool
+            enabled: Optional[bool] = Field(default=False)
 
         class Model(BaseModel):
-            enabled: Optional[bool]
-            llm: Optional[bool]
-            text_embedding: Optional[bool]
-            rerank: Optional[bool]
-            tts: Optional[bool]
-            speech2text: Optional[bool]
-            moderation: Optional[bool]
+            enabled: Optional[bool] = Field(default=False)
+            llm: Optional[bool] = Field(default=False)
+            text_embedding: Optional[bool] = Field(default=False)
+            rerank: Optional[bool] = Field(default=False)
+            tts: Optional[bool] = Field(default=False)
+            speech2text: Optional[bool] = Field(default=False)
+            moderation: Optional[bool] = Field(default=False)
 
         class Node(BaseModel):
-            enabled: bool
+            enabled: Optional[bool] = Field(default=False)
 
         class Endpoint(BaseModel):
-            enabled: bool
+            enabled: Optional[bool] = Field(default=False)
 
         class Storage(BaseModel):
-            enabled: bool
-            size: int = Field(ge=1024, le=1073741824)
+            enabled: Optional[bool] = Field(default=False)
+            size: int = Field(ge=1024, le=1073741824, default=1048576)
 
-        tool: Optional[Tool]
-        model: Optional[Model]
-        node: Optional[Node]
-        endpoint: Optional[Endpoint]
-        storage: Storage
+        tool: Optional[Tool] = Field(default=None)
+        model: Optional[Model] = Field(default=None)
+        node: Optional[Node] = Field(default=None)
+        endpoint: Optional[Endpoint] = Field(default=None)
+        storage: Storage = Field(default=None)
 
-    permission: Permission
+    permission: Optional[Permission]
 
 
 class PluginConfiguration(BaseModel):
@@ -78,7 +78,7 @@ class PluginConfiguration(BaseModel):
     icon: str
     label: I18nObject
     created_at: datetime.datetime
-    resource: dict
+    resource: PluginResourceRequirements
     plugins: Plugins
     meta: Meta
 
