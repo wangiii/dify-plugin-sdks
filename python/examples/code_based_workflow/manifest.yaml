@@ -1,6 +1,6 @@
 version: 0.0.1
 type: plugin
-author: "yeuoly"
+author: "langgenius"
 name: "code_based_workflow"
 label:
   en_US: "code_based_workflow"

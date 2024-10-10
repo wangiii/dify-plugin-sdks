@@ -1,6 +1,6 @@
 version: 0.0.1
 type: plugin
-author: "yeuoly"
+author: "langgenius"
 name: "openai"
 label:
   en_US: "OpenAI"
