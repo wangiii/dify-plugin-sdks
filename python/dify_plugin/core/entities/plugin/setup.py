@@ -75,6 +75,7 @@ class PluginConfiguration(BaseModel):
     type: PluginType
     author: Optional[str] = Field(..., pattern=r'^[a-zA-Z0-9_-]{1,64}$')
     name: str = Field(..., pattern=r'^[a-z0-9_-]{1,128}$')
+    description: I18nObject
     icon: str
     label: I18nObject
     created_at: datetime.datetime
