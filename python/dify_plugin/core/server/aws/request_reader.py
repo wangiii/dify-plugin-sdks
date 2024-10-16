@@ -35,6 +35,10 @@ class AWSLambdaRequestReader(RequestReader):
             plugin_in = PluginInStream(
                 event=event,
                 session_id=data["session_id"],
+                conversation_id=data.get("conversation_id"),
+                message_id=data.get("message_id"),
+                app_id=data.get("app_id"),
+                endpoint_id=data.get("endpoint_id"),
                 data=data["data"],
                 reader=self,
                 writer=AWSResponseWriter(queue),

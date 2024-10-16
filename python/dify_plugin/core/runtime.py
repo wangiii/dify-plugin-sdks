@@ -84,6 +84,10 @@ class Session:
         writer: ResponseWriter,
         install_method: Optional[InstallMethod] = None,
         dify_plugin_daemon_url: Optional[str] = None,
+        conversation_id: Optional[str] = None,
+        message_id: Optional[str] = None,
+        app_id: Optional[str] = None,
+        endpoint_id: Optional[str] = None,
     ) -> None:
         # current session id
         self.session_id: str = session_id
@@ -97,6 +101,18 @@ class Session:
         # reader and writer
         self.reader: RequestReader = reader
         self.writer: ResponseWriter = writer
+
+        # conversation id
+        self.conversation_id: Optional[str] = conversation_id
+
+        # message id
+        self.message_id: Optional[str] = message_id
+
+        # app id
+        self.app_id: Optional[str] = app_id
+
+        # endpoint id
+        self.endpoint_id: Optional[str] = endpoint_id
 
         # install method
         self.install_method: Optional[InstallMethod] = install_method

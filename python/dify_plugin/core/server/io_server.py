@@ -35,7 +35,15 @@ class IOServer(ABC):
 
     @abstractmethod
     def _execute_request(
-        self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
+        self,
+        session_id: str,
+        data: dict,
+        reader: RequestReader,
+        writer: ResponseWriter,
+        conversation_id: Optional[str] = None,
+        message_id: Optional[str] = None,
+        app_id: Optional[str] = None,
+        endpoint_id: Optional[str] = None,
     ):
         """
         accept requests and execute them, should be implemented outside
@@ -58,17 +66,38 @@ class IOServer(ABC):
                 data.data,
                 data.reader,
                 data.writer,
+                data.conversation_id,
+                data.message_id,
+                data.app_id,
+                data.endpoint_id,
             )
 
     def _execute_request_in_thread(
-        self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
+        self,
+        session_id: str,
+        data: dict,
+        reader: RequestReader,
+        writer: ResponseWriter,
+        conversation_id: Optional[str] = None,
+        message_id: Optional[str] = None,
+        app_id: Optional[str] = None,
+        endpoint_id: Optional[str] = None,
     ):
         """
         wrapper for _execute_request
         """
         # wait for the task to finish
         try:
-            self._execute_request(session_id, data, reader, writer)
+            self._execute_request(
+                session_id,
+                data,
+                reader,
+                writer,
+                conversation_id,
+                message_id,
+                app_id,
+                endpoint_id,
+            )
         except Exception as e:
             args = {}
             if isinstance(e, InvokeError):

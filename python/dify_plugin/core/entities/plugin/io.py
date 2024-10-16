@@ -1,6 +1,6 @@
 from enum import Enum
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from ....core.server.__base.request_reader import RequestReader
@@ -26,10 +26,18 @@ class PluginInStreamBase:
         session_id: str,
         event: PluginInStreamEvent,
         data: dict,
+        conversation_id: Optional[str] = None,
+        message_id: Optional[str] = None,
+        app_id: Optional[str] = None,
+        endpoint_id: Optional[str] = None,
     ) -> None:
         self.session_id = session_id
         self.event = event
         self.data = data
+        self.conversation_id = conversation_id
+        self.message_id = message_id
+        self.app_id = app_id
+        self.endpoint_id = endpoint_id
 
 
 class PluginInStream(PluginInStreamBase):
@@ -40,7 +48,11 @@ class PluginInStream(PluginInStreamBase):
         data: dict,
         reader: "RequestReader",
         writer: "ResponseWriter",
+        conversation_id: Optional[str] = None,
+        message_id: Optional[str] = None,
+        app_id: Optional[str] = None,
+        endpoint_id: Optional[str] = None,
     ):
         self.reader = reader
         self.writer = writer
-        super().__init__(session_id, event, data)
+        super().__init__(session_id, event, data, conversation_id, message_id, app_id, endpoint_id)

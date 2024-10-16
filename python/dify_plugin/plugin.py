@@ -218,7 +218,15 @@ class Plugin(IOServer, Router):
         )
 
     def _execute_request(
-        self, session_id: str, data: dict, reader: RequestReader, writer: ResponseWriter
+        self,
+        session_id: str,
+        data: dict,
+        reader: RequestReader,
+        writer: ResponseWriter,
+        conversation_id: Optional[str] = None,
+        message_id: Optional[str] = None,
+        app_id: Optional[str] = None,
+        endpoint_id: Optional[str] = None,
     ):
         """
         accept requests and execute
@@ -233,6 +241,10 @@ class Plugin(IOServer, Router):
             writer=writer,
             install_method=self.config.INSTALL_METHOD,
             dify_plugin_daemon_url=self.config.DIFY_PLUGIN_DAEMON_URL,
+            conversation_id=conversation_id,
+            message_id=message_id,
+            app_id=app_id,
+            endpoint_id=endpoint_id,
         )
         response = self.dispatch(session, data)
         if response:
