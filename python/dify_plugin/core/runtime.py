@@ -33,7 +33,7 @@ from ..core.entities.plugin.io import (
 
 class ModelInvocations:
     def __init__(self, session: "Session") -> None:
-        from ..invocations.model.llm import LLMInvocation
+        from ..invocations.model.llm import LLMInvocation, SummaryInvocation
         from ..invocations.model.moderation import ModerationInvocation
         from ..invocations.model.rerank import RerankInvocation
         from ..invocations.model.speech2text import Speech2TextInvocation
@@ -46,6 +46,7 @@ class ModelInvocations:
         self.speech2text = Speech2TextInvocation(session)
         self.tts = TTSInvocation(session)
         self.moderation = ModerationInvocation(session)
+        self.summary = SummaryInvocation(session)
 
 
 class AppInvocations:

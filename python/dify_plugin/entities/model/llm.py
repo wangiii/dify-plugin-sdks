@@ -114,6 +114,13 @@ class LLMResult(BaseModel):
                 finish_reason=None,
             ),
         )
+    
+class SummaryResult(BaseModel):
+    """
+    Model class for summary result.
+    """
+
+    summary: str
 
 
 class NumTokensResult(PriceInfo):
