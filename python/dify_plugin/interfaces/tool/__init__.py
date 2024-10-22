@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import Any, Optional
 
+from ...file.constants import DIFY_FILE_IDENTITY
+from ...file.file import File
 from ...entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
 from ...core.runtime import Session
 
@@ -154,11 +156,29 @@ class Tool(ABC):
         """
         return "_get_runtime_parameters" in cls.__dict__
 
+    @classmethod
+    def _convert_parameters(cls, tool_parameters: dict) -> dict:
+        """
+        convert parameters into correct types
+        """
+        for parameter, value in tool_parameters.items():
+            if isinstance(value, dict) and value.get("dify_model_identity") == DIFY_FILE_IDENTITY:
+                tool_parameters[parameter] = File(url=value["url"])
+            elif isinstance(value, list) and all(
+                isinstance(item, dict) and item.get("dify_model_identity") == DIFY_FILE_IDENTITY
+                for item in value
+            ):
+                tool_parameters[parameter] = [File(url=item["url"]) for item in value]
+
+        return tool_parameters
+
     ############################################################
     #                 For executor use only                    #
     ############################################################
 
     def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+        # convert parameters into correct types
+        tool_parameters = self._convert_parameters(tool_parameters)
         return self._invoke(tool_parameters)
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
