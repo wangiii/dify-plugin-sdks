@@ -1,0 +1,17 @@
+identity:
+  author: Yeuoly
+  name: kawaii_filter
+  label:
+    en_US: Kawaii Filter
+    zh_Hans: 可可爱爱滤镜
+    pt_BR: Kawaii Filter
+  description:
+    en_US: Transform an image to a kawaii style
+    zh_Hans: 将图片转换为可可爱爱的风格
+    pt_BR: Transforme uma imagem em um estilo kawaii
+  icon: icon.svg
+tools:
+  - tools/kawaii_filter.yaml
+extra:
+  python:
+    source: provider/kawaii_filter.py

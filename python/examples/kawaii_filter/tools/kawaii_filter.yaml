@@ -1,0 +1,30 @@
+identity:
+  name: kawaii_filter
+  author: Yeuoly
+  label:
+    en_US: Kawaii Filter
+    zh_Hans: 可可爱爱滤镜
+    pt_BR: Kawaii Filter
+description:
+  human:
+    en_US: A tool for performing a kawaii filter.Input should be a image.
+    zh_Hans: 一个用于执行可可爱爱滤镜的工具。输入应该是一张图片。
+    pt_BR: A tool for performing a kawaii filter.Input should be a image.
+  llm: A tool for performing a kawaii filter.Input should be a image.
+parameters:
+  - name: image
+    type: file
+    required: true
+    label:
+      en_US: Image
+      zh_Hans: 图片
+      pt_BR: Imagem
+    human_description:
+      en_US: used for kawaii filter
+      zh_Hans: 用于可可爱爱滤镜
+      pt_BR: usado para filtro kawaii
+    llm_description: image for kawaii filter
+    form: llm
+extra:
+  python:
+    source: tools/kawaii_filter.py

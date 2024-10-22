@@ -1,0 +1,33 @@
+version: 0.0.1
+type: plugin
+author: "yeuoly"
+name: "kawaii_filter"
+label:
+  en_US: "Kawaii Filter"
+description:
+  en_US: Convert a photo to a kawaii style.
+  zh_Hans: 将图片转换为可可爱爱的风格。
+created_at: "2024-07-12T08:03:44.658609186Z"
+icon: icon.svg
+resource:
+  memory: 1048576
+  permission:
+    storage: 
+      enabled: true
+      size: 1048576
+    node:
+      enabled: true
+plugins:
+  tools:
+    - "provider/kawaii_filter.yaml"
+tags:
+  - "image"
+meta:
+  version: 0.0.1
+  arch:
+    - "amd64"
+    - "arm64"
+  runner:
+    language: "python"
+    version: "3.12"
+    entrypoint: "main"
