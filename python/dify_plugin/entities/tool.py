@@ -73,6 +73,13 @@ class ToolInvokeMessage(BaseModel):
     class BlobMessage(BaseModel):
         blob: bytes
 
+    class BlobChunkMessage(BaseModel):
+        id: str = Field(..., description="The id of the blob")
+        sequence: int = Field(..., description="The sequence of the chunk")
+        total_length: int = Field(..., description="The total length of the blob")
+        blob: bytes = Field(..., description="The blob data of the chunk")
+        end: bool = Field(..., description="Whether the chunk is the last chunk")
+
     class VariableMessage(BaseModel):
         variable_name: str = Field(
             ...,
@@ -102,9 +109,17 @@ class ToolInvokeMessage(BaseModel):
         IMAGE = "image"
         IMAGE_LINK = "image_link"
         VARIABLE = "variable"
+        BLOB_CHUNK = "blob_chunk"
 
     type: MessageType
-    message: TextMessage | JsonMessage | VariableMessage | BlobMessage | None
+    message: (
+        TextMessage
+        | JsonMessage
+        | VariableMessage
+        | BlobMessage
+        | BlobChunkMessage
+        | None
+    )
     meta: Optional[dict] = None
 
     @field_validator("message", mode="before")
@@ -121,6 +136,14 @@ class ToolInvokeMessage(BaseModel):
     def serialize_message(self, v):
         if isinstance(v, self.BlobMessage):
             return {"blob": base64.b64encode(v.blob).decode("utf-8")}
+        elif isinstance(v, self.BlobChunkMessage):
+            return {
+                "id": v.id,
+                "sequence": v.sequence,
+                "total_length": v.total_length,
+                "blob": base64.b64encode(v.blob).decode("utf-8"),
+                "end": v.end,
+            }
         return v
 
 

@@ -1,5 +1,8 @@
 from typing import Any, Optional
+import uuid
 from pydantic import RootModel
+
+from dify_plugin.entities.tool import ToolInvokeMessage
 
 from .core.server.__base.request_reader import RequestReader
 from .core.server.__base.response_writer import ResponseWriter
@@ -250,10 +253,55 @@ class Plugin(IOServer, Router):
         if response:
             if isinstance(response, Generator):
                 for message in response:
-                    writer.session_message(
-                        session_id=session_id,
-                        data=writer.stream_object(data=message),
-                    )
+                    if isinstance(message, ToolInvokeMessage) and isinstance(
+                        message.message, ToolInvokeMessage.BlobMessage
+                    ):
+                        # convert blob to file chunks
+                        id = uuid.uuid4().hex
+                        blob = message.message.blob
+                        message.message.blob = id.encode("utf-8")
+                        # split the blob into chunks
+                        chunks = [blob[i : i + 8192] for i in range(0, len(blob), 8192)]
+                        for sequence, chunk in enumerate(chunks):
+                            writer.session_message(
+                                session_id=session_id,
+                                data=writer.stream_object(
+                                    data=ToolInvokeMessage(
+                                        type=ToolInvokeMessage.MessageType.BLOB_CHUNK,
+                                        message=ToolInvokeMessage.BlobChunkMessage(
+                                            id=id,
+                                            sequence=sequence,
+                                            total_length=len(blob),
+                                            blob=chunk,
+                                            end=False,
+                                        ),
+                                        meta=message.meta,
+                                    ),
+                                ),
+                            )
+
+                        # end the file stream
+                        writer.session_message(
+                            session_id=session_id,
+                            data=writer.stream_object(
+                                data=ToolInvokeMessage(
+                                    type=ToolInvokeMessage.MessageType.BLOB_CHUNK,
+                                    message=ToolInvokeMessage.BlobChunkMessage(
+                                        id=id,
+                                        sequence=len(chunks),
+                                        total_length=len(blob),
+                                        blob=b"",
+                                        end=True,
+                                    ),
+                                    meta=message.meta,
+                                )
+                            ),
+                        )
+                    else:
+                        writer.session_message(
+                            session_id=session_id,
+                            data=writer.stream_object(data=message),
+                        )
             else:
                 writer.session_message(
                     session_id=session_id,
