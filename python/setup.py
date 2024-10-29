@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dify_plugin",
-    version="0.0.1-beta13",
+    version="0.0.1-beta15",
     author="langgenius",
     long_description_content_type="text/markdown",
     url="https://github.com/langgenius/dify-plugin-sdks.git",
@@ -23,6 +23,6 @@ setup(
         "httpx~=0.27.0",
         "requests~=2.32.3"
     ],
-    python_requires='>=3.10'
+    python_requires='>=3.8'
 )
 
