@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dify_plugin",
-    version="0.0.1-beta15",
+    version="0.0.1-beta17",
     author="langgenius",
     long_description_content_type="text/markdown",
     url="https://github.com/langgenius/dify-plugin-sdks.git",
@@ -14,6 +14,7 @@ setup(
         "pydantic~=2.8.2",
         "pydantic_settings~=2.3.4",
         "pyyaml~=6.0.1",
+        "pydub~=0.25.1",
         "transformers~=4.42.4",
         "Flask~=3.0.3",
         "gevent~=24.2.1",
