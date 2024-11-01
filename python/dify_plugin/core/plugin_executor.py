@@ -4,6 +4,8 @@ import tempfile
 
 from werkzeug import Response
 
+from ..interfaces.model.ai_model import AIModel
+
 from ..config.config import DifyPluginEnv
 from .entities.plugin.request import (
     ModelGetAIModelSchemas,
@@ -294,7 +296,7 @@ class PluginExecutor:
         model_instance = self.registration.get_model_instance(
             data.provider, data.model_type
         )
-        if isinstance(model_instance, LargeLanguageModel):
+        if isinstance(model_instance, AIModel):
             return {
                 "model_schema": model_instance.get_model_schema(
                     data.model, data.credentials
