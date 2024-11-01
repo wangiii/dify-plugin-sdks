@@ -185,6 +185,12 @@ class Plugin(IOServer, Router):
         )
 
         self.register_route(
+            self.plugin_executer.get_tts_model_voices,
+            lambda data: data.get("type") == PluginInvokeType.Model.value
+            and data.get("action") == ModelActions.GetTTSVoices.value,
+        )
+
+        self.register_route(
             self.plugin_executer.invoke_speech_to_text,
             lambda data: data.get("type") == PluginInvokeType.Model.value
             and data.get("action") == ModelActions.InvokeSpeech2Text.value,
