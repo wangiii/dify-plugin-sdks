@@ -71,10 +71,10 @@ class PluginConfiguration(BaseModel):
         arch: list[PluginArch]
         runner: PluginRunner
 
-    version: str = Field(..., pattern=r'^\d{1,4}(\.\d{1,4}){1,3}(-\w{1,16})?$')
+    version: str = Field(..., pattern=r"^\d{1,4}(\.\d{1,4}){1,3}(-\w{1,16})?$")
     type: PluginType
-    author: Optional[str] = Field(..., pattern=r'^[a-zA-Z0-9_-]{1,64}$')
-    name: str = Field(..., pattern=r'^[a-z0-9_-]{1,128}$')
+    author: Optional[str] = Field(..., pattern=r"^[a-zA-Z0-9_-]{1,64}$")
+    name: str = Field(..., pattern=r"^[a-z0-9_-]{1,128}$")
     description: I18nObject
     icon: str
     label: I18nObject
@@ -92,5 +92,4 @@ class PluginProviderType(Enum):
 
 class PluginAsset(BaseModel):
     filename: str
-    data: str # hex encoded file data
-    
+    data: bytes

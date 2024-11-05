@@ -1,3 +1,4 @@
+import base64
 from collections.abc import Mapping
 import os
 from typing import Type, TypeVar
@@ -89,7 +90,7 @@ class PluginRegistration:
                 if entry.is_file():
                     with open(entry, "rb") as f:
                         self.files.append(
-                            PluginAsset(filename=entry.name, data=f.read().hex())
+                            PluginAsset(filename=entry.name, data=f.read())
                         )
 
     def _load_plugin_configuration(self):

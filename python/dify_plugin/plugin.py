@@ -1,7 +1,9 @@
+import base64
 from typing import Any, Optional
 import uuid
 from pydantic import RootModel
 
+from dify_plugin.core.entities.message import InitializeMessage
 from dify_plugin.entities.tool import ToolInvokeMessage
 
 from .core.server.__base.request_reader import RequestReader
@@ -84,31 +86,84 @@ class Plugin(IOServer, Router):
         if not config.REMOTE_INSTALL_KEY:
             raise ValueError("Missing remote install key")
 
-        class List(RootModel):
-            root: list[Any]
-
         tcp_stream = TCPReaderWriter(
             config.REMOTE_INSTALL_HOST,
             config.REMOTE_INSTALL_PORT,
             config.REMOTE_INSTALL_KEY,
-            on_connected=lambda: tcp_stream.write(
-                self.registration.configuration.model_dump_json()
-                + "\n\n"
-                + List(root=self.registration.tools_configuration).model_dump_json()
-                + "\n\n"
-                + List(root=self.registration.models_configuration).model_dump_json()
-                + "\n\n"
-                + List(root=self.registration.endpoints_configuration).model_dump_json()
-                + "\n\n"
-                + List(root=self.registration.files).model_dump_json()
-                + "\n\n"
-            )
-            and self._log_configuration(),
+            on_connected=lambda: self._initialize_tcp_stream(tcp_stream),
         )
 
         tcp_stream.launch()
 
         return tcp_stream, tcp_stream
+
+    def _initialize_tcp_stream(
+        self,
+        tcp_stream: TCPReaderWriter,
+    ):
+        class List(RootModel):
+            root: list[Any]
+
+        tcp_stream.write(
+            InitializeMessage(
+                type=InitializeMessage.Type.MANIFEST_DECLARATION,
+                data=self.registration.configuration.model_dump(),
+            ).model_dump_json()
+            + "\n\n"
+        )
+
+        if self.registration.tools_configuration:
+            tcp_stream.write(
+                InitializeMessage(
+                    type=InitializeMessage.Type.TOOL_DECLARATION,
+                    data=List(root=self.registration.tools_configuration).model_dump(),
+                ).model_dump_json()
+                + "\n\n"
+            )
+
+        if self.registration.models_configuration:
+            tcp_stream.write(
+                InitializeMessage(
+                    type=InitializeMessage.Type.MODEL_DECLARATION,
+                    data=List(root=self.registration.models_configuration).model_dump(),
+                ).model_dump_json()
+                + "\n\n"
+            )
+
+        if self.registration.endpoints_configuration:
+            tcp_stream.write(
+                InitializeMessage(
+                    type=InitializeMessage.Type.ENDPOINT_DECLARATION,
+                    data=List(root=self.registration.endpoints_configuration).model_dump(),
+                ).model_dump_json()
+                + "\n\n"
+            )
+
+        for file in self.registration.files:
+            # divide the file into chunks
+            chunks = [file.data[i : i + 8192] for i in range(0, len(file.data), 8192)]
+            for sequence, chunk in enumerate(chunks):
+                tcp_stream.write(
+                    InitializeMessage(
+                        type=InitializeMessage.Type.ASSET_CHUNK,
+                        data=InitializeMessage.AssetChunk(
+                            filename=file.filename,
+                            data=base64.b64encode(chunk).decode(),
+                            end=sequence == len(chunks) - 1,
+                        ).model_dump(),
+                    ).model_dump_json()
+                    + "\n\n"
+                )
+
+        tcp_stream.write(
+            InitializeMessage(
+                type=InitializeMessage.Type.END,
+                data={},
+            ).model_dump_json()
+            + "\n\n"
+        )
+
+        self._log_configuration()
 
     def _launch_aws_stream(
         self, config: DifyPluginEnv
@@ -131,6 +186,8 @@ class Plugin(IOServer, Router):
             logger.info(f"Installed tool: {tool.identity.name}")
         for model in self.registration.models_configuration:
             logger.info(f"Installed model: {model.provider}")
+        for endpoint in self.registration.endpoints_configuration:
+            logger.info(f"Installed endpoint: {endpoint.endpoints}")
 
     def _register_request_routes(self):
         """

@@ -40,14 +40,3 @@ class EndpointProviderConfiguration(BaseModel):
                 raise ValueError(f"Error loading endpoint configuration: {str(e)}")
 
         return endpoints
-
-    @field_validator("settings", mode="before")
-    def validate_settings(cls, value: dict[str, dict]) -> Mapping[str, dict]:
-        if not isinstance(value, dict):
-            raise ValueError("settings should be a dict")
-
-        # add name field for each provider config
-        for key, v in value.items():
-            v["name"] = key
-
-        return value

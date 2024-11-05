@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Sequence
 
 from pydantic import BaseModel
 
@@ -18,3 +19,25 @@ class SessionMessage(BaseModel):
             'type': self.type.value,
             'data': self.data
         }
+
+class InitializeMessage(BaseModel):
+    class Type(Enum):
+        HANDSHAKE = "handshake"
+        ASSET_CHUNK = "asset_chunk"
+        MANIFEST_DECLARATION = "manifest_declaration"
+        TOOL_DECLARATION = "tool_declaration"
+        MODEL_DECLARATION = "model_declaration"
+        ENDPOINT_DECLARATION = "endpoint_declaration"
+        END = "end"
+
+    class AssetChunk(BaseModel):
+        filename: str
+        data: str # base64 encoded
+        end: bool
+
+    class Key(BaseModel):
+        key: str
+
+
+    type: Type
+    data: dict | Sequence

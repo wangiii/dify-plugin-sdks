@@ -5,6 +5,8 @@ from typing import Callable, Generator, Optional
 
 from gevent.select import select
 
+from dify_plugin.core.entities.message import InitializeMessage
+
 from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
@@ -89,7 +91,11 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.host, self.port))
             self.alive = True
-            self.sock.sendall(self.key.encode() + b"\n")
+            handshake_message = InitializeMessage(
+                type=InitializeMessage.Type.HANDSHAKE,
+                data=InitializeMessage.Key(key=self.key).model_dump(),
+            )
+            self.sock.sendall(handshake_message.model_dump_json().encode() + b"\n")
             logger.info(f"Connected to {self.host}:{self.port}")
             if self.on_connected:
                 self.on_connected()
