@@ -96,12 +96,12 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 data=InitializeMessage.Key(key=self.key).model_dump(),
             )
             self.sock.sendall(handshake_message.model_dump_json().encode() + b"\n")
-            logger.info(f"Connected to {self.host}:{self.port}")
+            logger.info(f"\033[32mConnected to {self.host}:{self.port}\033[0m")
             if self.on_connected:
                 self.on_connected()
             logger.info(f"Sent key to {self.host}:{self.port}")
         except socket.error as e:
-            logger.error(f"Failed to connect to {self.host}:{self.port}, {e}")
+            logger.error(f"\033[31mFailed to connect to {self.host}:{self.port}, {e}\033[0m")
             raise e
 
     def _read_stream(self) -> Generator[PluginInStream, None, None]:
@@ -118,7 +118,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 if data == "":
                     raise Exception("Connection is closed")
             except Exception as e:
-                logger.error(f"Failed to read data from {self.host}:{self.port}, {e}")
+                logger.error(f"\033[31mFailed to read data from {self.host}:{self.port}, {e}\033[0m")
                 self.alive = False
                 time.sleep(self.reconnect_timeout)
                 self._launch()
@@ -151,4 +151,4 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                         writer=self,
                     )
                 except Exception:
-                    logger.error(f"An error occurred while parsing the data: {line}")
+                    logger.error(f"\033[31mAn error occurred while parsing the data: {line}\033[0m")
