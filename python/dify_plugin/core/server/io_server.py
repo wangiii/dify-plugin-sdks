@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+import os
 from threading import Thread
 import time
 from typing import Optional
+
+from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
 
 from ...config.config import DifyPluginEnv
 from ...core.entities.plugin.io import (
@@ -130,6 +133,16 @@ class IOServer(ABC):
                 pass
             time.sleep(self.config.HEARTBEAT_INTERVAL)
 
+    def _parent_alive_check(self):
+        """
+        check if the parent process is alive
+        """
+        while True:
+            time.sleep(0.5)
+            id = os.getppid()
+            if id == 1:
+                os._exit(-1)
+
     def _run(self):
         th1 = Thread(target=self._setup_instruction_listener)
         th2 = Thread(target=self.request_reader.event_loop)
@@ -137,6 +150,9 @@ class IOServer(ABC):
         if self.default_writer:
             th3 = Thread(target=self._heartbeat)
 
+        if isinstance(self.request_reader, StdioRequestReader):
+            Thread(target=self._parent_alive_check).start()
+        
         th1.start()
         th2.start()
 
