@@ -187,7 +187,7 @@ class Plugin(IOServer, Router):
         for model in self.registration.models_configuration:
             logger.info(f"Installed model: {model.provider}")
         for endpoint in self.registration.endpoints_configuration:
-            logger.info(f"Installed endpoint: {endpoint.endpoints}")
+            logger.info(f"Installed endpoint: {[e.path for e in endpoint.endpoints]}")
 
     def _register_request_routes(self):
         """

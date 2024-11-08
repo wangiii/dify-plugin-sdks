@@ -118,6 +118,7 @@ class IOServer(ABC):
             )
 
         writer.session_message(session_id=session_id, data=writer.stream_end_object())
+        writer.done()
 
     def _heartbeat(self):
         """
