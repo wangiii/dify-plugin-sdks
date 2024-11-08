@@ -15,7 +15,7 @@ setup(
         "pydantic_settings~=2.3.4",
         "pyyaml~=6.0.1",
         "pydub~=0.25.1",
-        "transformers~=4.42.4",
+        "tiktoken~=0.8.0",
         "Flask~=3.0.3",
         "gevent~=24.2.1",
         "Werkzeug~=3.0.3",

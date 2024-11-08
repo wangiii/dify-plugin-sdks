@@ -292,6 +292,6 @@ class AIModel(ABC):
         :param text: plain text of prompt. You need to convert the original message to plain text
         :return: number of tokens
         """
-        from .tokenizer.gpt2_tokenizer import GPT2Tokenizer
+        import tiktoken
         
-        return GPT2Tokenizer.get_num_tokens(text)
+        return len(tiktoken.encoding_for_model("gpt2").encode(text))
