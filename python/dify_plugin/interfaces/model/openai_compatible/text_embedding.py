@@ -4,7 +4,6 @@ from decimal import Decimal
 from typing import Optional
 from urllib.parse import urljoin
 
-import numpy as np
 import requests
 
 from ....entities import I18nObject
@@ -80,7 +79,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             num_tokens = self._get_num_tokens_by_gpt2(text)
 
             if num_tokens >= context_size:
-                cutoff = int(np.floor(len(text) * (context_size / num_tokens)))
+                cutoff = int((len(text) * context_size) // num_tokens)  
                 # if num tokens is larger than context length, only use the start
                 inputs.append(text[0:cutoff])
             else:
