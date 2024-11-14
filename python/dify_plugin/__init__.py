@@ -21,6 +21,8 @@ from .interfaces.model.openai_compatible.llm import OAICompatLargeLanguageModel 
 from .interfaces.model.openai_compatible.text_embedding import OAICompatEmbeddingModel  # noqa: E402
 from .interfaces.model.openai_compatible.speech2text import OAICompatSpeech2TextModel  # noqa: E402
 
+from .invocations.file import File  # noqa: E402
+
 __all__ = [
     "Plugin",
     "DifyPluginEnv",
@@ -39,4 +41,6 @@ __all__ = [
     "OAICompatLargeLanguageModel",
     "OAICompatEmbeddingModel",
     "OAICompatSpeech2TextModel",
+    
+    "File",
 ]
