@@ -24,7 +24,7 @@ class CommonParameterType(Enum):
     BOOLEAN = "boolean"
     APP_SELECTOR = "app-selector"
     MODEL_SELECTOR = "model-selector"
-    TOOL_SELECTOR = "tool-selector"
+    # TOOL_SELECTOR = "tool-selector"
 
 
 class AppSelectorScope(Enum):
@@ -176,7 +176,7 @@ class ToolParameter(BaseModel):
         FILE = CommonParameterType.FILE.value
         MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
-        TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
+        # TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
     class ToolParameterForm(Enum):
         SCHEMA = "schema"  # should be set while adding tool
@@ -262,7 +262,7 @@ class ProviderConfig(BaseModel):
         BOOLEAN = CommonParameterType.BOOLEAN.value
         MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
-        TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
+        # TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
 
         @classmethod
         def value_of(cls, value: str) -> "ProviderConfig.Config":
