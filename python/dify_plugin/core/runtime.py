@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+
 from ..config.config import InstallMethod
 from concurrent.futures import ThreadPoolExecutor
 
@@ -127,12 +128,14 @@ class Session:
     def _register_invocations(self) -> None:
         from ..invocations.tool import ToolInvocation
         from ..invocations.storage import StorageInvocation
+        from ..invocations.file import File
 
         self.model = ModelInvocations(self)
         self.tool = ToolInvocation(self)
         self.app = AppInvocations(self)
         self.workflow_node = WorkflowNodeInvocations(self)
         self.storage = StorageInvocation(self)
+        self.file = File(self)
 
     @classmethod
     def empty_session(cls) -> "Session":

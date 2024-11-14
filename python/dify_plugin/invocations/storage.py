@@ -10,7 +10,7 @@ class StorageInvocation(BackwardsInvocation[dict]):
         set a value into persistence storage.
         """
         for data in self._backwards_invoke(
-            InvokeType.STORAGE,
+            InvokeType.Storage,
             dict,
             {"opt": "set", "key": key, "value": hexlify(val).decode()},
         ):
@@ -23,7 +23,7 @@ class StorageInvocation(BackwardsInvocation[dict]):
 
     def get(self, key: str) -> bytes:
         for data in self._backwards_invoke(
-            InvokeType.STORAGE,
+            InvokeType.Storage,
             dict,
             {
                 "opt": "get",
@@ -36,7 +36,7 @@ class StorageInvocation(BackwardsInvocation[dict]):
 
     def delete(self, key: str) -> None:
         for data in self._backwards_invoke(
-            InvokeType.STORAGE,
+            InvokeType.Storage,
             dict,
             {
                 "opt": "del",

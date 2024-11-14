@@ -20,6 +20,7 @@ tools:
   - tools/moderation.yaml
   - tools/rerank.yaml
   - tools/tts.yaml
+  - tools/upload_file.yaml
 extra:
   python:
     source: provider/code_based_workflow.py
