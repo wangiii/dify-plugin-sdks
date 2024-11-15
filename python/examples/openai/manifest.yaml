@@ -20,9 +20,6 @@ resource:
 plugins:
   models:
     - "provider/openai.yaml"
-execution:
-  install: install.sh
-  launch: launch.sh
 meta:
   version: 0.0.1
   arch:
