@@ -14,24 +14,25 @@ from .response_writer import StdioResponseWriter
 
 class StdioRequestReader(RequestReader):
     def _read_stream(self) -> Generator[PluginInStream, None, None]:
-        buffer = ""
+        buffer = b""
         while True:
             # read data from stdin through tp_read
-            data = tp_read(sys.stdin.fileno(), 512).decode()
+            data = tp_read(sys.stdin.fileno(), 512)
 
             if not data:
                 continue
+
             buffer += data
 
             # process line by line and keep the last line if it is not complete
-            lines = buffer.split("\n")
+            lines = buffer.split(b"\n")
             if len(lines) == 0:
                 continue
 
-            if lines[-1] != "":
+            if lines[-1] != b"":
                 buffer = lines[-1]
             else:
-                buffer = ""
+                buffer = b""
 
             lines = lines[:-1]
             for line in lines:

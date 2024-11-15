@@ -108,14 +108,14 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
         """
         Read data from the target
         """
-        buffer = ""
+        buffer = b""
         while self.alive:
             try:
                 ready_to_read, _, _ = select([self.sock], [], [], 1)
                 if not ready_to_read:
                     continue
-                data = self.sock.recv(4096).decode()
-                if data == "":
+                data = self.sock.recv(4096)
+                if data == b"":
                     raise Exception("Connection is closed")
             except Exception as e:
                 logger.error(f"\033[31mFailed to read data from {self.host}:{self.port}, {e}\033[0m")
@@ -130,14 +130,14 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             buffer += data
 
             # process line by line and keep the last line if it is not complete
-            lines = buffer.split("\n")
+            lines = buffer.split(b"\n")
             if len(lines) == 0:
                 continue
 
             if lines[-1] != "":
                 buffer = lines[-1]
             else:
-                buffer = ""
+                buffer = b""
 
             lines = lines[:-1]
             for line in lines:
