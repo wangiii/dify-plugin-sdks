@@ -939,18 +939,19 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         tool_calls = []
         if response_tool_calls:
             for response_tool_call in response_tool_calls:
-                assert isinstance(response_tool_call, ChatCompletionMessageToolCall)
-                function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                    name=response_tool_call.function.name,
-                    arguments=response_tool_call.function.arguments,
-                )
+                assert isinstance(response_tool_call, (ChatCompletionMessageToolCall, ChoiceDeltaToolCall))
+                if response_tool_call.function:
+                    function = AssistantPromptMessage.ToolCall.ToolCallFunction(
+                        name=response_tool_call.function.name or "",
+                        arguments=response_tool_call.function.arguments or "",
+                    )
 
-                tool_call = AssistantPromptMessage.ToolCall(
-                    id=response_tool_call.id,
-                    type=response_tool_call.type,
-                    function=function,
-                )
-                tool_calls.append(tool_call)
+                    tool_call = AssistantPromptMessage.ToolCall(
+                        id=response_tool_call.id or "",
+                        type=response_tool_call.type or "",
+                        function=function,
+                    )
+                    tool_calls.append(tool_call)
 
         return tool_calls
 
@@ -965,15 +966,15 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         """
         tool_call = None
         if response_function_call:
-            assert isinstance(response_function_call, FunctionCall)
+            assert isinstance(response_function_call, (FunctionCall, ChoiceDeltaFunctionCall))
 
             function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                name=response_function_call.name,
-                arguments=response_function_call.arguments,
+                name=response_function_call.name or "",
+                arguments=response_function_call.arguments or "",
             )
 
             tool_call = AssistantPromptMessage.ToolCall(
-                id=response_function_call.name, type="function", function=function
+                id=response_function_call.name or "", type="function", function=function
             )
 
         return tool_call
