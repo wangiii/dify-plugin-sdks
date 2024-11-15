@@ -1,4 +1,3 @@
-from typing import Mapping
 from pydantic import BaseModel, Field, field_validator
 from ..entities.tool import ProviderConfig
 

@@ -3,7 +3,7 @@ import re
 import time
 from abc import abstractmethod
 from collections.abc import Generator, Mapping
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 from pydantic import ConfigDict
 

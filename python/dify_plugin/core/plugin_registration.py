@@ -1,4 +1,3 @@
-import base64
 from collections.abc import Mapping
 import os
 from typing import Type, TypeVar
