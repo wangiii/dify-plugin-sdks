@@ -42,6 +42,9 @@ class PluginResourceRequirements(BaseModel):
         class Endpoint(BaseModel):
             enabled: Optional[bool] = Field(default=False)
 
+        class App(BaseModel):
+            enabled: Optional[bool] = Field(default=False)
+
         class Storage(BaseModel):
             enabled: Optional[bool] = Field(default=False)
             size: int = Field(ge=1024, le=1073741824, default=1048576)
@@ -50,6 +53,7 @@ class PluginResourceRequirements(BaseModel):
         model: Optional[Model] = Field(default=None)
         node: Optional[Node] = Field(default=None)
         endpoint: Optional[Endpoint] = Field(default=None)
+        app: Optional[App] = Field(default=None)
         storage: Storage = Field(default=None)
 
     permission: Optional[Permission]
