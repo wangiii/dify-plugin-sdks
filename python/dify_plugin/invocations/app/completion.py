@@ -11,7 +11,6 @@ class CompletionAppInvocation(BackwardsInvocation[dict]):
         app_id: str,
         inputs: dict,
         response_mode: Literal["streaming"],
-        files: list,
     ) -> Generator[dict, None, None]: ...
 
     @overload
@@ -20,15 +19,13 @@ class CompletionAppInvocation(BackwardsInvocation[dict]):
         app_id: str,
         inputs: dict,
         response_mode: Literal["blocking"],
-        files: list,
     ) -> dict: ...
 
     def invoke(
         self,
         app_id: str,
         inputs: dict,
-        response_mode: Literal["streaming", "blocking"],
-        files: list,
+        response_mode: Literal["streaming", "blocking"] = "blocking",
     ) -> Generator[dict, None, None] | dict:
         """
         Invoke completion app
@@ -40,7 +37,6 @@ class CompletionAppInvocation(BackwardsInvocation[dict]):
                 "app_id": app_id,
                 "inputs": inputs,
                 "response_mode": response_mode,
-                "files": files,
             },
         )
 

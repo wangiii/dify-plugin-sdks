@@ -9,29 +9,29 @@ class ChatAppInvocation(BackwardsInvocation[dict]):
     def invoke(
         self,
         app_id: str,
+        query: str,
         inputs: dict,
         response_mode: Literal["streaming"],
-        conversation_id: str,
-        files: list,
+        conversation_id: str | None = None,
     ) -> Generator[dict, None, None]: ...
 
     @overload
     def invoke(
         self,
         app_id: str,
+        query: str,
         inputs: dict,
         response_mode: Literal["blocking"],
-        conversation_id: str,
-        files: list,
+        conversation_id: str | None = None,
     ) -> dict: ...
 
     def invoke(
         self,
         app_id: str,
+        query: str,
         inputs: dict,
-        response_mode: Literal["streaming", "blocking"],
-        conversation_id: str,
-        files: list,
+        response_mode: Literal["streaming", "blocking"] = "streaming",
+        conversation_id: str | None = None,
     ) -> Generator[dict, None, None] | dict:
         """
         Invoke chat app
@@ -41,10 +41,10 @@ class ChatAppInvocation(BackwardsInvocation[dict]):
             dict,
             {
                 "app_id": app_id,
+                "query": query,
                 "inputs": inputs,
                 "response_mode": response_mode,
                 "conversation_id": conversation_id,
-                "files": files,
             },
         )
 
