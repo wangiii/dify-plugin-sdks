@@ -113,7 +113,7 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
 
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
+    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
         Get number of tokens for given prompt messages
 
@@ -123,18 +123,18 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
         :return:
         """
         if len(texts) == 0:
-            return 0
+            return []
 
         try:
             enc = tiktoken.encoding_for_model(model)
         except KeyError:
             enc = tiktoken.get_encoding("cl100k_base")
 
-        total_num_tokens = 0
+        total_num_tokens = []
         for text in texts:
             # calculate the number of tokens in the encoded text
             tokenized_text = enc.encode(text)
-            total_num_tokens += len(tokenized_text)
+            total_num_tokens.append(len(tokenized_text))
 
         return total_num_tokens
 

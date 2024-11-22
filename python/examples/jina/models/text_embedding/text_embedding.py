@@ -103,7 +103,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
         return result
 
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
+    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
         Get number of tokens for given prompt messages
 
@@ -112,10 +112,11 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         :param texts: texts to embed
         :return:
         """
-        num_tokens = 0
+        num_tokens = []
         for text in texts:
             # use JinaTokenizer to get num tokens
-            num_tokens += JinaTokenizer.get_num_tokens(text)
+            num_tokens.append(JinaTokenizer.get_num_tokens(text))
+
         return num_tokens
 
     def validate_credentials(self, model: str, credentials: dict) -> None:

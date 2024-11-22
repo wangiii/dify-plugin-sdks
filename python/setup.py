@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dify_plugin",
-    version="0.0.1-beta29",
+    version="0.0.1-beta31",
     author="langgenius",
     long_description_content_type="text/markdown",
     url="https://github.com/langgenius/dify-plugin-sdks.git",
@@ -22,7 +22,8 @@ setup(
         "dpkt~=1.9.8",
         "yarl~=1.9.4",
         "httpx~=0.27.0",
-        "requests~=2.32.3"
+        "requests~=2.32.3",
+        "socksio==1.0.0" # for possible socks5 proxy support
     ],
     python_requires='>=3.10'
 )

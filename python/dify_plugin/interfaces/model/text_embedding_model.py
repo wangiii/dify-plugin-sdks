@@ -45,7 +45,7 @@ class TextEmbeddingModel(AIModel):
         raise NotImplementedError
 
     @abstractmethod
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
+    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
         Get number of tokens for given prompt messages
 
