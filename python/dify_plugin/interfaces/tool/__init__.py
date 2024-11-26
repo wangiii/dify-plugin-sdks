@@ -40,9 +40,10 @@ class Tool(ABC):
     def from_credentials(
         cls,
         credentials: dict,
+        user_id: Optional[str] = None,
     ) -> "Tool":
         return cls(
-            runtime=ToolRuntime(credentials=credentials, user_id=None, session_id=None),
+            runtime=ToolRuntime(credentials=credentials, user_id=user_id, session_id=None),
             session=Session.empty_session(),  # TODO could not fetch session here
         )
 
