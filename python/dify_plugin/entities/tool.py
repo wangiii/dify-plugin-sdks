@@ -52,7 +52,7 @@ class ToolSelectorScope(Enum):
 
 
 class ToolRuntime(BaseModel):
-    credentials: dict[str, str]
+    credentials: dict[str, Any]
     user_id: Optional[str]
     session_id: Optional[str]
 
