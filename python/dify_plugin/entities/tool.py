@@ -195,7 +195,7 @@ class ToolParameter(BaseModel):
     )
     llm_description: Optional[str] = None
     required: Optional[bool] = False
-    default: Optional[Union[int, str]] = None
+    default: Optional[Union[int, float, str]] = None
     min: Optional[Union[float, int]] = None
     max: Optional[Union[float, int]] = None
     options: Optional[list[ToolParameterOption]] = None
