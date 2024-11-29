@@ -129,7 +129,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             embeddings=batched_embeddings, usage=usage, model=model
         )
 
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
+    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
         Approximate number of tokens for given messages using GPT2 tokenizer
 
@@ -138,7 +138,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
         :param texts: texts to embed
         :return:
         """
-        return sum(self._get_num_tokens_by_gpt2(text) for text in texts)
+        return [self._get_num_tokens_by_gpt2(text) for text in texts]
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
