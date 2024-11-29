@@ -116,6 +116,25 @@ class PromptMessage(BaseModel):
         """
         return not self.content
 
+    @field_validator("content", mode="before")
+    def transform_content(
+        self, value: list[dict] | str | None
+    ) -> Optional[str | list[PromptMessageContent]]:
+        """
+        Transform content to list of prompt message content.
+        """
+        if isinstance(value, str):
+            return value
+        else:
+            result = []
+            for content in value or []:
+                if content.get("type") == PromptMessageContentType.TEXT.value:
+                    result.append(TextPromptMessageContent(**content))
+                elif content.get("type") == PromptMessageContentType.IMAGE.value:
+                    result.append(ImagePromptMessageContent(**content))
+                elif content.get("type") == PromptMessageContentType.DOCUMENT.value:
+                    result.append(DocumentPromptMessageContent(**content))
+            return result
 
 class UserPromptMessage(PromptMessage):
     """
