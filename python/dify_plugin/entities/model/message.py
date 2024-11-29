@@ -117,8 +117,9 @@ class PromptMessage(BaseModel):
         return not self.content
 
     @field_validator("content", mode="before")
+    @classmethod
     def transform_content(
-        self, value: list[dict] | str | None
+        cls, value: list[dict] | str | None
     ) -> Optional[str | list[PromptMessageContent]]:
         """
         Transform content to list of prompt message content.
