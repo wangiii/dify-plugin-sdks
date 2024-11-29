@@ -20,6 +20,8 @@ from .interfaces.model.openai_compatible.provider import OAICompatProvider  # no
 from .interfaces.model.openai_compatible.llm import OAICompatLargeLanguageModel  # noqa: E402
 from .interfaces.model.openai_compatible.text_embedding import OAICompatEmbeddingModel  # noqa: E402
 from .interfaces.model.openai_compatible.speech2text import OAICompatSpeech2TextModel  # noqa: E402
+from .interfaces.model.openai_compatible.tts import OAICompatText2SpeechModel  # noqa: E402
+from .interfaces.model.openai_compatible.rerank import OAICompatRerankModel  # noqa: E402
 
 from .invocations.file import File  # noqa: E402
 
@@ -41,6 +43,8 @@ __all__ = [
     "OAICompatLargeLanguageModel",
     "OAICompatEmbeddingModel",
     "OAICompatSpeech2TextModel",
+    "OAICompatText2SpeechModel",
+    "OAICompatRerankModel",
     
     "File",
 ]

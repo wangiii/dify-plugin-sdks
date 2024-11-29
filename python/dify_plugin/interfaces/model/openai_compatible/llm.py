@@ -46,7 +46,7 @@ from .common import _CommonOaiApiCompat
 logger = logging.getLogger(__name__)
 
 
-class OAIAPICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
+class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
     """
     Model class for OpenAI large language model.
     """

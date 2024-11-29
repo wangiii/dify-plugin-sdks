@@ -7,6 +7,7 @@ from yarl import URL
 
 from ....errors.model import (
     CredentialsValidateFailedError,
+    InvokeError,
     InvokeServerUnavailableError,
 )
 
@@ -161,3 +162,10 @@ class OAICompatRerankModel(RerankModel):
         )
 
         return entity
+
+    @property
+    def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:
+        """
+        Map model invoke error to unified error
+        """
+        return {}
