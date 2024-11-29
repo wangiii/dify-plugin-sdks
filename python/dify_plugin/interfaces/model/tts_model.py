@@ -33,6 +33,7 @@ class TTSModel(AIModel):
     def _invoke(
         self,
         model: str,
+        tenant_id: str,
         credentials: dict,
         content_text: str,
         voice: str,
@@ -178,6 +179,7 @@ class TTSModel(AIModel):
     def invoke(
         self,
         model: str,
+        tenant_id: str,
         credentials: dict,
         content_text: str,
         voice: str,
@@ -198,6 +200,7 @@ class TTSModel(AIModel):
         try:
             return self._invoke(
                 model=model,
+                tenant_id=tenant_id,
                 credentials=credentials,
                 user=user,
                 content_text=content_text,

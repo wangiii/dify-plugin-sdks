@@ -23,6 +23,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
     def _invoke(
         self,
         model: str,
+        tenant_id: str,
         credentials: dict,
         content_text: str,
         voice: str,

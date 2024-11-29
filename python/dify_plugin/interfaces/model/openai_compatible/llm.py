@@ -46,7 +46,7 @@ from .common import _CommonOaiApiCompat
 logger = logging.getLogger(__name__)
 
 
-class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
+class OAIAPICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
     """
     Model class for OpenAI large language model.
     """
@@ -105,7 +105,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         :return:
         """
         return self._num_tokens_from_messages(
-            model, prompt_messages, credentials, tools
+            model, prompt_messages, tools, credentials
         )
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
@@ -393,7 +393,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
 
                 for tool in tools:
                     formatted_tools.append(
-                        PromptMessageFunction(function=tool).model_dump(),
+                        PromptMessageFunction(function=tool).model_dump()
                     )
 
                 data["tools"] = formatted_tools
@@ -445,17 +445,27 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         chunk_index = 0
 
         def create_final_llm_result_chunk(
-            index: int, message: AssistantPromptMessage, finish_reason: str
+            id: Optional[str],
+            index: int,
+            message: AssistantPromptMessage,
+            finish_reason: str,
+            usage: dict,
         ) -> LLMResultChunk:
-            prompt_tokens = self._num_tokens_from_string(
-                model, prompt_messages[0].content
-            )
-            completion_tokens = self._num_tokens_from_string(
-                model, full_assistant_content
-            )
+            # calculate num tokens
+            prompt_tokens = usage.get("prompt_tokens") if usage else 0
+            if prompt_tokens is None:
+                assert prompt_messages[0].content is not None
+                prompt_tokens = self._num_tokens_from_string(
+                    model, prompt_messages[0].content
+                )
+            completion_tokens = usage.get("completion_tokens") if usage else 0
+            if completion_tokens is None:
+                completion_tokens = self._num_tokens_from_string(
+                    model, full_assistant_content
+                )
 
             # transform usage
-            usage = self._calc_response_usage(
+            usage_obj = self._calc_response_usage(
                 model, credentials, prompt_tokens, completion_tokens
             )
 
@@ -466,7 +476,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                     index=index,
                     message=message,
                     finish_reason=finish_reason,
-                    usage=usage,
+                    usage=usage_obj,
                 ),
             )
 
@@ -517,7 +527,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                     tool_call.function.arguments += new_tool_call.function.arguments
 
         finish_reason = None  # The default value of finish_reason is None
-
+        message_id, usage = None, None
         for chunk in response.iter_lines(decode_unicode=True, delimiter=delimiter):
             chunk = chunk.strip()
             if chunk:
@@ -529,20 +539,26 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                     continue
 
                 try:
-                    chunk_json = json.loads(decoded_chunk)
+                    chunk_json: dict = json.loads(decoded_chunk)
                 # stream ended
-                except json.JSONDecodeError as e:
+                except json.JSONDecodeError:
                     yield create_final_llm_result_chunk(
+                        id=message_id,
                         index=chunk_index + 1,
                         message=AssistantPromptMessage(content=""),
                         finish_reason="Non-JSON encountered.",
+                        usage=usage or {},
                     )
                     break
+                if chunk_json:
+                    if u := chunk_json.get("usage"):
+                        usage = u
                 if not chunk_json or len(chunk_json["choices"]) == 0:
                     continue
 
                 choice = chunk_json["choices"][0]
                 finish_reason = chunk_json["choices"][0].get("finish_reason")
+                message_id = chunk_json.get("id")
                 chunk_index += 1
 
                 if "delta" in choice:
@@ -625,9 +641,11 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             )
 
         yield create_final_llm_result_chunk(
+            id=message_id,
             index=chunk_index,
             message=AssistantPromptMessage(content=""),
             finish_reason=finish_reason or "",
+            usage=usage or {},
         )
 
     def _handle_generate_response(
@@ -637,11 +655,12 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         response: requests.Response,
         prompt_messages: list[PromptMessage],
     ) -> LLMResult:
-        response_json = response.json()
+        response_json: dict = response.json()
 
         completion_type = LLMMode.value_of(credentials["mode"])
 
         output = response_json["choices"][0]
+        message_id = response_json.get("id")
 
         response_content = ""
         tool_calls = None
@@ -666,9 +685,12 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                     tool_calls
                 )
             elif function_calling_type == "function_call":
-                assistant_tool_call = self._extract_response_function_call(tool_calls)
-                if assistant_tool_call:
-                    assistant_message.tool_calls = [assistant_tool_call]
+                if tool_calls:
+                    extracted_tool_call = self._extract_response_function_call(
+                        tool_calls
+                    )
+                    if extracted_tool_call:
+                        assistant_message.tool_calls = [extracted_tool_call]
 
         usage = response_json.get("usage")
         if usage:
@@ -677,9 +699,11 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             completion_tokens = usage["completion_tokens"]
         else:
             # calculate num tokens
+            assert prompt_messages[0].content is not None
             prompt_tokens = self._num_tokens_from_string(
                 model, prompt_messages[0].content
             )
+            assert assistant_message.content is not None
             completion_tokens = self._num_tokens_from_string(
                 model, assistant_message.content
             )
@@ -700,40 +724,38 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         return result
 
     def _convert_prompt_message_to_dict(
-        self, message: PromptMessage, credentials: dict
+        self, message: PromptMessage, credentials: Optional[dict] = None
     ) -> dict:
         """
         Convert PromptMessage to dict for OpenAI API format
         """
+        credentials = credentials or {}
         if isinstance(message, UserPromptMessage):
             message = cast(UserPromptMessage, message)
             if isinstance(message.content, str):
                 message_dict = {"role": "user", "content": message.content}
             else:
                 sub_messages = []
-                if message.content:
-                    for message_content in message.content:
-                        if message_content.type == PromptMessageContentType.TEXT:
-                            message_content = cast(
-                                PromptMessageContent, message_content
-                            )
-                            sub_message_dict = {
-                                "type": "text",
-                                "text": message_content.data,
-                            }
-                            sub_messages.append(sub_message_dict)
-                        elif message_content.type == PromptMessageContentType.IMAGE:
-                            message_content = cast(
-                                ImagePromptMessageContent, message_content
-                            )
-                            sub_message_dict = {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": message_content.data,
-                                    "detail": message_content.detail.value,
-                                },
-                            }
-                            sub_messages.append(sub_message_dict)
+                for message_content in message.content or []:
+                    if message_content.type == PromptMessageContentType.TEXT:
+                        message_content = cast(PromptMessageContent, message_content)
+                        sub_message_dict = {
+                            "type": "text",
+                            "text": message_content.data,
+                        }
+                        sub_messages.append(sub_message_dict)
+                    elif message_content.type == PromptMessageContentType.IMAGE:
+                        message_content = cast(
+                            ImagePromptMessageContent, message_content
+                        )
+                        sub_message_dict = {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": message_content.data,
+                                "detail": message_content.detail.value,
+                            },
+                        }
+                        sub_messages.append(sub_message_dict)
 
                 message_dict = {"role": "user", "content": sub_messages}
         elif isinstance(message, AssistantPromptMessage):
@@ -782,7 +804,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
     def _num_tokens_from_string(
         self,
         model: str,
-        text: Union[str, list[PromptMessageContent], None],
+        text: Union[str, list[PromptMessageContent]],
         tools: Optional[list[PromptMessageTool]] = None,
     ) -> int:
         """
@@ -797,11 +819,10 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             full_text = text
         else:
             full_text = ""
-            if text:
-                for message_content in text:
-                    if message_content.type == PromptMessageContentType.TEXT:
-                        message_content = cast(PromptMessageContent, message_content)
-                        full_text += message_content.data
+            for message_content in text:
+                if message_content.type == PromptMessageContentType.TEXT:
+                    message_content = cast(PromptMessageContent, message_content)
+                    full_text += message_content.data
 
         num_tokens = self._get_num_tokens_by_gpt2(full_text)
 
@@ -814,8 +835,8 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         self,
         model: str,
         messages: list[PromptMessage],
-        credentials: dict,
         tools: Optional[list[PromptMessageTool]] = None,
+        credentials: Optional[dict] = None,
     ) -> int:
         """
         Approximate num tokens with GPT2 tokenizer.
@@ -845,8 +866,8 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                     value = text
 
                 if key == "tool_calls":
-                    for tool_call in value:
-                        for t_key, t_value in tool_call.items():  # type: ignore
+                    for tool_call in value or []:
+                        for t_key, t_value in tool_call.items():
                             num_tokens += self._get_num_tokens_by_gpt2(t_key)
                             if t_key == "function":
                                 for f_key, f_value in t_value.items():
@@ -891,12 +912,14 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             num_tokens += self._get_num_tokens_by_gpt2("parameters")
             if "title" in parameters:
                 num_tokens += self._get_num_tokens_by_gpt2("title")
-                num_tokens += self._get_num_tokens_by_gpt2(parameters.get("title"))  # type: ignore
+                num_tokens += self._get_num_tokens_by_gpt2(
+                    parameters.get("title") or ""
+                )
             num_tokens += self._get_num_tokens_by_gpt2("type")
-            num_tokens += self._get_num_tokens_by_gpt2(parameters.get("type"))  # type: ignore
+            num_tokens += self._get_num_tokens_by_gpt2(parameters.get("type") or "")
             if "properties" in parameters:
                 num_tokens += self._get_num_tokens_by_gpt2("properties")
-                for key, value in parameters.get("properties").items():  # type: ignore
+                for key, value in parameters.get("properties") or {}.items():
                     num_tokens += self._get_num_tokens_by_gpt2(key)
                     for field_key, field_value in value.items():
                         num_tokens += self._get_num_tokens_by_gpt2(field_key)
@@ -943,7 +966,9 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
 
         return tool_calls
 
-    def _extract_response_function_call(self, response_function_call):
+    def _extract_response_function_call(
+        self, response_function_call
+    ) -> AssistantPromptMessage.ToolCall | None:
         """
         Extract function call from response
 

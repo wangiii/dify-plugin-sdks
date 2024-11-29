@@ -149,6 +149,7 @@ class ModelInvokeTTSRequest(PluginAccessModelRequest):
 
     content_text: str
     voice: str
+    tenant_id: str
 
 class ModelGetTTSVoices(PluginAccessModelRequest):
     action: ModelActions = ModelActions.GetTTSVoices

@@ -1,14 +1,17 @@
+from decimal import Decimal
 import json
 import time
-from decimal import Decimal
 from typing import Optional
 from urllib.parse import urljoin
 
 import requests
 
+from ....entities.model.text_embedding import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
+from ....interfaces.model.text_embedding_model import TextEmbeddingModel
 from ....entities import I18nObject
-from ....errors.model import CredentialsValidateFailedError
-from ....entities.model.text_embedding import EmbeddingUsage, TextEmbeddingResult
 from ....entities.model import (
     AIModelEntity,
     EmbeddingInputType,
@@ -18,7 +21,9 @@ from ....entities.model import (
     PriceConfig,
     PriceType,
 )
-from ..text_embedding_model import TextEmbeddingModel
+from ....errors.model import (
+    CredentialsValidateFailedError,
+)
 from .common import _CommonOaiApiCompat
 
 
@@ -53,7 +58,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
 
-        endpoint_url = credentials.get("endpoint_url", "https://api.openai.com/v1/")
+        endpoint_url = credentials.get("endpoint_url", "")
         if not endpoint_url.endswith("/"):
             endpoint_url += "/"
 
@@ -79,7 +84,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             num_tokens = self._get_num_tokens_by_gpt2(text)
 
             if num_tokens >= context_size:
-                cutoff = int((len(text) * context_size) // num_tokens)  
+                cutoff = int((len(text) * context_size) // num_tokens)
                 # if num tokens is larger than context length, only use the start
                 inputs.append(text[0:cutoff])
             else:
@@ -151,7 +156,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             if api_key:
                 headers["Authorization"] = f"Bearer {api_key}"
 
-            endpoint_url = credentials.get("endpoint_url", "https://api.openai.com/v1/")
+            endpoint_url = credentials.get("endpoint_url", "")
             if not endpoint_url.endswith("/"):
                 endpoint_url += "/"
 
@@ -173,7 +178,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 raise CredentialsValidateFailedError(
                     "Credentials validation failed: JSON decode error"
                 )
@@ -199,7 +204,9 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             model_type=ModelType.TEXT_EMBEDDING,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", 0)),
+                ModelPropertyKey.CONTEXT_SIZE: int(
+                    credentials.get("context_size", 512)
+                ),
                 ModelPropertyKey.MAX_CHUNKS: 1,
             },
             parameter_rules=[],

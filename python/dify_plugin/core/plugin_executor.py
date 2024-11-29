@@ -236,6 +236,7 @@ class PluginExecutor:
         if isinstance(model_instance, TTSModel):
             b = model_instance.invoke(
                 data.model,
+                data.tenant_id,
                 data.credentials,
                 data.content_text,
                 data.voice,
