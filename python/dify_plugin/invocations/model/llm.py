@@ -61,12 +61,12 @@ class LLMInvocation(BackwardsInvocation[LLMResult | LLMResultChunk]):
             response = cast(Generator[LLMResultChunk, None, None], response)
             return response
 
-        for data in self._backwards_invoke(
+        for llm_result in self._backwards_invoke(
             InvokeType.LLM,
             LLMResult,
             data,
         ):
-            data = cast(LLMResult, data)
+            data = cast(LLMResult, llm_result)
             return data
 
         raise Exception("No response from llm")
@@ -91,12 +91,12 @@ class SummaryInvocation(BackwardsInvocation[SummaryResult]):
             "instruction": instruction,
         }
 
-        for data in self._backwards_invoke(
+        for llm_result in self._backwards_invoke(
             InvokeType.SYSTEM_SUMMARY,
             SummaryResult,
             data,
         ):
-            data = cast(SummaryResult, data)
+            data = cast(SummaryResult, llm_result)
             return data.summary
 
         raise Exception("No response from summary")
