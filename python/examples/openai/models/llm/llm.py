@@ -305,10 +305,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         :return:
         """
         # handle fine tune remote models
-        if model.startswith("ft:"):
-            base_model = model.split(":")[1]
-        else:
-            base_model = model
+        base_model = model.lstrip("ft:")
 
         # get model mode
         model_mode = self.get_model_mode(model)
@@ -645,10 +642,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
 
         response_format = model_parameters.get("response_format")
         if response_format:
-            if response_format == "json_object":
-                response_format = {"type": "json_object"}
-            else:
-                response_format = {"type": "text"}
+            response_format = {"type": "json_object"} if response_format == "json_object" else {"type": "text"}
 
             model_parameters["response_format"] = response_format
 
@@ -1174,11 +1168,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
 
         :return: model schema
         """
-        if not model.startswith("ft:"):
-            base_model = model
-        else:
-            # get base_model
-            base_model = model.split(":")[1]
+        base_model = model.lstrip("ft:")
 
         # get model schema
         models = self.predefined_models()

@@ -269,18 +269,21 @@ class BackwardsInvocation(Generic[T], ABC):
             ),
         )
 
-        with httpx.Client() as client, client.stream(
-            method="POST",
-            url=str(url),
-            headers=headers,
-            content=payload,
-            timeout=(
-                300,
-                300,
-                300,
-                300,
-            ),  # 300 seconds for connection, read, write, and pool
-        ) as response:
+        with (
+            httpx.Client() as client,
+            client.stream(
+                method="POST",
+                url=str(url),
+                headers=headers,
+                content=payload,
+                timeout=(
+                    300,
+                    300,
+                    300,
+                    300,
+                ),  # 300 seconds for connection, read, write, and pool
+            ) as response,
+        ):
 
             def generator():
                 for line in response.iter_lines():

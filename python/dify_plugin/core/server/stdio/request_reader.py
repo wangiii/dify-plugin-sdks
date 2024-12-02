@@ -29,10 +29,7 @@ class StdioRequestReader(RequestReader):
             if len(lines) == 0:
                 continue
 
-            if lines[-1] != b"":
-                buffer = lines[-1]
-            else:
-                buffer = b""
+            buffer = lines[-1]
 
             lines = lines[:-1]
             for line in lines:

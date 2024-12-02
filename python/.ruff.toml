@@ -50,7 +50,6 @@ ignore = [
     "N815", # mixed-case-variable-in-class-scope
     "PT011", # pytest-raises-too-broad
     "SIM105", # suppressible-exception
-    "SIM108", # if-else-block-instead-of-if-exp
 ]
 
 [lint.per-file-ignores]
