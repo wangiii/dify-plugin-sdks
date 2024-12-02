@@ -200,7 +200,8 @@ class PluginExecutor:
                 data.user_id,
             )
             if isinstance(b, bytes | bytearray | memoryview):
-                return {"result": binascii.hexlify(b).decode()}
+                yield {"result": binascii.hexlify(b).decode()}
+                return
 
             for chunk in b:
                 yield {"result": binascii.hexlify(chunk).decode()}
