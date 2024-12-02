@@ -71,10 +71,15 @@ class SummaryInvocation(BackwardsInvocation[SummaryResult]):
         self,
         text: str,
         instruction: str,
+        min_summarize_length: int = 1024,
     ) -> str:
         """
         Invoke summary
         """
+
+        if len(text) < min_summarize_length:
+            return text
+        
         data = {
             "text": text,
             "instruction": instruction,
