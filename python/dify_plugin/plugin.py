@@ -42,11 +42,11 @@ class Plugin(IOServer, Router):
         # load plugin configuration
         self.registration = PluginRegistration(config)
 
-        if config.INSTALL_METHOD == InstallMethod.Local:
+        if InstallMethod.Local == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_local_stream(config)
-        elif config.INSTALL_METHOD == InstallMethod.Remote:
+        elif InstallMethod.Remote == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_remote_stream(config)
-        elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
+        elif InstallMethod.AWSLambda == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_aws_stream(config)
         else:
             raise ValueError("Invalid install method")
