@@ -36,11 +36,6 @@ select = [
 
 ignore = [
     "E402", # module-import-not-at-top-of-file
-    "E731", # lambda-assignment
-    "FURB152", # math-constant
-    "B006", # mutable-argument-default
-    "B007", # unused-loop-control-variable
-    "B026", # star-arg-unpacking-after-keyword-arg
     "N815", # mixed-case-variable-in-class-scope
 ]
 
