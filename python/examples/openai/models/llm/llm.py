@@ -305,7 +305,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         :return:
         """
         # handle fine tune remote models
-        base_model = model.lstrip("ft:")
+        base_model = model.removeprefix("ft:")
 
         # get model mode
         model_mode = self.get_model_mode(model)
@@ -1168,7 +1168,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
 
         :return: model schema
         """
-        base_model = model.lstrip("ft:")
+        base_model = model.removeprefix("ft:")
 
         # get model schema
         models = self.predefined_models()
