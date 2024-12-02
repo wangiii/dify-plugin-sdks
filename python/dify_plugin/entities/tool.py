@@ -324,6 +324,7 @@ class ToolProviderConfiguration(BaseModel):
     extra: ToolProviderConfigurationExtra
 
     @model_validator(mode="before")
+    @classmethod
     def validate_credentials_schema(cls, data: dict) -> dict:
         original_credentials_for_provider: dict[str, dict] = data.get(
             "credentials_for_provider", {}
@@ -338,6 +339,7 @@ class ToolProviderConfiguration(BaseModel):
         return data
 
     @field_validator("tools", mode="before")
+    @classmethod
     def validate_tools(cls, value) -> list[ToolConfiguration]:
         if not isinstance(value, list):
             raise ValueError("tools should be a list")

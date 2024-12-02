@@ -4,7 +4,7 @@ from abc import ABC
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
-from typing import Generic, Optional, Type, TypeVar, Union
+from typing import Generic, Optional, TypeVar, Union
 
 import httpx
 from pydantic import BaseModel
@@ -189,7 +189,7 @@ class BackwardsInvocation(Generic[T], ABC):
     def _backwards_invoke(
         self,
         type: InvokeType,
-        data_type: Type[T],
+        data_type: type[T],
         data: dict,
     ) -> Generator[T, None, None]:
         """
@@ -208,7 +208,7 @@ class BackwardsInvocation(Generic[T], ABC):
     def _line_converter_wrapper(
         self,
         generator: Generator[PluginInStreamBase | None, None, None],
-        data_type: Type[T],
+        data_type: type[T],
     ) -> Generator[T, None, None]:
         """
         convert string into type T
@@ -246,7 +246,7 @@ class BackwardsInvocation(Generic[T], ABC):
         self,
         backwards_request_id: str,
         type: InvokeType,
-        data_type: Type[T],
+        data_type: type[T],
         data: dict,
     ) -> Generator[T, None, None]:
         """
@@ -307,7 +307,7 @@ class BackwardsInvocation(Generic[T], ABC):
         self,
         backwards_request_id: str,
         type: InvokeType,
-        data_type: Type[T],
+        data_type: type[T],
         data: dict,
     ) -> Generator[T, None, None]:
         if not self.session:

@@ -61,7 +61,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
         try:
             self.sock.sendall(data.encode())
         except Exception as e:
-            logger.error(f"Failed to write data: {e}")
+            logger.exception("Failed to write data")
             self._launch()
 
     def done(self):
@@ -101,8 +101,8 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 self.on_connected()
             logger.info(f"Sent key to {self.host}:{self.port}")
         except OSError as e:
-            logger.error(
-                f"\033[31mFailed to connect to {self.host}:{self.port}, {e}\033[0m"
+            logger.exception(
+                f"\033[31mFailed to connect to {self.host}:{self.port}\033[0m"
             )
             raise e
 
@@ -120,9 +120,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 if data == b"":
                     raise Exception("Connection is closed")
             except Exception as e:
-                logger.error(
-                    f"\033[31mFailed to read data from {self.host}:{self.port}, {e}\033[0m"
-                )
+                logger.exception(f"\033[31mFailed to read data from {self.host}:{self.port}\033[0m")
                 self.alive = False
                 time.sleep(self.reconnect_timeout)
                 self._launch()
@@ -159,6 +157,6 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                         f"Received event: \n{chunk.event}\n session_id: \n{chunk.session_id}\n data: \n{chunk.data}"
                     )
                 except Exception:
-                    logger.error(
+                    logger.exception(
                         f"\033[31mAn error occurred while parsing the data: {line}\033[0m"
                     )

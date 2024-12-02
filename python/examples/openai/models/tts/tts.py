@@ -1,4 +1,5 @@
 import concurrent.futures
+import operator
 from collections.abc import Generator
 from functools import reduce
 from io import BytesIO
@@ -125,7 +126,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                     for audio_bytes in audio_bytes_list
                     if audio_bytes
                 ]
-                combined_segment = reduce(lambda x, y: x + y, audio_segments)
+                combined_segment = reduce(operator.add, audio_segments)
                 buffer: BytesIO = BytesIO()
                 combined_segment.export(buffer, format=audio_type)
                 buffer.seek(0)

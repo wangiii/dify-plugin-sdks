@@ -229,6 +229,7 @@ class ProviderModel(BaseModel):
     """
 
     @model_validator(mode="before")
+    @classmethod
     def validate_label(cls, data: dict) -> dict:
         if isinstance(data, dict):
             if not data.get("label"):
@@ -255,6 +256,7 @@ class ParameterRule(BaseModel):
     options: list[str] = []
 
     @model_validator(mode="before")
+    @classmethod
     def validate_label(cls, data: dict) -> dict:
         if isinstance(data, dict):
             if not data.get("label"):

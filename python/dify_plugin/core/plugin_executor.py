@@ -348,7 +348,7 @@ class PluginExecutor:
             # return headers
             yield {
                 "status": response.status_code,
-                "headers": {k: v for k, v in response.headers.items()},
+                "headers": dict(response.headers.items()),
             }
 
             for chunk in response.response:
@@ -359,7 +359,7 @@ class PluginExecutor:
         else:
             result = {
                 "status": response.status_code,
-                "headers": {k: v for k, v in response.headers.items()},
+                "headers": dict(response.headers.items()),
             }
 
             if isinstance(response.response, bytes | bytearray | memoryview):

@@ -1,6 +1,6 @@
 import os
 from collections.abc import Mapping
-from typing import Type, TypeVar
+from typing import TypeVar
 
 import werkzeug
 import werkzeug.exceptions
@@ -42,8 +42,8 @@ class PluginRegistration:
         str,
         tuple[
             ToolProviderConfiguration,
-            Type[ToolProvider],
-            dict[str, tuple[ToolConfiguration, Type[Tool]]],
+            type[ToolProvider],
+            dict[str, tuple[ToolConfiguration, type[Tool]]],
         ],
     ]
 
@@ -151,15 +151,11 @@ class PluginRegistration:
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)
 
-    def _is_strict_subclass(self, cls: Type[T], *parent_cls: Type[T]) -> bool:
+    def _is_strict_subclass(self, cls: type[T], *parent_cls: type[T]) -> bool:
         """
         check if the class is a strict subclass of one of the parent classes
         """
-        for parent in parent_cls:
-            if issubclass(cls, parent) and cls != parent:
-                return True
-
-        return False
+        return any(issubclass(cls, parent) and cls != parent for parent in parent_cls)
 
     def _resolve_model_providers(self):
         """
@@ -294,7 +290,7 @@ class PluginRegistration:
 
     def dispatch_endpoint_request(
         self, request: Request
-    ) -> tuple[Type[Endpoint], Mapping]:
+    ) -> tuple[type[Endpoint], Mapping]:
         """
         dispatch endpoint request, match the request to the registered endpoints
 

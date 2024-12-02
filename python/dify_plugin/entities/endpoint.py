@@ -22,6 +22,7 @@ class EndpointProviderConfiguration(BaseModel):
     endpoints: list[EndpointConfiguration] = Field(default_factory=list)
 
     @field_validator("endpoints", mode="before")
+    @classmethod
     def validate_endpoints(cls, value) -> list[EndpointConfiguration]:
         if not isinstance(value, list):
             raise ValueError("endpoints should be a list")

@@ -49,7 +49,7 @@ class Router:
                     data = annotation(**data)
                 except TypeError as e:
                     if not self.response_writer:
-                        logger.error("failed to route request: %s", e)
+                        logger.exception("failed to route request: %s")
                     else:
                         self.response_writer.error(
                             session_id=session.session_id,
@@ -67,7 +67,7 @@ class Router:
                     data = annotation(**data)
                 except TypeError as e:
                     if not self.response_writer:
-                        logger.error("failed to route request: %s", e)
+                        logger.exception("failed to route request: %s")
                     else:
                         self.response_writer.error(
                             session_id=session.session_id,

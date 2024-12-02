@@ -19,7 +19,7 @@ def get_position_map(
     positions = load_yaml_file(position_file_name, ignore_error=True)
     position_map = {}
     index = 0
-    for _, name in enumerate(positions):
+    for name in positions:
         if name and isinstance(name, str):
             position_map[name.strip()] = index
             index += 1
