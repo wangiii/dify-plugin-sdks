@@ -60,7 +60,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
 
         try:
             self.sock.sendall(data.encode())
-        except Exception as e:
+        except Exception:
             logger.exception("Failed to write data")
             self._launch()
 
@@ -117,7 +117,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 data = self.sock.recv(4096)
                 if data == b"":
                     raise Exception("Connection is closed")
-            except Exception as e:
+            except Exception:
                 logger.exception(f"\033[31mFailed to read data from {self.host}:{self.port}\033[0m")
                 self.alive = False
                 time.sleep(self.reconnect_timeout)
