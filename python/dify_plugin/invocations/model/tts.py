@@ -5,7 +5,7 @@ from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
 from ...entities.model.tts import TTSModelConfig, TTSResult
 
-    
+
 class TTSInvocation(BackwardsInvocation[TTSResult]):
     def invoke(
         self, model_config: TTSModelConfig, content_text: str

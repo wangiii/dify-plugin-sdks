@@ -1,13 +1,13 @@
-from json import loads
 import sys
-from typing import Generator
+from collections.abc import Generator
+from json import loads
+
+from gevent.os import tp_read
+
 from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-
-from gevent.os import tp_read
-
 from ....core.server.__base.request_reader import RequestReader
 from .response_writer import StdioResponseWriter
 

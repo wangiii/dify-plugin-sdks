@@ -1,34 +1,33 @@
 import base64
-from typing import Any, Optional
+import logging
 import uuid
+from collections.abc import Generator
+from typing import Any, Optional
+
 from pydantic import RootModel
 
 from dify_plugin.core.entities.message import InitializeMessage
 from dify_plugin.entities.tool import ToolInvokeMessage
 
-from .core.server.__base.request_reader import RequestReader
-from .core.server.__base.response_writer import ResponseWriter
-from .core.server.aws.request_reader import AWSLambdaRequestReader
-from .core.server.stdio.request_reader import StdioRequestReader
-from .core.server.stdio.response_writer import StdioResponseWriter
-from .core.server.tcp.request_reader import TCPReaderWriter
-from collections.abc import Generator
-import logging
 from .config.config import DifyPluginEnv, InstallMethod
+from .config.logger_format import plugin_logger_handler
 from .core.entities.plugin.request import (
+    EndpointActions,
     ModelActions,
     PluginInvokeType,
     ToolActions,
-    EndpointActions,
 )
-from .core.runtime import Session
-from .core.server.io_server import IOServer
-from .core.server.router import Router
-from .config.logger_format import plugin_logger_handler
-
 from .core.plugin_executor import PluginExecutor
 from .core.plugin_registration import PluginRegistration
-
+from .core.runtime import Session
+from .core.server.__base.request_reader import RequestReader
+from .core.server.__base.response_writer import ResponseWriter
+from .core.server.aws.request_reader import AWSLambdaRequestReader
+from .core.server.io_server import IOServer
+from .core.server.router import Router
+from .core.server.stdio.request_reader import StdioRequestReader
+from .core.server.stdio.response_writer import StdioResponseWriter
+from .core.server.tcp.request_reader import TCPReaderWriter
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -134,7 +133,9 @@ class Plugin(IOServer, Router):
             tcp_stream.write(
                 InitializeMessage(
                     type=InitializeMessage.Type.ENDPOINT_DECLARATION,
-                    data=List(root=self.registration.endpoints_configuration).model_dump(),
+                    data=List(
+                        root=self.registration.endpoints_configuration
+                    ).model_dump(),
                 ).model_dump_json()
                 + "\n\n"
             )

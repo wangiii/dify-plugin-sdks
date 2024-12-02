@@ -1,11 +1,16 @@
 from collections.abc import Generator
 from typing import Literal, cast, overload
 
-from ...entities.model.llm import LLMModelConfig, LLMResult, LLMResultChunk, SummaryResult
-from ...entities.model.message import PromptMessage, PromptMessageTool
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
-    
+from ...entities.model.llm import (
+    LLMModelConfig,
+    LLMResult,
+    LLMResultChunk,
+    SummaryResult,
+)
+from ...entities.model.message import PromptMessage, PromptMessageTool
+
 
 class LLMInvocation(BackwardsInvocation[LLMResult | LLMResultChunk]):
     @overload
@@ -66,6 +71,7 @@ class LLMInvocation(BackwardsInvocation[LLMResult | LLMResultChunk]):
 
         raise Exception("No response from llm")
 
+
 class SummaryInvocation(BackwardsInvocation[SummaryResult]):
     def invoke(
         self,
@@ -79,7 +85,7 @@ class SummaryInvocation(BackwardsInvocation[SummaryResult]):
 
         if len(text) < min_summarize_length:
             return text
-        
+
         data = {
             "text": text,
             "instruction": instruction,

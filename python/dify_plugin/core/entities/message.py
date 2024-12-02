@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from enum import Enum
-from typing import Sequence
 
 from pydantic import BaseModel
 
@@ -15,10 +15,8 @@ class SessionMessage(BaseModel):
     data: dict
 
     def to_dict(self):
-        return {
-            'type': self.type.value,
-            'data': self.data
-        }
+        return {"type": self.type.value, "data": self.data}
+
 
 class InitializeMessage(BaseModel):
     class Type(Enum):
@@ -32,12 +30,11 @@ class InitializeMessage(BaseModel):
 
     class AssetChunk(BaseModel):
         filename: str
-        data: str # base64 encoded
+        data: str  # base64 encoded
         end: bool
 
     class Key(BaseModel):
         key: str
-
 
     type: Type
     data: dict | Sequence

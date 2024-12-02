@@ -4,16 +4,18 @@ from openai import OpenAI
 
 from dify_plugin import Speech2TextModel
 from dify_plugin.errors.model import CredentialsValidateFailedError
+
 from ..common_openai import _CommonOpenAI
+
 
 class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
     """
     Model class for OpenAI Speech to text model.
     """
 
-    def _invoke(self, model: str, credentials: dict,
-                file: IO[bytes], user: Optional[str] = None) \
-            -> str:
+    def _invoke(
+        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
+    ) -> str:
         """
         Invoke speech2text model
 
@@ -36,12 +38,14 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
         try:
             audio_file_path = self._get_demo_file_path()
 
-            with open(audio_file_path, 'rb') as audio_file:
+            with open(audio_file_path, "rb") as audio_file:
                 self._speech2text_invoke(model, credentials, audio_file)
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
+    def _speech2text_invoke(
+        self, model: str, credentials: dict, file: IO[bytes]
+    ) -> str:
         """
         Invoke speech2text model
 

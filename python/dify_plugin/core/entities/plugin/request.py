@@ -1,7 +1,9 @@
 from enum import Enum
 from typing import Any, Optional
+
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from ....entities.model import ModelType
 from ....entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
@@ -11,7 +13,6 @@ from ....entities.model.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from ....entities.model import ModelType
 
 
 class PluginInvokeType(Enum):
@@ -124,6 +125,7 @@ class ModelGetLLMNumTokens(PluginAccessModelRequest, PromptMessageMixin):
 
     tools: Optional[list[PromptMessageTool]]
 
+
 class ModelInvokeTextEmbeddingRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeTextEmbedding
 
@@ -134,6 +136,7 @@ class ModelGetTextEmbeddingNumTokens(PluginAccessModelRequest):
     action: ModelActions = ModelActions.GetTextEmbeddingNumTokens
 
     texts: list[str]
+
 
 class ModelInvokeRerankRequest(PluginAccessModelRequest):
     action: ModelActions = ModelActions.InvokeRerank
@@ -150,6 +153,7 @@ class ModelInvokeTTSRequest(PluginAccessModelRequest):
     content_text: str
     voice: str
     tenant_id: str
+
 
 class ModelGetTTSVoices(PluginAccessModelRequest):
     action: ModelActions = ModelActions.GetTTSVoices
@@ -179,6 +183,7 @@ class ModelValidateProviderCredentialsRequest(BaseModel):
 
     model_config = ConfigDict(protected_namespaces=())
 
+
 class ModelValidateModelCredentialsRequest(BaseModel):
     type: PluginInvokeType = PluginInvokeType.Model
     user_id: str
@@ -190,6 +195,7 @@ class ModelValidateModelCredentialsRequest(BaseModel):
     action: ModelActions = ModelActions.ValidateModelCredentials
 
     model_config = ConfigDict(protected_namespaces=())
+
 
 class ModelGetAIModelSchemas(PluginAccessModelRequest):
     action: ModelActions = ModelActions.GetAIModelSchemas

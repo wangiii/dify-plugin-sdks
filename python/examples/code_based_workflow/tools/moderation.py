@@ -1,4 +1,5 @@
-from typing import Generator
+from collections.abc import Generator
+
 from dify_plugin.entities.model.moderation import ModerationModelConfig
 from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin.interfaces.tool import Tool
@@ -16,6 +17,8 @@ class Moderation(Tool):
             text=tool_parameters["text"],
         )
 
-        yield self.create_json_message({
-            "data": response,
-        })
+        yield self.create_json_message(
+            {
+                "data": response,
+            }
+        )

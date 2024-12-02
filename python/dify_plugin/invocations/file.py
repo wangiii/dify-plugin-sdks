@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel
+
 import requests
+from pydantic import BaseModel
+
 from dify_plugin.core.entities.invocation import InvokeType
 from dify_plugin.core.runtime import BackwardsInvocation
 
@@ -20,7 +22,7 @@ class UploadFileResponse(BaseModel):
                 return cls.VIDEO
             if mime_type.startswith("audio/"):
                 return cls.AUDIO
-            
+
             return cls.DOCUMENT
 
     id: str

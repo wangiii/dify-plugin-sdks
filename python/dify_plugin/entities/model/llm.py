@@ -4,11 +4,11 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from ...entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
 from ...entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
 )
-from ...entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
 
 
 class LLMMode(Enum):
@@ -114,7 +114,8 @@ class LLMResult(BaseModel):
                 finish_reason=None,
             ),
         )
-    
+
+
 class SummaryResult(BaseModel):
     """
     Model class for summary result.

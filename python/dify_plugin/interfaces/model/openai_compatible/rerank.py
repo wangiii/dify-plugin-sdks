@@ -1,19 +1,17 @@
 from json import dumps
 from typing import Optional
 
-from requests import post, HTTPError
+from requests import HTTPError, post
 from yarl import URL
 
-
+from ....entities import I18nObject
+from ....entities.model import AIModelEntity, FetchFrom, ModelType
+from ....entities.model.rerank import RerankDocument, RerankResult
 from ....errors.model import (
     CredentialsValidateFailedError,
     InvokeError,
     InvokeServerUnavailableError,
 )
-
-from ....entities import I18nObject
-from ....entities.model import AIModelEntity, FetchFrom, ModelType
-from ....entities.model.rerank import RerankDocument, RerankResult
 from ..rerank_model import RerankModel
 
 

@@ -8,11 +8,12 @@ from openai import OpenAI
 
 from dify_plugin import TextEmbeddingModel
 from dify_plugin.entities.model import EmbeddingInputType, PriceType
-from dify_plugin.errors.model import CredentialsValidateFailedError
 from dify_plugin.entities.model.text_embedding import (
     EmbeddingUsage,
     TextEmbeddingResult,
 )
+from dify_plugin.errors.model import CredentialsValidateFailedError
+
 from ..common_openai import _CommonOpenAI
 
 
@@ -113,7 +114,9 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
 
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
+    def get_num_tokens(
+        self, model: str, credentials: dict, texts: list[str]
+    ) -> list[int]:
         """
         Get number of tokens for given prompt messages
 

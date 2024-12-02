@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import Any, Optional
 
+from ...core.runtime import Session
+from ...entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
 from ...file.constants import DIFY_FILE_IDENTITY
 from ...file.file import File
-from ...entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
-from ...core.runtime import Session
 
 
 class ToolProvider(ABC):
@@ -43,7 +43,9 @@ class Tool(ABC):
         user_id: Optional[str] = None,
     ):
         return cls(
-            runtime=ToolRuntime(credentials=credentials, user_id=user_id, session_id=None),
+            runtime=ToolRuntime(
+                credentials=credentials, user_id=user_id, session_id=None
+            ),
             session=Session.empty_session(),  # TODO could not fetch session here
         )
 
@@ -163,10 +165,14 @@ class Tool(ABC):
         convert parameters into correct types
         """
         for parameter, value in tool_parameters.items():
-            if isinstance(value, dict) and value.get("dify_model_identity") == DIFY_FILE_IDENTITY:
+            if (
+                isinstance(value, dict)
+                and value.get("dify_model_identity") == DIFY_FILE_IDENTITY
+            ):
                 tool_parameters[parameter] = File(url=value["url"])
             elif isinstance(value, list) and all(
-                isinstance(item, dict) and item.get("dify_model_identity") == DIFY_FILE_IDENTITY
+                isinstance(item, dict)
+                and item.get("dify_model_identity") == DIFY_FILE_IDENTITY
                 for item in value
             ):
                 tool_parameters[parameter] = [File(url=item["url"]) for item in value]

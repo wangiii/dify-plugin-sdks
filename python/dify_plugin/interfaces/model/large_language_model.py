@@ -7,6 +7,13 @@ from typing import Optional, Union
 
 from pydantic import ConfigDict
 
+from ...entities.model import (
+    ModelPropertyKey,
+    ModelType,
+    ParameterRule,
+    ParameterType,
+    PriceType,
+)
 from ...entities.model.llm import (
     LLMMode,
     LLMResult,
@@ -23,13 +30,6 @@ from ...entities.model.message import (
     UserPromptMessage,
 )
 from .ai_model import AIModel
-from ...entities.model import (
-    ModelPropertyKey,
-    ModelType,
-    ParameterRule,
-    ParameterType,
-    PriceType,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -639,7 +639,7 @@ if you are not sure about the structure.
                 )
         except Exception as e:
             raise self._transform_invoke_error(e)
-        
+
         if isinstance(result, LLMResult):
             yield result.to_llm_result_chunk()
         else:

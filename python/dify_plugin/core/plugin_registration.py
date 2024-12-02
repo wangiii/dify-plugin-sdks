@@ -1,36 +1,36 @@
-from collections.abc import Mapping
 import os
+from collections.abc import Mapping
 from typing import Type, TypeVar
 
-from werkzeug import Request
 import werkzeug
 import werkzeug.exceptions
+from werkzeug import Request
 from werkzeug.routing import Map, Rule
 
 from ..config.config import DifyPluginEnv
-from .entities.plugin.setup import (
-    PluginAsset,
-    PluginConfiguration,
-)
-from ..interfaces.model.ai_model import AIModel
-from ..entities.model.provider import ModelProviderConfiguration
-from ..interfaces.model.large_language_model import LargeLanguageModel
-from ..interfaces.model import ModelProvider
-from ..entities.model import ModelType
-from ..interfaces.model.moderation_model import ModerationModel
-from ..interfaces.model.rerank_model import RerankModel
-from ..interfaces.model.speech2text_model import Speech2TextModel
-from ..interfaces.model.text_embedding_model import TextEmbeddingModel
-from ..interfaces.model.tts_model import TTSModel
-from ..entities.tool import ToolConfiguration, ToolProviderConfiguration
-from ..interfaces.tool import Tool, ToolProvider
-from ..entities.endpoint import EndpointProviderConfiguration
-from ..interfaces.endpoint import Endpoint
 from ..core.utils.class_loader import (
     load_multi_subclasses_from_source,
     load_single_subclass_from_source,
 )
 from ..core.utils.yaml_loader import load_yaml_file
+from ..entities.endpoint import EndpointProviderConfiguration
+from ..entities.model import ModelType
+from ..entities.model.provider import ModelProviderConfiguration
+from ..entities.tool import ToolConfiguration, ToolProviderConfiguration
+from ..interfaces.endpoint import Endpoint
+from ..interfaces.model import ModelProvider
+from ..interfaces.model.ai_model import AIModel
+from ..interfaces.model.large_language_model import LargeLanguageModel
+from ..interfaces.model.moderation_model import ModerationModel
+from ..interfaces.model.rerank_model import RerankModel
+from ..interfaces.model.speech2text_model import Speech2TextModel
+from ..interfaces.model.text_embedding_model import TextEmbeddingModel
+from ..interfaces.model.tts_model import TTSModel
+from ..interfaces.tool import Tool, ToolProvider
+from .entities.plugin.setup import (
+    PluginAsset,
+    PluginConfiguration,
+)
 
 T = TypeVar("T")
 

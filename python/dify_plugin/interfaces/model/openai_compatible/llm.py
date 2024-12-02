@@ -19,7 +19,6 @@ from ....entities.model import (
     ParameterType,
     PriceConfig,
 )
-from ....errors.model import CredentialsValidateFailedError, InvokeError
 from ....entities.model.llm import (
     LLMMode,
     LLMResult,
@@ -38,10 +37,9 @@ from ....entities.model.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
+from ....errors.model import CredentialsValidateFailedError, InvokeError
 from ..large_language_model import LargeLanguageModel
-
 from .common import _CommonOaiApiCompat
-
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +154,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise CredentialsValidateFailedError(
                     "Credentials validation failed: JSON decode error"
                 )
@@ -660,7 +658,6 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         completion_type = LLMMode.value_of(credentials["mode"])
 
         output = response_json["choices"][0]
-        message_id = response_json.get("id")
 
         response_content = ""
         tool_calls = None

@@ -1,8 +1,9 @@
 from typing import Any
 
+from tools.google_search import GoogleSearchTool
+
 from dify_plugin import ToolProvider
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
-from tools.google_search import GoogleSearchTool
 
 
 class GoogleProvider(ToolProvider):

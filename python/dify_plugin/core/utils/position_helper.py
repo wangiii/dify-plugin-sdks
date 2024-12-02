@@ -6,7 +6,9 @@ from typing import Any
 from .yaml_loader import load_yaml_file
 
 
-def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> dict[str, int]:
+def get_position_map(
+    folder_path: str, *, file_name: str = "_position.yaml"
+) -> dict[str, int]:
     """
     Get the mapping from name to index from a YAML file
     :param folder_path:
@@ -25,9 +27,9 @@ def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> 
 
 
 def sort_by_position_map(
-        position_map: dict[str, int],
-        data: list[Any],
-        name_func: Callable[[Any], str],
+    position_map: dict[str, int],
+    data: list[Any],
+    name_func: Callable[[Any], str],
 ) -> list[Any]:
     """
     Sort the objects by the position map.
@@ -40,13 +42,13 @@ def sort_by_position_map(
     if not position_map or not data:
         return data
 
-    return sorted(data, key=lambda x: position_map.get(name_func(x), float('inf')))
+    return sorted(data, key=lambda x: position_map.get(name_func(x), float("inf")))
 
 
 def sort_to_dict_by_position_map(
-        position_map: dict[str, int],
-        data: list[Any],
-        name_func: Callable[[Any], str],
+    position_map: dict[str, int],
+    data: list[Any],
+    name_func: Callable[[Any], str],
 ) -> OrderedDict[str, Any]:
     """
     Sort the objects into a ordered dict by the position map.

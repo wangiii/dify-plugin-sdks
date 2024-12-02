@@ -137,6 +137,7 @@ class PromptMessage(BaseModel):
                     result.append(DocumentPromptMessageContent(**content))
             return result
 
+
 class UserPromptMessage(PromptMessage):
     """
     Model class for user prompt message.

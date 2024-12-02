@@ -1,5 +1,5 @@
-from collections.abc import Generator
 import concurrent.futures
+from collections.abc import Generator
 from functools import reduce
 from io import BytesIO
 from typing import Optional
@@ -12,6 +12,7 @@ from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
     InvokeBadRequestError,
 )
+
 from ..common_openai import _CommonOpenAI
 
 
@@ -177,7 +178,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                     )
                     for i in range(len(sentences))
                 ]
-                for index, future in enumerate(futures):
+                for future in futures:
                     yield from future.result().__enter__().iter_bytes(1024)
 
             else:

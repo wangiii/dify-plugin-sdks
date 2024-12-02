@@ -6,7 +6,6 @@ from typing import Optional
 from pydantic import ConfigDict
 
 from ...entities import I18nObject
-from ...errors.model import InvokeAuthorizationError, InvokeError
 from ...entities.model import (
     PARAMETER_RULE_TEMPLATE,
     AIModelEntity,
@@ -16,6 +15,7 @@ from ...entities.model import (
     PriceInfo,
     PriceType,
 )
+from ...errors.model import InvokeAuthorizationError, InvokeError
 
 
 class AIModel(ABC):
@@ -31,7 +31,11 @@ class AIModel(ABC):
     model_config = ConfigDict(protected_namespaces=())
 
     def __init__(self, model_schemas: list[AIModelEntity]) -> None:
-        self.model_schemas = [model_schema for model_schema in model_schemas if model_schema.model_type == self.model_type]
+        self.model_schemas = [
+            model_schema
+            for model_schema in model_schemas
+            if model_schema.model_type == self.model_type
+        ]
 
     @abstractmethod
     def validate_credentials(self, model: str, credentials: Mapping) -> None:
@@ -293,5 +297,5 @@ class AIModel(ABC):
         :return: number of tokens
         """
         import tiktoken
-        
+
         return len(tiktoken.encoding_for_model("gpt2").encode(text))

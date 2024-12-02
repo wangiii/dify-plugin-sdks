@@ -1,4 +1,5 @@
 from queue import Queue
+
 from ....core.server.__base.response_writer import ResponseWriter
 
 
@@ -6,7 +7,8 @@ class AWSResponseWriter(ResponseWriter):
     """
     Writer for a single plugin request
     """
-    def __init__(self, queue: Queue) -> None: 
+
+    def __init__(self, queue: Queue) -> None:
         self.q = queue
 
     def write(self, data: bytes) -> None:

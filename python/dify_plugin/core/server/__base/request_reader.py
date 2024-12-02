@@ -1,9 +1,8 @@
+import threading
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-import threading
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ....core.entities.plugin.io import PluginInStream
 

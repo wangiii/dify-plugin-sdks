@@ -2,14 +2,32 @@ import time
 from json import JSONDecodeError, dumps
 from typing import Optional
 
+from models.text_embedding.jina_tokenizer import JinaTokenizer
 from requests import post
 
 from dify_plugin import TextEmbeddingModel
 from dify_plugin.entities import I18nObject
-from dify_plugin.entities.model import AIModelEntity, EmbeddingInputType, FetchFrom, ModelPropertyKey, ModelType, PriceType
-from dify_plugin.entities.model.text_embedding import EmbeddingUsage, TextEmbeddingResult
-from dify_plugin.errors.model import CredentialsValidateFailedError, InvokeAuthorizationError, InvokeBadRequestError, InvokeConnectionError, InvokeError, InvokeRateLimitError, InvokeServerUnavailableError
-from models.text_embedding.jina_tokenizer import JinaTokenizer
+from dify_plugin.entities.model import (
+    AIModelEntity,
+    EmbeddingInputType,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+    PriceType,
+)
+from dify_plugin.entities.model.text_embedding import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
+from dify_plugin.errors.model import (
+    CredentialsValidateFailedError,
+    InvokeAuthorizationError,
+    InvokeBadRequestError,
+    InvokeConnectionError,
+    InvokeError,
+    InvokeRateLimitError,
+    InvokeServerUnavailableError,
+)
 
 
 class JinaTextEmbeddingModel(TextEmbeddingModel):
@@ -41,8 +59,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             raise CredentialsValidateFailedError("api_key is required")
 
         base_url = credentials.get("base_url", self.api_base)
-        if base_url.endswith("/"):
-            base_url = base_url[:-1]
+        base_url = base_url.removesuffix("/")
 
         url = base_url + "/embeddings"
         headers = {
@@ -103,7 +120,9 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
         return result
 
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
+    def get_num_tokens(
+        self, model: str, credentials: dict, texts: list[str]
+    ) -> list[int]:
         """
         Get number of tokens for given prompt messages
 

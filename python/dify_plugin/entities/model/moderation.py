@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+
 from ...entities.model import BaseModelConfig, ModelType
 
 
@@ -16,4 +17,5 @@ class ModerationResult(BaseModel):
     """
     Model class for moderation result.
     """
+
     result: bool

@@ -1,6 +1,6 @@
-from ...entities.model.rerank import RerankModelConfig, RerankResult
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
+from ...entities.model.rerank import RerankModelConfig, RerankResult
 
 
 class RerankInvocation(BackwardsInvocation[RerankResult]):

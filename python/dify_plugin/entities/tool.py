@@ -1,5 +1,7 @@
 import base64
+from enum import Enum
 from typing import Any, Optional, Union
+
 from pydantic import (
     BaseModel,
     Field,
@@ -8,10 +10,9 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from enum import Enum
 
-from ..entities import I18nObject
 from ..core.utils.yaml_loader import load_yaml_file
+from ..entities import I18nObject
 
 
 class CommonParameterType(Enum):
@@ -94,7 +95,7 @@ class ToolInvokeMessage(BaseModel):
         @field_validator("variable_value", "stream")
         @classmethod
         def validate_variable_value_and_stream(cls, v, values):
-            if "stream" in values and values["stream"]:
+            if values.get("stream"):
                 if not isinstance(v, str):
                     raise ValueError(
                         "When 'stream' is True, 'variable_value' must be a string."

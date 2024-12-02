@@ -1,6 +1,6 @@
-from ...entities.model.text_embedding import TextEmbeddingResult
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
+from ...entities.model.text_embedding import TextEmbeddingResult
 
 
 class TextEmbeddingInvocation(BackwardsInvocation[TextEmbeddingResult]):

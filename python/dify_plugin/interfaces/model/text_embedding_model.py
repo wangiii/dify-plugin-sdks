@@ -4,9 +4,9 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
+from ...entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
 from ...entities.model.text_embedding import TextEmbeddingResult
 from .ai_model import AIModel
-from ...entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
 
 
 class TextEmbeddingModel(AIModel):
@@ -45,7 +45,9 @@ class TextEmbeddingModel(AIModel):
         raise NotImplementedError
 
     @abstractmethod
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
+    def get_num_tokens(
+        self, model: str, credentials: dict, texts: list[str]
+    ) -> list[int]:
         """
         Get number of tokens for given prompt messages
 

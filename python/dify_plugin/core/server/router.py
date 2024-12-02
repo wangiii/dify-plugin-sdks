@@ -1,11 +1,11 @@
-from collections.abc import Callable
 import inspect
 import logging
+from collections.abc import Callable
 from typing import Any, Optional
 
+from ...core.runtime import Session
 from .__base.request_reader import RequestReader
 from .__base.response_writer import ResponseWriter
-from ...core.runtime import Session
 
 logger = logging.getLogger(__file__)
 

@@ -1,31 +1,25 @@
-from enum import Enum
-from typing import Optional
-
-from pydantic import BaseModel
-
-
-from ..config.config import InstallMethod
-from concurrent.futures import ThreadPoolExecutor
-
+import json
+import uuid
 from abc import ABC
 from collections.abc import Generator
-import json
-from typing import Generic, Type, TypeVar, Union
-import uuid
+from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
+from typing import Generic, Optional, Type, TypeVar, Union
 
 import httpx
+from pydantic import BaseModel
 from yarl import URL
 
-from ..core.server.__base.request_reader import RequestReader
-from ..core.server.__base.response_writer import ResponseWriter
-from ..core.server.tcp.request_reader import TCPReaderWriter
+from ..config.config import InstallMethod
 from ..core.entities.invocation import InvokeType
 from ..core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamBase,
     PluginInStreamEvent,
 )
-
+from ..core.server.__base.request_reader import RequestReader
+from ..core.server.__base.response_writer import ResponseWriter
+from ..core.server.tcp.request_reader import TCPReaderWriter
 
 #################################################
 # Session
@@ -126,9 +120,9 @@ class Session:
         self._register_invocations()
 
     def _register_invocations(self) -> None:
-        from ..invocations.tool import ToolInvocation
-        from ..invocations.storage import StorageInvocation
         from ..invocations.file import File
+        from ..invocations.storage import StorageInvocation
+        from ..invocations.tool import ToolInvocation
 
         self.model = ModelInvocations(self)
         self.tool = ToolInvocation(self)
@@ -287,8 +281,14 @@ class BackwardsInvocation(Generic[T], ABC):
                 url=str(url),
                 headers=headers,
                 content=payload,
-                timeout=(300, 300, 300, 300),  # 300 seconds for connection, read, write, and pool
+                timeout=(
+                    300,
+                    300,
+                    300,
+                    300,
+                ),  # 300 seconds for connection, read, write, and pool
             ) as response:
+
                 def generator():
                     for line in response.iter_lines():
                         if not line:

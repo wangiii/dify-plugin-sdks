@@ -1,11 +1,10 @@
-from decimal import Decimal
 import logging
 from collections.abc import Generator
+from decimal import Decimal
 from typing import Optional, Union, cast
-import tiktoken
 
-from openai import OpenAI
-from openai import Stream
+import tiktoken
+from openai import OpenAI, Stream
 from openai.types import Completion
 from openai.types.chat import (
     ChatCompletion,
@@ -18,13 +17,8 @@ from openai.types.chat.chat_completion_chunk import (
 )
 from openai.types.chat.chat_completion_message import FunctionCall
 
-from ..common_openai import _CommonOpenAI
-
 from dify_plugin import LargeLanguageModel
 from dify_plugin.entities import I18nObject
-from dify_plugin.errors.model import (
-    CredentialsValidateFailedError,
-)
 from dify_plugin.entities.model import (
     AIModelEntity,
     FetchFrom,
@@ -48,6 +42,11 @@ from dify_plugin.entities.model.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
+from dify_plugin.errors.model import (
+    CredentialsValidateFailedError,
+)
+
+from ..common_openai import _CommonOpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -593,7 +592,7 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
                 continue
 
             # transform assistant message to prompt message
-            text = delta.text if delta.text else ""
+            text = delta.text or ""
             assistant_prompt_message = AssistantPromptMessage(content=text)
 
             full_text += text
@@ -877,11 +876,11 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
 
             # transform assistant message to prompt message
             assistant_prompt_message = AssistantPromptMessage(
-                content=delta.delta.content if delta.delta.content else "",
+                content=delta.delta.content or "",
                 tool_calls=tool_calls,
             )
 
-            full_assistant_content += delta.delta.content if delta.delta.content else ""
+            full_assistant_content += delta.delta.content or ""
 
             if has_finish_reason:
                 final_chunk = LLMResultChunk(
@@ -939,7 +938,10 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         tool_calls = []
         if response_tool_calls:
             for response_tool_call in response_tool_calls:
-                assert isinstance(response_tool_call, (ChatCompletionMessageToolCall, ChoiceDeltaToolCall))
+                assert isinstance(
+                    response_tool_call,
+                    (ChatCompletionMessageToolCall, ChoiceDeltaToolCall),
+                )
                 if response_tool_call.function:
                     function = AssistantPromptMessage.ToolCall.ToolCallFunction(
                         name=response_tool_call.function.name or "",
@@ -966,7 +968,9 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         """
         tool_call = None
         if response_function_call:
-            assert isinstance(response_function_call, (FunctionCall, ChoiceDeltaFunctionCall))
+            assert isinstance(
+                response_function_call, (FunctionCall, ChoiceDeltaFunctionCall)
+            )
 
             function = AssistantPromptMessage.ToolCall.ToolCallFunction(
                 name=response_function_call.name or "",

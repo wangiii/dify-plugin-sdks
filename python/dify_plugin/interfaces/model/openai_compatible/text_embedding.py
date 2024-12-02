@@ -1,16 +1,11 @@
-from decimal import Decimal
 import json
 import time
+from decimal import Decimal
 from typing import Optional
 from urllib.parse import urljoin
 
 import requests
 
-from ....entities.model.text_embedding import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
-from ....interfaces.model.text_embedding_model import TextEmbeddingModel
 from ....entities import I18nObject
 from ....entities.model import (
     AIModelEntity,
@@ -21,9 +16,14 @@ from ....entities.model import (
     PriceConfig,
     PriceType,
 )
+from ....entities.model.text_embedding import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from ....errors.model import (
     CredentialsValidateFailedError,
 )
+from ....interfaces.model.text_embedding_model import TextEmbeddingModel
 from .common import _CommonOaiApiCompat
 
 
@@ -129,7 +129,9 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             embeddings=batched_embeddings, usage=usage, model=model
         )
 
-    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
+    def get_num_tokens(
+        self, model: str, credentials: dict, texts: list[str]
+    ) -> list[int]:
         """
         Approximate number of tokens for given messages using GPT2 tokenizer
 
@@ -178,7 +180,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise CredentialsValidateFailedError(
                     "Credentials validation failed: JSON decode error"
                 )

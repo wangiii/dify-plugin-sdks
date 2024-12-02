@@ -64,7 +64,7 @@ class ResponseWriter(ABC):
     ) -> str:
         if isinstance(data, BaseModel):
             data = data.model_dump()
-            
+
         return (
             StreamOutputMessage(
                 event=Event.SESSION, session_id=session_id, data=data

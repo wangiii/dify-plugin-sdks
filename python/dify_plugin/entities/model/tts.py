@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+
 from ...entities.model import BaseModelConfig, ModelType
 
 
@@ -12,8 +13,10 @@ class TTSModelConfig(BaseModelConfig):
 
     model_config = ConfigDict(protected_namespaces=())
 
+
 class TTSResult(BaseModel):
     """
     Model class for tts result.
     """
+
     result: str

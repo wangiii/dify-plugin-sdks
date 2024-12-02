@@ -1,16 +1,15 @@
-from collections.abc import Generator
 import hashlib
 import logging
 import re
 import uuid
 from abc import abstractmethod
+from collections.abc import Generator
 from typing import Any, Optional
 
 from pydantic import ConfigDict
 
-from .ai_model import AIModel
 from ...entities.model import ModelPropertyKey, ModelType
-
+from .ai_model import AIModel
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +169,6 @@ class TTSModel(AIModel):
         namespace_uuid = uuid.UUID("a5da6ef9-b303-596f-8e88-bf8fa40f4b31")
         unique_uuid = uuid.uuid5(namespace_uuid, hex_digest)
         return str(unique_uuid)
-
 
     ############################################################
     #                 For executor use only                    #

@@ -1,5 +1,4 @@
 from enum import Enum
-
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -55,4 +54,6 @@ class PluginInStream(PluginInStreamBase):
     ):
         self.reader = reader
         self.writer = writer
-        super().__init__(session_id, event, data, conversation_id, message_id, app_id, endpoint_id)
+        super().__init__(
+            session_id, event, data, conversation_id, message_id, app_id, endpoint_id
+        )

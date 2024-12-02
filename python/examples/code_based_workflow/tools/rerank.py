@@ -1,4 +1,5 @@
-from typing import Generator
+from collections.abc import Generator
+
 from dify_plugin.entities.model.rerank import RerankModelConfig
 from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin.interfaces.tool import Tool
@@ -19,6 +20,8 @@ class Rerank(Tool):
             query="Utae",
         )
 
-        yield self.create_json_message({
-            "data": response.docs,
-        })
+        yield self.create_json_message(
+            {
+                "data": response.docs,
+            }
+        )

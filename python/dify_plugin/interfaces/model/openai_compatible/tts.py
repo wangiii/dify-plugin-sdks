@@ -3,11 +3,22 @@ from typing import Optional
 from urllib.parse import urljoin
 
 import requests
+
 from dify_plugin.entities import I18nObject
-from dify_plugin.entities.model import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
-from dify_plugin.errors.model import CredentialsValidateFailedError, InvokeBadRequestError
+from dify_plugin.entities.model import (
+    AIModelEntity,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+)
+from dify_plugin.errors.model import (
+    CredentialsValidateFailedError,
+    InvokeBadRequestError,
+)
 from dify_plugin.interfaces.model.tts_model import TTSModel
+
 from .common import _CommonOaiApiCompat
+
 
 class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
     """
@@ -54,10 +65,17 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
 
         for sentence in sentences:
             # Prepare request payload
-            payload = {"model": model, "input": sentence, "voice": voice, "response_format": audio_format}
+            payload = {
+                "model": model,
+                "input": sentence,
+                "voice": voice,
+                "response_format": audio_format,
+            }
 
             # Make POST request
-            response = requests.post(endpoint_url, headers=headers, json=payload, stream=True)
+            response = requests.post(
+                endpoint_url, headers=headers, json=payload, stream=True
+            )
 
             if response.status_code != 200:
                 raise InvokeBadRequestError(response.text)
@@ -82,13 +100,19 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
             # Test with a simple text
             next(
                 self._invoke(
-                    model=model, tenant_id="validate", credentials=credentials, content_text="Test.", voice=voice
+                    model=model,
+                    tenant_id="validate",
+                    credentials=credentials,
+                    content_text="Test.",
+                    voice=voice,
                 )
             )
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> Optional[AIModelEntity]:
         """
         Get customizable model schema
         """
@@ -127,13 +151,18 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
             },
         )
 
-    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> list:
+    def get_tts_model_voices(
+        self, model: str, credentials: dict, language: Optional[str] = None
+    ) -> list:
         """
         Override base get_tts_model_voices to handle customizable voices
         """
         model_schema = self.get_customizable_model_schema(model, credentials)
 
-        if not model_schema or ModelPropertyKey.VOICES not in model_schema.model_properties:
+        if (
+            not model_schema
+            or ModelPropertyKey.VOICES not in model_schema.model_properties
+        ):
             raise ValueError("this model does not support voice")
 
         voices = model_schema.model_properties[ModelPropertyKey.VOICES]

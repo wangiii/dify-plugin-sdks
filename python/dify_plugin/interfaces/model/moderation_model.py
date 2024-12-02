@@ -4,14 +4,15 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from .ai_model import AIModel
 from ...entities.model import ModelType
+from .ai_model import AIModel
 
 
 class ModerationModel(AIModel):
     """
     Model class for moderation model.
     """
+
     model_type: ModelType = ModelType.MODERATION
 
     # pydantic configs
@@ -22,9 +23,9 @@ class ModerationModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def _invoke(self, model: str, credentials: dict,
-                text: str, user: Optional[str] = None) \
-            -> bool:
+    def _invoke(
+        self, model: str, credentials: dict, text: str, user: Optional[str] = None
+    ) -> bool:
         """
         Invoke large language model
 
@@ -35,14 +36,14 @@ class ModerationModel(AIModel):
         :return: false if text is safe, true otherwise
         """
         raise NotImplementedError
-    
+
     ############################################################
     #                 For executor use only                    #
     ############################################################
 
-    def invoke(self, model: str, credentials: dict,
-               text: str, user: Optional[str] = None) \
-            -> bool:
+    def invoke(
+        self, model: str, credentials: dict, text: str, user: Optional[str] = None
+    ) -> bool:
         """
         Invoke moderation model
 

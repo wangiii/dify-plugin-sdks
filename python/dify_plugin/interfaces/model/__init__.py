@@ -1,15 +1,19 @@
 from abc import ABC, abstractmethod
 
-from .ai_model import AIModel
 from ...entities.model import AIModelEntity, ModelType
 from ...entities.model.provider import ProviderEntity
+from .ai_model import AIModel
 
 
 class ModelProvider(ABC):
     provider_schema: ProviderEntity
     model_instance_map: dict[ModelType, AIModel]
 
-    def __init__(self, provider_schemas: ProviderEntity, model_instance_map: dict[ModelType, AIModel]):
+    def __init__(
+        self,
+        provider_schemas: ProviderEntity,
+        model_instance_map: dict[ModelType, AIModel],
+    ):
         """
         Initialize model provider
 

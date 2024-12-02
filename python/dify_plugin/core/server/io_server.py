@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor
 import logging
 import os
-from threading import Thread
 import time
+from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 from typing import Optional
 
 from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader

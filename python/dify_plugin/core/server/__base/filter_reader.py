@@ -1,6 +1,6 @@
+import queue
 from collections.abc import Callable, Generator
 from queue import Queue
-import queue
 from typing import Optional, overload
 
 from ....core.entities.plugin.io import PluginInStream

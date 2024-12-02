@@ -4,7 +4,16 @@ import httpx
 
 from dify_plugin import RerankModel
 from dify_plugin.entities import I18nObject
-from dify_plugin.entities.model import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
+from dify_plugin.entities.model import (
+    AIModelEntity,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+)
+from dify_plugin.entities.model.rerank import (
+    RerankDocument,
+    RerankResult,
+)
 from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
     InvokeAuthorizationError,
@@ -14,10 +23,7 @@ from dify_plugin.errors.model import (
     InvokeRateLimitError,
     InvokeServerUnavailableError,
 )
-from dify_plugin.entities.model.rerank import (
-    RerankDocument,
-    RerankResult,
-)
+
 
 class JinaRerankModel(RerankModel):
     """
@@ -50,8 +56,7 @@ class JinaRerankModel(RerankModel):
             return RerankResult(model=model, docs=[])
 
         base_url = credentials.get("base_url", "https://api.jina.ai/v1")
-        if base_url.endswith("/"):
-            base_url = base_url[:-1]
+        base_url = base_url.removesuffix("/")
 
         try:
             response = httpx.post(

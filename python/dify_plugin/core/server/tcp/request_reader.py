@@ -1,7 +1,9 @@
-from json import loads
+import logging
 import socket
 import time
-from typing import Callable, Generator, Optional
+from collections.abc import Generator
+from json import loads
+from typing import Callable, Optional
 
 from gevent.select import select
 
@@ -13,8 +15,6 @@ from ....core.entities.plugin.io import (
 )
 from ....core.server.__base.request_reader import RequestReader
 from ....core.server.__base.response_writer import ResponseWriter
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +100,10 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             if self.on_connected:
                 self.on_connected()
             logger.info(f"Sent key to {self.host}:{self.port}")
-        except socket.error as e:
-            logger.error(f"\033[31mFailed to connect to {self.host}:{self.port}, {e}\033[0m")
+        except OSError as e:
+            logger.error(
+                f"\033[31mFailed to connect to {self.host}:{self.port}, {e}\033[0m"
+            )
             raise e
 
     def _read_stream(self) -> Generator[PluginInStream, None, None]:
@@ -118,7 +120,9 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 if data == b"":
                     raise Exception("Connection is closed")
             except Exception as e:
-                logger.error(f"\033[31mFailed to read data from {self.host}:{self.port}, {e}\033[0m")
+                logger.error(
+                    f"\033[31mFailed to read data from {self.host}:{self.port}, {e}\033[0m"
+                )
                 self.alive = False
                 time.sleep(self.reconnect_timeout)
                 self._launch()
@@ -155,4 +159,6 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                         f"Received event: \n{chunk.event}\n session_id: \n{chunk.session_id}\n data: \n{chunk.data}"
                     )
                 except Exception:
-                    logger.error(f"\033[31mAn error occurred while parsing the data: {line}\033[0m")
+                    logger.error(
+                        f"\033[31mAn error occurred while parsing the data: {line}\033[0m"
+                    )

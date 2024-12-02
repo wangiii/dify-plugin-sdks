@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
+
 from werkzeug import Request, Response
 
 from ...core.runtime import Session
-
 
 
 class Endpoint(ABC):

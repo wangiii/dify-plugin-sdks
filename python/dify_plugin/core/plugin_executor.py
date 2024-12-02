@@ -1,41 +1,40 @@
 import binascii
-from collections.abc import Generator, Iterable
 import tempfile
+from collections.abc import Generator, Iterable
 
 from werkzeug import Response
 
-from ..interfaces.model.ai_model import AIModel
-
 from ..config.config import DifyPluginEnv
-from .entities.plugin.request import (
-    ModelGetAIModelSchemas,
-    ModelGetLLMNumTokens,
-    ModelGetTTSVoices,
-    ModelGetTextEmbeddingNumTokens,
-    ModelInvokeLLMRequest,
-    ModelInvokeModerationRequest,
-    ModelInvokeRerankRequest,
-    ModelInvokeSpeech2TextRequest,
-    ModelInvokeTTSRequest,
-    ModelInvokeTextEmbeddingRequest,
-    ModelValidateModelCredentialsRequest,
-    ModelValidateProviderCredentialsRequest,
-    ToolGetRuntimeParametersRequest,
-    ToolInvokeRequest,
-    ToolValidateCredentialsRequest,
-    EndpointInvokeRequest,
-)
+from ..core.plugin_registration import PluginRegistration
+from ..core.runtime import Session
+from ..core.utils.http_parser import parse_raw_request
+from ..entities.tool import ToolRuntime
 from ..interfaces.endpoint import Endpoint
+from ..interfaces.model.ai_model import AIModel
 from ..interfaces.model.large_language_model import LargeLanguageModel
 from ..interfaces.model.moderation_model import ModerationModel
 from ..interfaces.model.rerank_model import RerankModel
 from ..interfaces.model.speech2text_model import Speech2TextModel
 from ..interfaces.model.text_embedding_model import TextEmbeddingModel
 from ..interfaces.model.tts_model import TTSModel
-from ..core.plugin_registration import PluginRegistration
-from ..entities.tool import ToolRuntime
-from ..core.utils.http_parser import parse_raw_request
-from ..core.runtime import Session
+from .entities.plugin.request import (
+    EndpointInvokeRequest,
+    ModelGetAIModelSchemas,
+    ModelGetLLMNumTokens,
+    ModelGetTextEmbeddingNumTokens,
+    ModelGetTTSVoices,
+    ModelInvokeLLMRequest,
+    ModelInvokeModerationRequest,
+    ModelInvokeRerankRequest,
+    ModelInvokeSpeech2TextRequest,
+    ModelInvokeTextEmbeddingRequest,
+    ModelInvokeTTSRequest,
+    ModelValidateModelCredentialsRequest,
+    ModelValidateProviderCredentialsRequest,
+    ToolGetRuntimeParametersRequest,
+    ToolInvokeRequest,
+    ToolValidateCredentialsRequest,
+)
 
 
 class PluginExecutor:
@@ -89,7 +88,9 @@ class PluginExecutor:
             )
 
         if not tool_cls._is_get_runtime_parameters_overridden():
-            raise ValueError(f"Tool `{data.tool}` does not implement runtime parameters")
+            raise ValueError(
+                f"Tool `{data.tool}` does not implement runtime parameters"
+            )
 
         tool_instance = tool_cls(
             runtime=ToolRuntime(
