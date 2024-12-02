@@ -235,7 +235,8 @@ class LargeLanguageModel(AIModel):
                     else:
                         if parameter_value != round(parameter_value, parameter_rule.precision):
                             raise ValueError(
-                                f"Model Parameter {parameter_name} should be round to {parameter_rule.precision} decimal places."
+                                f"Model Parameter {parameter_name} should be round to "
+                                f"{parameter_rule.precision} decimal places."
                             )
 
                 # validate parameter value range
@@ -298,7 +299,7 @@ if you are not sure about the structure.
 <instructions>
 {{instructions}}
 </instructions>
-"""
+"""  # noqa: E501
 
         code_block = model_parameters.get("response_format", "")
         if not code_block:
