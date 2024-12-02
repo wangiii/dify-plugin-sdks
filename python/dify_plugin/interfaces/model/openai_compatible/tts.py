@@ -106,7 +106,7 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
                 )
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
         """

@@ -153,7 +153,7 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             # call embedding model
             self._embedding_invoke(model=model, client=client, texts=["ping"], extra_model_kwargs={})
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def _embedding_invoke(
         self,

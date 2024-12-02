@@ -112,7 +112,7 @@ class PluginRegistration:
                 endpoint_configuration = EndpointProviderConfiguration(**fs)
                 self.endpoints_configuration.append(endpoint_configuration)
         except Exception as e:
-            raise ValueError(f"Error loading plugin configuration: {str(e)}")
+            raise ValueError(f"Error loading plugin configuration: {str(e)}") from e
 
     def _resolve_tool_providers(self):
         """
@@ -292,4 +292,4 @@ class PluginRegistration:
             endpoint, values = adapter.match()
             return endpoint, values
         except werkzeug.exceptions.HTTPException as e:
-            raise ValueError(f"Failed to dispatch endpoint request: {str(e)}")
+            raise ValueError(f"Failed to dispatch endpoint request: {str(e)}") from e

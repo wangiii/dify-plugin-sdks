@@ -14,4 +14,4 @@ class GoogleProvider(ToolProvider):
             ):
                 pass
         except Exception as e:
-            raise ToolProviderCredentialValidationError(str(e))
+            raise ToolProviderCredentialValidationError(str(e)) from e

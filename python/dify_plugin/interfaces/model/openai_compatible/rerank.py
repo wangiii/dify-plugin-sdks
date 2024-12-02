@@ -115,7 +115,7 @@ class OAICompatRerankModel(RerankModel):
             return RerankResult(model=model, docs=rerank_documents)
 
         except HTTPError as e:
-            raise InvokeServerUnavailableError(str(e))
+            raise InvokeServerUnavailableError(str(e)) from e
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -139,7 +139,7 @@ class OAICompatRerankModel(RerankModel):
                 score_threshold=0.8,
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """

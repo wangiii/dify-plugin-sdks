@@ -174,15 +174,15 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError:
-                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error")
+            except json.JSONDecodeError as e:
+                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error") from e
 
             if "model" not in json_result:
                 raise CredentialsValidateFailedError("Credentials validation failed: invalid response")
         except CredentialsValidateFailedError:
             raise
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """

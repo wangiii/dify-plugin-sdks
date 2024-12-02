@@ -191,4 +191,4 @@ class TTSModel(AIModel):
                 voice=voice,
             )
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e

@@ -67,7 +67,7 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
                 texts=["ping"],
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def _moderation_invoke(self, model: str, client: OpenAI, texts: list[str]) -> ModerationCreateResponse:
         """

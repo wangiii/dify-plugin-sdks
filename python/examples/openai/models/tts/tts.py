@@ -70,7 +70,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                 voice=self._get_model_default_voice(model, credentials),
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def _tts_invoke(self, model: str, credentials: dict, content_text: str, voice: str) -> bytes:
         """
@@ -106,7 +106,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                         if future.result():
                             audio_bytes_list.append(future.result())
                     except Exception as ex:
-                        raise InvokeBadRequestError(str(ex))
+                        raise InvokeBadRequestError(str(ex)) from ex
 
             if len(audio_bytes_list) > 0:
                 audio_segments = [
@@ -123,7 +123,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
             else:
                 raise InvokeBadRequestError("No audio bytes found")
         except Exception as ex:
-            raise InvokeBadRequestError(str(ex))
+            raise InvokeBadRequestError(str(ex)) from ex
 
     def _tts_invoke_streaming(
         self, model: str, credentials: dict, content_text: str, voice: str
@@ -179,7 +179,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                 with response as r:
                     yield from r.iter_bytes(1024)
         except Exception as ex:
-            raise InvokeBadRequestError(str(ex))
+            raise InvokeBadRequestError(str(ex)) from ex
 
     def _process_sentence(self, sentence: str, model: str, voice, credentials: dict):
         """

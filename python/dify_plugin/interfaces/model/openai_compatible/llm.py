@@ -150,8 +150,8 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError:
-                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error")
+            except json.JSONDecodeError as e:
+                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error") from e
 
             if completion_type is LLMMode.CHAT and json_result.get("object", "") == "":
                 json_result["object"] = "chat.completion"
@@ -173,7 +173,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         except CredentialsValidateFailedError:
             raise
         except Exception as ex:
-            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {str(ex)}")
+            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {str(ex)}") from ex
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """

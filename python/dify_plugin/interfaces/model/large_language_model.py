@@ -580,7 +580,7 @@ if you are not sure about the structure.
                     user,
                 )
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e
 
         if isinstance(result, LLMResult):
             yield result.to_llm_result_chunk()

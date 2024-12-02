@@ -84,7 +84,7 @@ class JinaRerankModel(RerankModel):
 
             return RerankResult(model=model, docs=rerank_documents)
         except httpx.HTTPStatusError as e:
-            raise InvokeServerUnavailableError(str(e))
+            raise InvokeServerUnavailableError(str(e)) from e
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -108,7 +108,7 @@ class JinaRerankModel(RerankModel):
                 score_threshold=0.8,
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     @property
     def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:

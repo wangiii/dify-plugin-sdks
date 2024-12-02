@@ -60,4 +60,4 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
             with open(audio_file_path, "rb") as audio_file:
                 self._invoke(model, credentials, audio_file)
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex

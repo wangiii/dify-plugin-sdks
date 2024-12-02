@@ -27,7 +27,7 @@ def load_yaml_file(file_path: str, ignore_error: bool = False) -> dict:
             try:
                 return yaml.safe_load(file)
             except Exception as e:
-                raise yaml.YAMLError(f"Failed to load YAML file {file_path}: {e}")
+                raise yaml.YAMLError(f"Failed to load YAML file {file_path}: {e}") from e
     except FileNotFoundError as e:
         logger.debug(f"Failed to load YAML file {file_path}: {e}")
         return {}

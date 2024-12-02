@@ -80,7 +80,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         try:
             response = post(url, headers=headers, data=dumps(data))
         except Exception as e:
-            raise InvokeConnectionError(str(e))
+            raise InvokeConnectionError(str(e)) from e
 
         if response.status_code != 200:
             try:
@@ -97,14 +97,16 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             except JSONDecodeError as e:
                 raise InvokeServerUnavailableError(
                     f"Failed to convert response to json: {e} with text: {response.text}"
-                )
+                ) from e
 
         try:
             resp = response.json()
             embeddings = resp["data"]
             usage = resp["usage"]
         except Exception as e:
-            raise InvokeServerUnavailableError(f"Failed to convert response to json: {e} with text: {response.text}")
+            raise InvokeServerUnavailableError(
+                "Failed to convert response to json: " f"{e} with text: {response.text}"
+            ) from e
 
         usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
 
@@ -143,7 +145,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         try:
             self._invoke(model=model, credentials=credentials, texts=["ping"])
         except Exception as e:
-            raise CredentialsValidateFailedError(f"Credentials validation failed: {e}")
+            raise CredentialsValidateFailedError(f"Credentials validation failed: {e}") from e
 
     @property
     def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:

@@ -74,4 +74,4 @@ class RerankModel(AIModel):
         try:
             return self._invoke(model, credentials, query, docs, score_threshold, top_n, user)
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e

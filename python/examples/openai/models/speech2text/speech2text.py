@@ -39,7 +39,7 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
             with open(audio_file_path, "rb") as audio_file:
                 self._speech2text_invoke(model, credentials, audio_file)
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
         """

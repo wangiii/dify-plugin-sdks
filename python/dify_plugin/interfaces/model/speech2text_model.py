@@ -68,4 +68,4 @@ class Speech2TextModel(AIModel):
         try:
             return self._invoke(model, credentials, file, user)
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e
