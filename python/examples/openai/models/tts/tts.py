@@ -164,7 +164,9 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                     for i in range(len(sentences))
                 ]
                 for future in futures:
-                    yield from future.result().__enter__().iter_bytes(1024)
+                    response = future.result()
+                    with response as r:
+                        yield from r.iter_bytes(1024)
 
             else:
                 response = client.audio.speech.with_streaming_response.create(
@@ -174,7 +176,8 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
                     input=content_text.strip(),
                 )
 
-                yield from response.__enter__().iter_bytes(1024)
+                with response as r:
+                    yield from r.iter_bytes(1024)
         except Exception as ex:
             raise InvokeBadRequestError(str(ex))
 
