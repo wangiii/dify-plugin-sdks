@@ -23,16 +23,12 @@ class Router:
     routes: list[Route]
     request_reader: RequestReader
 
-    def __init__(
-        self, request_reader: RequestReader, response_writer: Optional[ResponseWriter]
-    ) -> None:
+    def __init__(self, request_reader: RequestReader, response_writer: Optional[ResponseWriter]) -> None:
         self.routes = []
         self.request_reader = request_reader
         self.response_writer = response_writer
 
-    def register_route(
-        self, f: Callable, filter: Callable[[dict], bool], instance: Any = None
-    ):
+    def register_route(self, f: Callable, filter: Callable[[dict], bool], instance: Any = None):
         sig = inspect.signature(f)
         parameters = list(sig.parameters.values())
         if len(parameters) == 0:

@@ -42,9 +42,7 @@ class RequestReader(ABC):
         except Exception as e:
             data.writer.error(
                 session_id=session_id,
-                data={
-                    "error": f"Failed to process request ({type(e).__name__}): {str(e)}"
-                },
+                data={"error": f"Failed to process request ({type(e).__name__}): {str(e)}"},
             )
 
     def read(self, filter: Callable[["PluginInStream"], bool]) -> FilterReader:

@@ -51,13 +51,9 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
             voice = self._get_model_default_voice(model, credentials)
 
         # if streaming:
-        return self._tts_invoke_streaming(
-            model=model, credentials=credentials, content_text=content_text, voice=voice
-        )
+        return self._tts_invoke_streaming(model=model, credentials=credentials, content_text=content_text, voice=voice)
 
-    def validate_credentials(
-        self, model: str, credentials: dict, user: Optional[str] = None
-    ) -> None:
+    def validate_credentials(self, model: str, credentials: dict, user: Optional[str] = None) -> None:
         """
         validate credentials text2speech model
 
@@ -76,9 +72,7 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _tts_invoke(
-        self, model: str, credentials: dict, content_text: str, voice: str
-    ) -> bytes:
+    def _tts_invoke(self, model: str, credentials: dict, content_text: str, voice: str) -> bytes:
         """
         _tts_invoke text2speech model
 
@@ -92,17 +86,11 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
         word_limit = self._get_model_word_limit(model, credentials) or 500
         max_workers = self._get_model_workers_limit(model, credentials)
         try:
-            sentences = list(
-                self._split_text_into_sentences(
-                    org_text=content_text, max_length=word_limit
-                )
-            )
+            sentences = list(self._split_text_into_sentences(org_text=content_text, max_length=word_limit))
             audio_bytes_list = []
 
             # Create a thread pool and map the function to the list of sentences
-            with concurrent.futures.ThreadPoolExecutor(
-                max_workers=max_workers
-            ) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = [
                     executor.submit(
                         self._process_sentence,
@@ -163,12 +151,8 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
 
             word_limit = self._get_model_word_limit(model, credentials) or 500
             if len(content_text) > word_limit:
-                sentences = self._split_text_into_sentences(
-                    content_text, max_length=word_limit
-                )
-                executor = concurrent.futures.ThreadPoolExecutor(
-                    max_workers=min(3, len(sentences))
-                )
+                sentences = self._split_text_into_sentences(content_text, max_length=word_limit)
+                executor = concurrent.futures.ThreadPoolExecutor(max_workers=min(3, len(sentences)))
                 futures = [
                     executor.submit(
                         client.audio.speech.with_streaming_response.create,
@@ -207,8 +191,6 @@ class OpenAIText2SpeechModel(_CommonOpenAI, TTSModel):
         # transform credentials to kwargs for model instance
         credentials_kwargs = self._to_credential_kwargs(credentials)
         client = OpenAI(**credentials_kwargs)
-        response = client.audio.speech.create(
-            model=model, voice=voice, input=sentence.strip()
-        )
+        response = client.audio.speech.create(model=model, voice=voice, input=sentence.strip())
         if isinstance(response.read(), bytes):
             return response.read()

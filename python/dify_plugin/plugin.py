@@ -63,9 +63,7 @@ class Plugin(IOServer, Router):
         # register io routes
         self._register_request_routes()
 
-    def _launch_local_stream(
-        self, config: DifyPluginEnv
-    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_local_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch local stream
         """
@@ -76,9 +74,7 @@ class Plugin(IOServer, Router):
         self._log_configuration()
         return reader, writer
 
-    def _launch_remote_stream(
-        self, config: DifyPluginEnv
-    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_remote_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch remote stream
         """
@@ -133,9 +129,7 @@ class Plugin(IOServer, Router):
             tcp_stream.write(
                 InitializeMessage(
                     type=InitializeMessage.Type.ENDPOINT_DECLARATION,
-                    data=List(
-                        root=self.registration.endpoints_configuration
-                    ).model_dump(),
+                    data=List(root=self.registration.endpoints_configuration).model_dump(),
                 ).model_dump_json()
                 + "\n\n"
             )
@@ -166,15 +160,11 @@ class Plugin(IOServer, Router):
 
         self._log_configuration()
 
-    def _launch_aws_stream(
-        self, config: DifyPluginEnv
-    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_aws_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch AWS stream
         """
-        aws_stream = AWSLambdaRequestReader(
-            config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT
-        )
+        aws_stream = AWSLambdaRequestReader(config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT)
         aws_stream.launch()
 
         return aws_stream, None

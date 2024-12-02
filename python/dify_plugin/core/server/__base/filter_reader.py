@@ -21,16 +21,12 @@ class FilterReader:
         self.close_callback = close_callback
 
     @overload
-    def read(
-        self, timeout_for_round: float
-    ) -> Generator[PluginInStream | None, None, None]: ...
+    def read(self, timeout_for_round: float) -> Generator[PluginInStream | None, None, None]: ...
 
     @overload
     def read(self) -> Generator[PluginInStream, None, None]: ...
 
-    def read(
-        self, timeout_for_round: Optional[float] = None
-    ) -> Generator[PluginInStream | None, None, None]:
+    def read(self, timeout_for_round: Optional[float] = None) -> Generator[PluginInStream | None, None, None]:
         while True:
             try:
                 data = self.queue.get(timeout=timeout_for_round)

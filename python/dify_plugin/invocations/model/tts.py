@@ -7,9 +7,7 @@ from ...entities.model.tts import TTSModelConfig, TTSResult
 
 
 class TTSInvocation(BackwardsInvocation[TTSResult]):
-    def invoke(
-        self, model_config: TTSModelConfig, content_text: str
-    ) -> Generator[bytes, None, None]:
+    def invoke(self, model_config: TTSModelConfig, content_text: str) -> Generator[bytes, None, None]:
         """
         Invoke tts
         """

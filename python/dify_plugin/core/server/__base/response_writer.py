@@ -36,16 +36,10 @@ class ResponseWriter(ABC):
         if isinstance(data, BaseModel):
             data = data.model_dump()
 
-        self.write(
-            StreamOutputMessage(
-                event=event, session_id=session_id, data=data
-            ).model_dump_json()
-        )
+        self.write(StreamOutputMessage(event=event, session_id=session_id, data=data).model_dump_json())
         self.write("\n\n")
 
-    def error(
-        self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None
-    ):
+    def error(self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
         return self.put(Event.ERROR, session_id, data)
 
     def log(self, data: Optional[dict] = None):
@@ -54,23 +48,14 @@ class ResponseWriter(ABC):
     def heartbeat(self):
         return self.put(Event.HEARTBEAT, None, {})
 
-    def session_message(
-        self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None
-    ):
+    def session_message(self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None):
         return self.put(Event.SESSION, session_id, data)
 
-    def session_message_text(
-        self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None
-    ) -> str:
+    def session_message_text(self, session_id: Optional[str] = None, data: Optional[dict | BaseModel] = None) -> str:
         if isinstance(data, BaseModel):
             data = data.model_dump()
 
-        return (
-            StreamOutputMessage(
-                event=Event.SESSION, session_id=session_id, data=data
-            ).model_dump_json()
-            + "\n\n"
-        )
+        return StreamOutputMessage(event=Event.SESSION, session_id=session_id, data=data).model_dump_json() + "\n\n"
 
     def stream_object(self, data: dict | BaseModel) -> SessionMessage:
         if isinstance(data, BaseModel):

@@ -79,10 +79,7 @@ class JinaRerankModel(RerankModel):
                     text=result["document"]["text"],
                     score=result["relevance_score"],
                 )
-                if (
-                    score_threshold is None
-                    or result["relevance_score"] >= score_threshold
-                ):
+                if score_threshold is None or result["relevance_score"] >= score_threshold:
                     rerank_documents.append(rerank_document)
 
             return RerankResult(model=model, docs=rerank_documents)
@@ -126,9 +123,7 @@ class JinaRerankModel(RerankModel):
             InvokeBadRequestError: [httpx.RequestError],
         }
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -137,9 +132,7 @@ class JinaRerankModel(RerankModel):
             label=I18nObject(en_US=model),
             model_type=ModelType.RERANK,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
-            model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size") or 0)
-            },
+            model_properties={ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size") or 0)},
         )
 
         return entity

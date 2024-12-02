@@ -6,9 +6,7 @@ from typing import Any
 from .yaml_loader import load_yaml_file
 
 
-def get_position_map(
-    folder_path: str, *, file_name: str = "_position.yaml"
-) -> dict[str, int]:
+def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> dict[str, int]:
     """
     Get the mapping from name to index from a YAML file
     :param folder_path:

@@ -73,9 +73,7 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
             }
 
             # Make POST request
-            response = requests.post(
-                endpoint_url, headers=headers, json=payload, stream=True
-            )
+            response = requests.post(endpoint_url, headers=headers, json=payload, stream=True)
 
             if response.status_code != 200:
                 raise InvokeBadRequestError(response.text)
@@ -110,9 +108,7 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> Optional[AIModelEntity]:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
         """
         Get customizable model schema
         """
@@ -151,18 +147,13 @@ class OAICompatText2SpeechModel(_CommonOaiApiCompat, TTSModel):
             },
         )
 
-    def get_tts_model_voices(
-        self, model: str, credentials: dict, language: Optional[str] = None
-    ) -> list:
+    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> list:
         """
         Override base get_tts_model_voices to handle customizable voices
         """
         model_schema = self.get_customizable_model_schema(model, credentials)
 
-        if (
-            not model_schema
-            or ModelPropertyKey.VOICES not in model_schema.model_properties
-        ):
+        if not model_schema or ModelPropertyKey.VOICES not in model_schema.model_properties:
             raise ValueError("this model does not support voice")
 
         voices = model_schema.model_properties[ModelPropertyKey.VOICES]

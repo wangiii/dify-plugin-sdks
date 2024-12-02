@@ -108,15 +108,11 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             embeddings[i] = (average / np.linalg.norm(average)).tolist()  # type: ignore
 
         # calc usage
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=used_tokens
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
-    def get_num_tokens(
-        self, model: str, credentials: dict, texts: list[str]
-    ) -> list[int]:
+    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
         Get number of tokens for given prompt messages
 
@@ -155,9 +151,7 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             client = OpenAI(**credentials_kwargs)
 
             # call embedding model
-            self._embedding_invoke(
-                model=model, client=client, texts=["ping"], extra_model_kwargs={}
-            )
+            self._embedding_invoke(model=model, client=client, texts=["ping"], extra_model_kwargs={})
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
@@ -184,26 +178,16 @@ class OpenAITextEmbeddingModel(_CommonOpenAI, TextEmbeddingModel):
             **extra_model_kwargs,
         )
 
-        if (
-            "encoding_format" in extra_model_kwargs
-            and extra_model_kwargs["encoding_format"] == "base64"
-        ):
+        if "encoding_format" in extra_model_kwargs and extra_model_kwargs["encoding_format"] == "base64":
             # decode base64 embedding
             return (
-                [
-                    list(
-                        np.frombuffer(base64.b64decode(data.embedding), dtype="float32")
-                    )
-                    for data in response.data
-                ],  # type: ignore
+                [list(np.frombuffer(base64.b64decode(data.embedding), dtype="float32")) for data in response.data],  # type: ignore
                 response.usage.total_tokens,
             )
 
         return [data.embedding for data in response.data], response.usage.total_tokens
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 

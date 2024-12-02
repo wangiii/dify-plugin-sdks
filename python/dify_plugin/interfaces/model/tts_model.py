@@ -52,9 +52,7 @@ class TTSModel(AIModel):
         """
         raise NotImplementedError
 
-    def get_tts_model_voices(
-        self, model: str, credentials: dict, language: Optional[str] = None
-    ) -> Optional[list]:
+    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> Optional[list]:
         """
         Get voice for given tts model voices
 
@@ -90,10 +88,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.DEFAULT_VOICE]
 
     def _get_model_audio_type(self, model: str, credentials: dict) -> Optional[str]:
@@ -106,10 +101,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.AUDIO_TYPE]
 
     def _get_model_word_limit(self, model: str, credentials: dict) -> Optional[int]:
@@ -119,10 +111,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.WORD_LIMIT]
 
     def _get_model_workers_limit(self, model: str, credentials: dict) -> Optional[int]:
@@ -132,10 +121,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.MAX_WORKERS]
 
     @staticmethod

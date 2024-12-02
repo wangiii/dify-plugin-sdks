@@ -21,9 +21,7 @@ def load_yaml_file(file_path: str, ignore_error: bool = False) -> dict:
     """
     try:
         if not file_path or not os.path.exists(file_path):
-            raise FileNotFoundError(
-                f"Failed to load YAML file {file_path}: file not found"
-            )
+            raise FileNotFoundError(f"Failed to load YAML file {file_path}: file not found")
 
         with open(file_path, encoding="utf-8") as file:
             try:

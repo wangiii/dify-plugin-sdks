@@ -16,9 +16,7 @@ class JinaProvider(ModelProvider):
 
             # Use `jina-embeddings-v2-base-en` model for validate,
             # no matter what model you pass in, text completion model or chat model
-            model_instance.validate_credentials(
-                model="jina-embeddings-v2-base-en", credentials=credentials
-            )
+            model_instance.validate_credentials(model="jina-embeddings-v2-base-en", credentials=credentials)
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:

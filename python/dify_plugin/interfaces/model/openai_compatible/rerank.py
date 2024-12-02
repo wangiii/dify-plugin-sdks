@@ -71,9 +71,7 @@ class OAICompatRerankModel(RerankModel):
         }
 
         try:
-            response = post(
-                str(URL(url) / "rerank"), headers=headers, data=dumps(data), timeout=60
-            )
+            response = post(str(URL(url) / "rerank"), headers=headers, data=dumps(data), timeout=60)
             response.raise_for_status()
             results = response.json()
 
@@ -83,9 +81,7 @@ class OAICompatRerankModel(RerankModel):
             # Min-Max Normalization: Normalize scores to 0 ~ 1.0 range
             min_score = min(scores)
             max_score = max(scores)
-            score_range = (
-                max_score - min_score if max_score != min_score else 1.0
-            )  # Avoid division by zero
+            score_range = max_score - min_score if max_score != min_score else 1.0  # Avoid division by zero
 
             for result in results["results"]:
                 index = result["index"]
@@ -145,9 +141,7 @@ class OAICompatRerankModel(RerankModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """

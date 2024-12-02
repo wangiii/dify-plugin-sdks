@@ -72,8 +72,6 @@ class RerankModel(AIModel):
         self.started_at = time.perf_counter()
 
         try:
-            return self._invoke(
-                model, credentials, query, docs, score_threshold, top_n, user
-            )
+            return self._invoke(model, credentials, query, docs, score_threshold, top_n, user)
         except Exception as e:
             raise self._transform_invoke_error(e)

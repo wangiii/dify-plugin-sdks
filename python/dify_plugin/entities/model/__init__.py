@@ -265,16 +265,10 @@ class ParameterRule(BaseModel):
             # check if there is a template
             if "use_template" in data:
                 try:
-                    default_parameter_name = DefaultParameterName.value_of(
-                        data["use_template"]
-                    )
-                    default_parameter_rule = PARAMETER_RULE_TEMPLATE.get(
-                        default_parameter_name
-                    )
+                    default_parameter_name = DefaultParameterName.value_of(data["use_template"])
+                    default_parameter_rule = PARAMETER_RULE_TEMPLATE.get(default_parameter_name)
                     if not default_parameter_rule:
-                        raise Exception(
-                            f"Invalid model parameter rule name {default_parameter_name}"
-                        )
+                        raise Exception(f"Invalid model parameter rule name {default_parameter_name}")
                     copy_default_parameter_rule = default_parameter_rule.copy()
                     copy_default_parameter_rule.update(data)
                     data = copy_default_parameter_rule

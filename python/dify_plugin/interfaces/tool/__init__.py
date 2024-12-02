@@ -43,9 +43,7 @@ class Tool(ABC):
         user_id: Optional[str] = None,
     ):
         return cls(
-            runtime=ToolRuntime(
-                credentials=credentials, user_id=user_id, session_id=None
-            ),
+            runtime=ToolRuntime(credentials=credentials, user_id=user_id, session_id=None),
             session=Session.empty_session(),  # TODO could not fetch session here
         )
 
@@ -89,9 +87,7 @@ class Tool(ABC):
             message=ToolInvokeMessage.TextMessage(text=link),
         )
 
-    def create_blob_message(
-        self, blob: bytes, meta: Optional[dict] = None
-    ) -> ToolInvokeMessage:
+    def create_blob_message(self, blob: bytes, meta: Optional[dict] = None) -> ToolInvokeMessage:
         """
         create a blob message
 
@@ -104,9 +100,7 @@ class Tool(ABC):
             meta=meta,
         )
 
-    def create_variable_message(
-        self, variable_name: str, variable_value: Any
-    ) -> ToolInvokeMessage:
+    def create_variable_message(self, variable_name: str, variable_value: Any) -> ToolInvokeMessage:
         """
         create a variable message
 
@@ -116,14 +110,10 @@ class Tool(ABC):
         """
         return ToolInvokeMessage(
             type=ToolInvokeMessage.MessageType.VARIABLE,
-            message=ToolInvokeMessage.VariableMessage(
-                variable_name=variable_name, variable_value=variable_value
-            ),
+            message=ToolInvokeMessage.VariableMessage(variable_name=variable_name, variable_value=variable_value),
         )
 
-    def create_stream_variable_message(
-        self, variable_name: str, variable_value: str
-    ) -> ToolInvokeMessage:
+    def create_stream_variable_message(self, variable_name: str, variable_value: str) -> ToolInvokeMessage:
         """
         create a variable message that will be streamed to the frontend
 
@@ -165,15 +155,10 @@ class Tool(ABC):
         convert parameters into correct types
         """
         for parameter, value in tool_parameters.items():
-            if (
-                isinstance(value, dict)
-                and value.get("dify_model_identity") == DIFY_FILE_IDENTITY
-            ):
+            if isinstance(value, dict) and value.get("dify_model_identity") == DIFY_FILE_IDENTITY:
                 tool_parameters[parameter] = File(url=value["url"])
             elif isinstance(value, list) and all(
-                isinstance(item, dict)
-                and item.get("dify_model_identity") == DIFY_FILE_IDENTITY
-                for item in value
+                isinstance(item, dict) and item.get("dify_model_identity") == DIFY_FILE_IDENTITY for item in value
             ):
                 tool_parameters[parameter] = [File(url=item["url"]) for item in value]
 

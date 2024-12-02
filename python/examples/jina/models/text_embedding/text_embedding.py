@@ -104,13 +104,9 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             embeddings = resp["data"]
             usage = resp["usage"]
         except Exception as e:
-            raise InvokeServerUnavailableError(
-                f"Failed to convert response to json: {e} with text: {response.text}"
-            )
+            raise InvokeServerUnavailableError(f"Failed to convert response to json: {e} with text: {response.text}")
 
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=usage["total_tokens"]
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
 
         result = TextEmbeddingResult(
             model=model,
@@ -120,9 +116,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
         return result
 
-    def get_num_tokens(
-        self, model: str, credentials: dict, texts: list[str]
-    ) -> list[int]:
+    def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
         Get number of tokens for given prompt messages
 
@@ -161,9 +155,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError, InvokeBadRequestError],
         }
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -193,9 +185,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
         return usage
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """

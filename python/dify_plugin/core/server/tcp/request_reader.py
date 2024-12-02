@@ -101,9 +101,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 self.on_connected()
             logger.info(f"Sent key to {self.host}:{self.port}")
         except OSError as e:
-            logger.exception(
-                f"\033[31mFailed to connect to {self.host}:{self.port}\033[0m"
-            )
+            logger.exception(f"\033[31mFailed to connect to {self.host}:{self.port}\033[0m")
             raise e
 
     def _read_stream(self) -> Generator[PluginInStream, None, None]:
@@ -157,6 +155,4 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                         f"Received event: \n{chunk.event}\n session_id: \n{chunk.session_id}\n data: \n{chunk.data}"
                     )
                 except Exception:
-                    logger.exception(
-                        f"\033[31mAn error occurred while parsing the data: {line}\033[0m"
-                    )
+                    logger.exception(f"\033[31mAn error occurred while parsing the data: {line}\033[0m")

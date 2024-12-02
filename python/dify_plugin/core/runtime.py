@@ -200,9 +200,7 @@ class BackwardsInvocation(Generic[T], ABC):
         if not self.session:
             raise Exception("current tool runtime does not support backwards invoke")
         if self.session.install_method in [InstallMethod.Local, InstallMethod.Remote]:
-            return self._full_duplex_backwards_invoke(
-                backwards_request_id, type, data_type, data
-            )
+            return self._full_duplex_backwards_invoke(backwards_request_id, type, data_type, data)
         return self._http_backwards_invoke(backwards_request_id, type, data_type, data)
 
     def _line_converter_wrapper(
@@ -255,11 +253,7 @@ class BackwardsInvocation(Generic[T], ABC):
         if not self.session or not self.session.dify_plugin_daemon_url:
             raise Exception("current tool runtime does not support backwards invoke")
 
-        url = (
-            URL(self.session.dify_plugin_daemon_url)
-            / "backwards-invocation"
-            / "transaction"
-        )
+        url = URL(self.session.dify_plugin_daemon_url) / "backwards-invocation" / "transaction"
         headers = {
             "Dify-Plugin-Session-ID": self.session.session_id,
         }
@@ -331,6 +325,4 @@ class BackwardsInvocation(Generic[T], ABC):
             )
 
         with self.session.reader.read(filter) as reader:
-            yield from self._line_converter_wrapper(
-                reader.read(timeout_for_round=1), data_type
-            )
+            yield from self._line_converter_wrapper(reader.read(timeout_for_round=1), data_type)

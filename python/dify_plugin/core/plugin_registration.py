@@ -88,9 +88,7 @@ class PluginRegistration:
             for entry in entries:
                 if entry.is_file():
                     with open(entry, "rb") as f:
-                        self.files.append(
-                            PluginAsset(filename=entry.name, data=f.read())
-                        )
+                        self.files.append(PluginAsset(filename=entry.name, data=f.read()))
 
     def _load_plugin_configuration(self):
         """
@@ -221,11 +219,7 @@ class PluginRegistration:
                     parent_type=Endpoint,
                 )
 
-                self.endpoints.add(
-                    Rule(
-                        endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls
-                    )
-                )
+                self.endpoints.add(Rule(endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls))
 
     def _resolve_plugin_cls(self):
         """
@@ -282,15 +276,11 @@ class PluginRegistration:
         """
         for provider_registration in self.models_mapping:
             if provider_registration == provider:
-                registration = self.models_mapping[provider_registration][2].get(
-                    model_type
-                )
+                registration = self.models_mapping[provider_registration][2].get(model_type)
                 if registration:
                     return registration
 
-    def dispatch_endpoint_request(
-        self, request: Request
-    ) -> tuple[type[Endpoint], Mapping]:
+    def dispatch_endpoint_request(self, request: Request) -> tuple[type[Endpoint], Mapping]:
         """
         dispatch endpoint request, match the request to the registered endpoints
 

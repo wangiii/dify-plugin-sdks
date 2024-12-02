@@ -41,9 +41,7 @@ class UploadFileResponse(BaseModel):
 
 
 class File(BackwardsInvocation[dict]):
-    def upload(
-        self, filename: str, content: bytes, mimetype: str
-    ) -> UploadFileResponse:
+    def upload(self, filename: str, content: bytes, mimetype: str) -> UploadFileResponse:
         """
         Upload a file
 
@@ -67,9 +65,7 @@ class File(BackwardsInvocation[dict]):
 
             response = requests.post(url, files={"file": (filename, content, mimetype)})
             if response.status_code != 201:
-                raise Exception(
-                    f"upload file failed, status code: {response.status_code}, response: {response.text}"
-                )
+                raise Exception(f"upload file failed, status code: {response.status_code}, response: {response.text}")
 
             return UploadFileResponse(**response.json())
 

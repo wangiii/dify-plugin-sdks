@@ -13,9 +13,7 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
     Model class for OpenAI Speech to text model.
     """
 
-    def _invoke(
-        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
-    ) -> str:
+    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
         """
         Invoke speech2text model
 
@@ -43,9 +41,7 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _speech2text_invoke(
-        self, model: str, credentials: dict, file: IO[bytes]
-    ) -> str:
+    def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
         """
         Invoke speech2text model
 
