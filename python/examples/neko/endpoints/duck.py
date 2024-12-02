@@ -1,3 +1,4 @@
+import contextlib
 import time
 from collections.abc import Mapping
 
@@ -35,10 +36,8 @@ class Duck(Endpoint):
 
             visitors += 1
 
-            try:
+            with contextlib.suppress(Exception):
                 self.session.storage.set("visitors", str(visitors).encode())
-            except Exception:
-                pass
 
             yield f"it's your {visitors} time visit this page! <br>"
 

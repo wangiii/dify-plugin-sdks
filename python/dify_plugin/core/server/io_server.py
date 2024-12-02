@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 import time
@@ -137,10 +138,8 @@ class IOServer(ABC):
 
         while True:
             # timer
-            try:
+            with contextlib.suppress(Exception):
                 self.default_writer.heartbeat()
-            except Exception:
-                pass
             time.sleep(self.config.HEARTBEAT_INTERVAL)
 
     def _parent_alive_check(self):
@@ -156,6 +155,7 @@ class IOServer(ABC):
     def _run(self):
         th1 = Thread(target=self._setup_instruction_listener)
         th2 = Thread(target=self.request_reader.event_loop)
+        th3 = None
 
         if self.default_writer:
             th3 = Thread(target=self._heartbeat)
@@ -166,13 +166,13 @@ class IOServer(ABC):
         th1.start()
         th2.start()
 
-        if self.default_writer:
+        if th3 is not None:
             th3.start()
 
         th1.join()
         th2.join()
 
-        if self.default_writer:
+        if th3 is not None:
             th3.join()
 
     def run(self):

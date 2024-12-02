@@ -1,3 +1,4 @@
+import contextlib
 from collections.abc import Mapping
 
 from flask import Flask, render_template_string
@@ -17,10 +18,8 @@ class NekoEndpoint(Endpoint):
 
         visitors += 1
 
-        try:
+        with contextlib.suppress(Exception):
             self.session.storage.set("visitors", str(visitors).encode())
-        except Exception:
-            pass
 
         # align the string length of visitors to the length of 4
         visitors = str(visitors).rjust(4)
