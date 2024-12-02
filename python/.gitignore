@@ -7,3 +7,4 @@ __pycache__
 dist/
 dify_plugin.egg-info/
 build/
+.pdm-python
