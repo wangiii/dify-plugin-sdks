@@ -63,9 +63,7 @@ class IOServer(ABC):
         """
 
         def filter(data: PluginInStream) -> bool:
-            if data.event == PluginInStreamEvent.Request:
-                return True
-            return False
+            return data.event == PluginInStreamEvent.Request
 
         for data in self.request_reader.read(filter).read():
             self.executer.submit(
