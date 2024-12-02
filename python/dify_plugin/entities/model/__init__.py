@@ -235,9 +235,8 @@ class ProviderModel(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_label(cls, data: dict) -> dict:
-        if isinstance(data, dict):
-            if not data.get("label"):
-                data["label"] = I18nObject(en_US=data["model"])
+        if isinstance(data, dict) and not data.get("label"):
+            data["label"] = I18nObject(en_US=data["model"])
 
         return data
 

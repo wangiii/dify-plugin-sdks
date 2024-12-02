@@ -431,9 +431,8 @@ if you are not sure about the structure.
                         new_piece += "`" * backtick_count + char
                         state = "normal"
                         backtick_count = 0
-                elif state == "skip_content":
-                    if char.isspace():
-                        state = "normal"
+                elif state == "skip_content" and char.isspace():
+                    state = "normal"
 
             if new_piece:
                 yield LLMResultChunk(

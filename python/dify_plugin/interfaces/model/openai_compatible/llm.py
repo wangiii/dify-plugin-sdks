@@ -502,9 +502,8 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                         usage=usage or {},
                     )
                     break
-                if chunk_json:
-                    if u := chunk_json.get("usage"):
-                        usage = u
+                if chunk_json and (u := chunk_json.get("usage")):
+                    usage = u
                 if not chunk_json or len(chunk_json["choices"]) == 0:
                     continue
 
@@ -622,11 +621,10 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         if tool_calls:
             if function_calling_type == "tool_call":
                 assistant_message.tool_calls = self._extract_response_tool_calls(tool_calls)
-            elif function_calling_type == "function_call":
-                if tool_calls:
-                    extracted_tool_call = self._extract_response_function_call(tool_calls)
-                    if extracted_tool_call:
-                        assistant_message.tool_calls = [extracted_tool_call]
+            elif function_calling_type == "function_call" and tool_calls:
+                extracted_tool_call = self._extract_response_function_call(tool_calls)
+                if extracted_tool_call:
+                    assistant_message.tool_calls = [extracted_tool_call]
 
         usage = response_json.get("usage")
         if usage:

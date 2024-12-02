@@ -940,18 +940,17 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
             user_message_count = len([m for m in prompt_messages if isinstance(m, UserPromptMessage)])
             if user_message_count > 1:
                 for prompt_message in prompt_messages:
-                    if isinstance(prompt_message, UserPromptMessage):
-                        if isinstance(prompt_message.content, list):
-                            prompt_message.content = "\n".join(
-                                [
-                                    item.data
-                                    if item.type == PromptMessageContentType.TEXT
-                                    else "[IMAGE]"
-                                    if item.type == PromptMessageContentType.IMAGE
-                                    else ""
-                                    for item in prompt_message.content
-                                ]
-                            )
+                    if isinstance(prompt_message, UserPromptMessage) and isinstance(prompt_message.content, list):
+                        prompt_message.content = "\n".join(
+                            [
+                                item.data
+                                if item.type == PromptMessageContentType.TEXT
+                                else "[IMAGE]"
+                                if item.type == PromptMessageContentType.IMAGE
+                                else ""
+                                for item in prompt_message.content
+                            ]
+                        )
 
         return prompt_messages
 

@@ -49,11 +49,8 @@ ignore = [
     "N806", # non-lowercase-variable-in-function
     "N815", # mixed-case-variable-in-class-scope
     "PT011", # pytest-raises-too-broad
-    "SIM102", # collapsible-if
     "SIM105", # suppressible-exception
-    "SIM107", # return-in-try-except-finally
     "SIM108", # if-else-block-instead-of-if-exp
-    "SIM113", # eumerate-for-loop
 ]
 
 [lint.per-file-ignores]

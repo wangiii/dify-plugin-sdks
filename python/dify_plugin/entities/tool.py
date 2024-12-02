@@ -93,9 +93,8 @@ class ToolInvokeMessage(BaseModel):
         @field_validator("variable_value", "stream")
         @classmethod
         def validate_variable_value_and_stream(cls, v, values):
-            if values.get("stream"):
-                if not isinstance(v, str):
-                    raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
+            if values.get("stream") and not isinstance(v, str):
+                raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
             return v
 
     class MessageType(Enum):
