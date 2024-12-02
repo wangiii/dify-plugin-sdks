@@ -56,7 +56,7 @@ class PluginResourceRequirements(BaseModel):
         app: Optional[App] = Field(default=None)
         storage: Storage = Field(default=None)
 
-    permission: Optional[Permission]
+    permission: Optional[Permission] = Field(default=None)
 
 
 class PluginConfiguration(BaseModel):
