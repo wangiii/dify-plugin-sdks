@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+import logging
 import os
 from threading import Thread
 import time
 from typing import Optional
 
+from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader
 from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
+from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
 
 from ...config.config import DifyPluginEnv
 from ...core.entities.plugin.io import (
@@ -17,6 +20,8 @@ from ...errors.model import (
 )
 from .__base.request_reader import RequestReader
 from .__base.response_writer import ResponseWriter
+
+logger = logging.getLogger(__name__)
 
 
 class IOServer(ABC):
@@ -106,6 +111,12 @@ class IOServer(ABC):
             if isinstance(e, InvokeError):
                 args["description"] = e.description
 
+            if isinstance(reader, (TCPReaderWriter, AWSLambdaRequestReader)):
+                logger.exception(
+                    "Unexpected error occurred when executing request",
+                    exc_info=e,
+                )
+
             writer.session_message(
                 session_id=session_id,
                 data=writer.stream_error_object(
@@ -153,7 +164,7 @@ class IOServer(ABC):
 
         if isinstance(self.request_reader, StdioRequestReader):
             Thread(target=self._parent_alive_check).start()
-        
+
         th1.start()
         th2.start()
 

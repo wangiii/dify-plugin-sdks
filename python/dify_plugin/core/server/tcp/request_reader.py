@@ -143,12 +143,16 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             for line in lines:
                 try:
                     data = loads(line)
-                    yield PluginInStream(
+                    chunk = PluginInStream(
                         session_id=data["session_id"],
                         event=PluginInStreamEvent.value_of(data["event"]),
                         data=data["data"],
                         reader=self,
                         writer=self,
+                    )
+                    yield chunk
+                    logger.info(
+                        f"Received event: \n{chunk.event}\n session_id: \n{chunk.session_id}\n data: \n{chunk.data}"
                     )
                 except Exception:
                     logger.error(f"\033[31mAn error occurred while parsing the data: {line}\033[0m")
