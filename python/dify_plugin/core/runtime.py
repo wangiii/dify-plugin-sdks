@@ -269,33 +269,32 @@ class BackwardsInvocation(Generic[T], ABC):
             ),
         )
 
-        with httpx.Client() as client:
-            with client.stream(
-                method="POST",
-                url=str(url),
-                headers=headers,
-                content=payload,
-                timeout=(
-                    300,
-                    300,
-                    300,
-                    300,
-                ),  # 300 seconds for connection, read, write, and pool
-            ) as response:
+        with httpx.Client() as client, client.stream(
+            method="POST",
+            url=str(url),
+            headers=headers,
+            content=payload,
+            timeout=(
+                300,
+                300,
+                300,
+                300,
+            ),  # 300 seconds for connection, read, write, and pool
+        ) as response:
 
-                def generator():
-                    for line in response.iter_lines():
-                        if not line:
-                            continue
+            def generator():
+                for line in response.iter_lines():
+                    if not line:
+                        continue
 
-                        data = json.loads(line)
-                        yield PluginInStreamBase(
-                            session_id=data["session_id"],
-                            event=PluginInStreamEvent.value_of(data["event"]),
-                            data=data["data"],
-                        )
+                    data = json.loads(line)
+                    yield PluginInStreamBase(
+                        session_id=data["session_id"],
+                        event=PluginInStreamEvent.value_of(data["event"]),
+                        data=data["data"],
+                    )
 
-                yield from self._line_converter_wrapper(generator(), data_type)
+            yield from self._line_converter_wrapper(generator(), data_type)
 
     def _full_duplex_backwards_invoke(
         self,
