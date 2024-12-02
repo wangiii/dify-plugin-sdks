@@ -81,7 +81,7 @@ class SummaryInvocation(BackwardsInvocation[SummaryResult]):
         }
 
         for data in self._backwards_invoke(
-            InvokeType.LLM,
+            InvokeType.SYSTEM_SUMMARY,
             SummaryResult,
             data,
         ):

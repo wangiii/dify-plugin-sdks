@@ -14,6 +14,7 @@ class InvokeType(Enum):
     App = "app"
     Storage = "storage"
     UploadFile = "upload_file"
+    SYSTEM_SUMMARY = "system_summary"
 
     @classmethod
     def value_of(cls, value: str) -> "InvokeType":

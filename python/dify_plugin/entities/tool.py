@@ -21,6 +21,7 @@ class CommonParameterType(Enum):
     STRING = "string"
     NUMBER = "number"
     FILE = "file"
+    FILES = "files"
     BOOLEAN = "boolean"
     APP_SELECTOR = "app-selector"
     MODEL_SELECTOR = "model-selector"
@@ -174,6 +175,7 @@ class ToolParameter(BaseModel):
         SELECT = CommonParameterType.SELECT.value
         SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
         FILE = CommonParameterType.FILE.value
+        FILES = CommonParameterType.FILES.value
         MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
         # TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
