@@ -1,5 +1,6 @@
 import os
 from collections.abc import Mapping
+from pathlib import Path
 from typing import TypeVar
 
 import werkzeug
@@ -87,8 +88,8 @@ class PluginRegistration:
         with os.scandir("_assets") as entries:
             for entry in entries:
                 if entry.is_file():
-                    with open(entry, "rb") as f:
-                        self.files.append(PluginAsset(filename=entry.name, data=f.read()))
+                    entry_bytes = Path(entry).read_bytes()
+                    self.files.append(PluginAsset(filename=entry.name, data=entry_bytes))
 
     def _load_plugin_configuration(self):
         """
