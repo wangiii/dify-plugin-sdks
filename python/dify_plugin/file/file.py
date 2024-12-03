@@ -8,7 +8,10 @@ from dify_plugin.file.entities import FileType
 class File(BaseModel):
     dify_model_identity: str = DIFY_FILE_IDENTITY
     url: str
-    mime_type: str | None
+    mime_type: str | None = None
+    filename: str | None = None
+    extension: str | None = None
+    size: int | None = None
     type: FileType
 
     _blob: bytes | None = None

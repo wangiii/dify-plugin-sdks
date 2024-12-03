@@ -159,13 +159,25 @@ class Tool(ABC):
         for parameter, value in tool_parameters.items():
             if isinstance(value, dict) and value.get("dify_model_identity") == DIFY_FILE_IDENTITY:
                 tool_parameters[parameter] = File(
-                    url=value["url"], mime_type=value.get("mime_type"), type=FileType(value.get("type"))
+                    url=value["url"],
+                    mime_type=value.get("mime_type"),
+                    type=FileType(value.get("type")),
+                    filename=value.get("filename"),
+                    extension=value.get("extension"),
+                    size=value.get("size"),
                 )
             elif isinstance(value, list) and all(
                 isinstance(item, dict) and item.get("dify_model_identity") == DIFY_FILE_IDENTITY for item in value
             ):
                 tool_parameters[parameter] = [
-                    File(url=item["url"], mime_type=item.get("mime_type"), type=FileType(item.get("type")))
+                    File(
+                        url=item["url"],
+                        mime_type=item.get("mime_type"),
+                        type=FileType(item.get("type")),
+                        filename=item.get("filename"),
+                        extension=item.get("extension"),
+                        size=item.get("size"),
+                    )
                     for item in value
                 ]
 
