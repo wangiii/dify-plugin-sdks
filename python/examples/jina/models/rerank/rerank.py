@@ -4,7 +4,16 @@ import httpx
 
 from dify_plugin import RerankModel
 from dify_plugin.entities import I18nObject
-from dify_plugin.entities.model import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
+from dify_plugin.entities.model import (
+    AIModelEntity,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+)
+from dify_plugin.entities.model.rerank import (
+    RerankDocument,
+    RerankResult,
+)
 from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
     InvokeAuthorizationError,
@@ -14,10 +23,7 @@ from dify_plugin.errors.model import (
     InvokeRateLimitError,
     InvokeServerUnavailableError,
 )
-from dify_plugin.entities.model.rerank import (
-    RerankDocument,
-    RerankResult,
-)
+
 
 class JinaRerankModel(RerankModel):
     """
@@ -50,8 +56,7 @@ class JinaRerankModel(RerankModel):
             return RerankResult(model=model, docs=[])
 
         base_url = credentials.get("base_url", "https://api.jina.ai/v1")
-        if base_url.endswith("/"):
-            base_url = base_url[:-1]
+        base_url = base_url.removesuffix("/")
 
         try:
             response = httpx.post(
@@ -74,15 +79,12 @@ class JinaRerankModel(RerankModel):
                     text=result["document"]["text"],
                     score=result["relevance_score"],
                 )
-                if (
-                    score_threshold is None
-                    or result["relevance_score"] >= score_threshold
-                ):
+                if score_threshold is None or result["relevance_score"] >= score_threshold:
                     rerank_documents.append(rerank_document)
 
             return RerankResult(model=model, docs=rerank_documents)
         except httpx.HTTPStatusError as e:
-            raise InvokeServerUnavailableError(str(e))
+            raise InvokeServerUnavailableError(str(e)) from e
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -106,7 +108,7 @@ class JinaRerankModel(RerankModel):
                 score_threshold=0.8,
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
     @property
     def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:
@@ -121,9 +123,7 @@ class JinaRerankModel(RerankModel):
             InvokeBadRequestError: [httpx.RequestError],
         }
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -132,9 +132,7 @@ class JinaRerankModel(RerankModel):
             label=I18nObject(en_US=model),
             model_type=ModelType.RERANK,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
-            model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size") or 0)
-            },
+            model_properties={ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size") or 0)},
         )
 
         return entity

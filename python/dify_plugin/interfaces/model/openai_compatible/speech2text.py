@@ -16,9 +16,7 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
     Model class for OpenAI Compatible Speech to text model.
     """
 
-    def _invoke(
-        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
-    ) -> str:
+    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
         """
         Invoke speech2text model
 
@@ -41,9 +39,7 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
 
         payload = {"model": model}
         files = [("file", file)]
-        response = requests.post(
-            endpoint_url, headers=headers, data=payload, files=files
-        )
+        response = requests.post(endpoint_url, headers=headers, data=payload, files=files)
 
         if response.status_code != 200:
             raise InvokeBadRequestError(response.text)
@@ -64,4 +60,4 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
             with open(audio_file_path, "rb") as audio_file:
                 self._invoke(model, credentials, audio_file)
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex

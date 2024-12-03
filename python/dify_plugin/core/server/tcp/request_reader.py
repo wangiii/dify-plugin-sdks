@@ -1,7 +1,9 @@
-from json import loads
+import logging
 import socket
 import time
-from typing import Callable, Generator, Optional
+from collections.abc import Generator
+from json import loads
+from typing import Callable, Optional
 
 from gevent.select import select
 
@@ -13,8 +15,6 @@ from ....core.entities.plugin.io import (
 )
 from ....core.server.__base.request_reader import RequestReader
 from ....core.server.__base.response_writer import ResponseWriter
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,8 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
 
         try:
             self.sock.sendall(data.encode())
-        except Exception as e:
-            logger.error(f"Failed to write data: {e}")
+        except Exception:
+            logger.exception("Failed to write data")
             self._launch()
 
     def done(self):
@@ -100,8 +100,8 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             if self.on_connected:
                 self.on_connected()
             logger.info(f"Sent key to {self.host}:{self.port}")
-        except socket.error as e:
-            logger.error(f"\033[31mFailed to connect to {self.host}:{self.port}, {e}\033[0m")
+        except OSError as e:
+            logger.exception(f"\033[31mFailed to connect to {self.host}:{self.port}\033[0m")
             raise e
 
     def _read_stream(self) -> Generator[PluginInStream, None, None]:
@@ -117,8 +117,8 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                 data = self.sock.recv(4096)
                 if data == b"":
                     raise Exception("Connection is closed")
-            except Exception as e:
-                logger.error(f"\033[31mFailed to read data from {self.host}:{self.port}, {e}\033[0m")
+            except Exception:
+                logger.exception(f"\033[31mFailed to read data from {self.host}:{self.port}\033[0m")
                 self.alive = False
                 time.sleep(self.reconnect_timeout)
                 self._launch()
@@ -134,10 +134,7 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
             if len(lines) == 0:
                 continue
 
-            if lines[-1] != "":
-                buffer = lines[-1]
-            else:
-                buffer = b""
+            buffer = lines[-1]
 
             lines = lines[:-1]
             for line in lines:
@@ -155,4 +152,4 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
                         f"Received event: \n{chunk.event}\n session_id: \n{chunk.session_id}\n data: \n{chunk.data}"
                     )
                 except Exception:
-                    logger.error(f"\033[31mAn error occurred while parsing the data: {line}\033[0m")
+                    logger.exception(f"\033[31mAn error occurred while parsing the data: {line}\033[0m")

@@ -1,9 +1,13 @@
-from typing import Mapping
-from werkzeug import Request, Response
+import contextlib
+from collections.abc import Mapping
+
 from flask import Flask, render_template_string
+from werkzeug import Request, Response
+
 from dify_plugin import Endpoint
 
 app = Flask(__name__)
+
 
 class NekoEndpoint(Endpoint):
     def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
@@ -14,15 +18,13 @@ class NekoEndpoint(Endpoint):
 
         visitors += 1
 
-        try:
+        with contextlib.suppress(Exception):
             self.session.storage.set("visitors", str(visitors).encode())
-        except Exception:
-            pass
 
         # align the string length of visitors to the length of 4
         visitors = str(visitors).rjust(4)
 
-        ascii_art = f'''
+        ascii_art = f"""
 ⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛⬛️⬜️⬜️⬜️⬜️⬜⬜️⬜️️
 🟥🟥⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️🟥🟥🟥🟥🟥🟥🟥🟥⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧🥧⬛️⬜️⬜️⬜️⬜️⬜⬜️️
 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥⬛️🥧🥧🥧💟💟💟💟💟💟💟💟💟💟💟💟💟🥧🥧🥧⬛️⬜️⬜️⬜️⬜⬜️️
@@ -43,10 +45,12 @@ class NekoEndpoint(Endpoint):
 🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪⬛️🌫🌫🌫⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬜️⬜️⬜️
 🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪🟪⬛️🌫🌫⬛️⬛️⬜️⬛️🌫🌫⬛️⬜️⬜️⬜️⬜️⬜️⬛️🌫🌫⬛️⬜️⬛️🌫🌫⬛️⬜️⬜️⬜️⬜️
 ⬜️⬜️🟪🟪🟪🟪🟪🟪🟪🟪⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️🟪🟪🟪🟪🟪⬛️⬛️⬛️⬛⬜️⬜️⬛️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬛️⬜️⬜️⬛️⬛️⬜️⬜️⬜️⬜️⬜️️
-        '''
-        ascii_art_lines = ascii_art.strip().split('\n')
+        """
+        ascii_art_lines = ascii_art.strip().split("\n")
         with app.app_context():
-            return Response(render_template_string('''
+            return Response(
+                render_template_string(
+                    """
     <!DOCTYPE html>
     <html>
     <head>
@@ -106,4 +110,9 @@ class NekoEndpoint(Endpoint):
         </script>
     </body>
     </html>
-        ''', ascii_art_lines=ascii_art_lines), status=200, content_type="text/html")
+        """,
+                    ascii_art_lines=ascii_art_lines,
+                ),
+                status=200,
+                content_type="text/html",
+            )

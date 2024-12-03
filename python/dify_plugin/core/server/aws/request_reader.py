@@ -1,7 +1,9 @@
-from queue import Queue
 import threading
-from typing import Generator
+from collections.abc import Generator
+from queue import Queue
+
 from flask import Flask, request
+
 from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
@@ -45,6 +47,7 @@ class AWSLambdaRequestReader(RequestReader):
             )
             # put request to queue
             self.request_queue.put(plugin_in)
+
             # wait for response
             def generate():
                 while True:
@@ -52,6 +55,7 @@ class AWSLambdaRequestReader(RequestReader):
                     if response is None:
                         break
                     yield response
+
             return generate(), 200
         except Exception as e:
             return str(e), 500

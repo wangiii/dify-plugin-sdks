@@ -1,19 +1,17 @@
 from json import dumps
 from typing import Optional
 
-from requests import post, HTTPError
+from requests import HTTPError, post
 from yarl import URL
 
-
+from ....entities import I18nObject
+from ....entities.model import AIModelEntity, FetchFrom, ModelType
+from ....entities.model.rerank import RerankDocument, RerankResult
 from ....errors.model import (
     CredentialsValidateFailedError,
     InvokeError,
     InvokeServerUnavailableError,
 )
-
-from ....entities import I18nObject
-from ....entities.model import AIModelEntity, FetchFrom, ModelType
-from ....entities.model.rerank import RerankDocument, RerankResult
 from ..rerank_model import RerankModel
 
 
@@ -73,9 +71,7 @@ class OAICompatRerankModel(RerankModel):
         }
 
         try:
-            response = post(
-                str(URL(url) / "rerank"), headers=headers, data=dumps(data), timeout=60
-            )
+            response = post(str(URL(url) / "rerank"), headers=headers, data=dumps(data), timeout=60)
             response.raise_for_status()
             results = response.json()
 
@@ -85,9 +81,7 @@ class OAICompatRerankModel(RerankModel):
             # Min-Max Normalization: Normalize scores to 0 ~ 1.0 range
             min_score = min(scores)
             max_score = max(scores)
-            score_range = (
-                max_score - min_score if max_score != min_score else 1.0
-            )  # Avoid division by zero
+            score_range = max_score - min_score if max_score != min_score else 1.0  # Avoid division by zero
 
             for result in results["results"]:
                 index = result["index"]
@@ -121,7 +115,7 @@ class OAICompatRerankModel(RerankModel):
             return RerankResult(model=model, docs=rerank_documents)
 
         except HTTPError as e:
-            raise InvokeServerUnavailableError(str(e))
+            raise InvokeServerUnavailableError(str(e)) from e
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -145,11 +139,9 @@ class OAICompatRerankModel(RerankModel):
                 score_threshold=0.8,
             )
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """

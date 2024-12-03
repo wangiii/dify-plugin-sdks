@@ -118,9 +118,7 @@ class PromptMessage(BaseModel):
 
     @field_validator("content", mode="before")
     @classmethod
-    def transform_content(
-        cls, value: list[dict] | str | None
-    ) -> Optional[str | list[PromptMessageContent]]:
+    def transform_content(cls, value: list[dict] | str | None) -> Optional[str | list[PromptMessageContent]]:
         """
         Transform content to list of prompt message content.
         """
@@ -136,6 +134,7 @@ class PromptMessage(BaseModel):
                 elif content.get("type") == PromptMessageContentType.DOCUMENT.value:
                     result.append(DocumentPromptMessageContent(**content))
             return result
+
 
 class UserPromptMessage(PromptMessage):
     """
@@ -184,10 +183,7 @@ class AssistantPromptMessage(PromptMessage):
 
         :return: True if prompt message is empty, False otherwise
         """
-        if not super().is_empty() and not self.tool_calls:
-            return False
-
-        return True
+        return not (not super().is_empty() and not self.tool_calls)
 
 
 class SystemPromptMessage(PromptMessage):
@@ -212,7 +208,4 @@ class ToolPromptMessage(PromptMessage):
 
         :return: True if prompt message is empty, False otherwise
         """
-        if not super().is_empty() and not self.tool_call_id:
-            return False
-
-        return True
+        return not (not super().is_empty() and not self.tool_call_id)

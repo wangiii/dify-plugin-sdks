@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel
+
 import requests
+from pydantic import BaseModel
+
 from dify_plugin.core.entities.invocation import InvokeType
 from dify_plugin.core.runtime import BackwardsInvocation
 
@@ -20,7 +22,7 @@ class UploadFileResponse(BaseModel):
                 return cls.VIDEO
             if mime_type.startswith("audio/"):
                 return cls.AUDIO
-            
+
             return cls.DOCUMENT
 
     id: str
@@ -39,9 +41,7 @@ class UploadFileResponse(BaseModel):
 
 
 class File(BackwardsInvocation[dict]):
-    def upload(
-        self, filename: str, content: bytes, mimetype: str
-    ) -> UploadFileResponse:
+    def upload(self, filename: str, content: bytes, mimetype: str) -> UploadFileResponse:
         """
         Upload a file
 
@@ -65,9 +65,7 @@ class File(BackwardsInvocation[dict]):
 
             response = requests.post(url, files={"file": (filename, content, mimetype)})
             if response.status_code != 201:
-                raise Exception(
-                    f"upload file failed, status code: {response.status_code}, response: {response.text}"
-                )
+                raise Exception(f"upload file failed, status code: {response.status_code}, response: {response.text}")
 
             return UploadFileResponse(**response.json())
 

@@ -1,12 +1,14 @@
-import yaml
-from ...config.logger_format import plugin_logger_handler
-
 import logging
 import os
+
+import yaml
+
+from ...config.logger_format import plugin_logger_handler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(plugin_logger_handler)
+
 
 def load_yaml_file(file_path: str, ignore_error: bool = False) -> dict:
     """
@@ -19,19 +21,19 @@ def load_yaml_file(file_path: str, ignore_error: bool = False) -> dict:
     """
     try:
         if not file_path or not os.path.exists(file_path):
-            raise FileNotFoundError(f'Failed to load YAML file {file_path}: file not found')
+            raise FileNotFoundError(f"Failed to load YAML file {file_path}: file not found")
 
-        with open(file_path, encoding='utf-8') as file:
+        with open(file_path, encoding="utf-8") as file:
             try:
                 return yaml.safe_load(file)
             except Exception as e:
-                raise yaml.YAMLError(f'Failed to load YAML file {file_path}: {e}')
+                raise yaml.YAMLError(f"Failed to load YAML file {file_path}: {e}") from e
     except FileNotFoundError as e:
-        logger.debug(f'Failed to load YAML file {file_path}: {e}')
+        logger.debug(f"Failed to load YAML file {file_path}: {e}")
         return {}
     except Exception as e:
         if ignore_error:
-            logger.warning(f'Failed to load YAML file {file_path}: {e}')
+            logger.warning(f"Failed to load YAML file {file_path}: {e}")
             return {}
         else:
             raise e

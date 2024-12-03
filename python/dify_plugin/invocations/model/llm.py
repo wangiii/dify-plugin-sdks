@@ -1,11 +1,16 @@
 from collections.abc import Generator
 from typing import Literal, cast, overload
 
-from ...entities.model.llm import LLMModelConfig, LLMResult, LLMResultChunk, SummaryResult
-from ...entities.model.message import PromptMessage, PromptMessageTool
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
-    
+from ...entities.model.llm import (
+    LLMModelConfig,
+    LLMResult,
+    LLMResultChunk,
+    SummaryResult,
+)
+from ...entities.model.message import PromptMessage, PromptMessageTool
+
 
 class LLMInvocation(BackwardsInvocation[LLMResult | LLMResultChunk]):
     @overload
@@ -56,15 +61,16 @@ class LLMInvocation(BackwardsInvocation[LLMResult | LLMResultChunk]):
             response = cast(Generator[LLMResultChunk, None, None], response)
             return response
 
-        for data in self._backwards_invoke(
+        for llm_result in self._backwards_invoke(
             InvokeType.LLM,
             LLMResult,
             data,
         ):
-            data = cast(LLMResult, data)
+            data = cast(LLMResult, llm_result)
             return data
 
         raise Exception("No response from llm")
+
 
 class SummaryInvocation(BackwardsInvocation[SummaryResult]):
     def invoke(
@@ -79,18 +85,18 @@ class SummaryInvocation(BackwardsInvocation[SummaryResult]):
 
         if len(text) < min_summarize_length:
             return text
-        
+
         data = {
             "text": text,
             "instruction": instruction,
         }
 
-        for data in self._backwards_invoke(
+        for llm_result in self._backwards_invoke(
             InvokeType.SYSTEM_SUMMARY,
             SummaryResult,
             data,
         ):
-            data = cast(SummaryResult, data)
+            data = cast(SummaryResult, llm_result)
             return data.summary
 
         raise Exception("No response from summary")

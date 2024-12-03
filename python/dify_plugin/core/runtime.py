@@ -1,31 +1,25 @@
-from enum import Enum
-from typing import Optional
-
-from pydantic import BaseModel
-
-
-from ..config.config import InstallMethod
-from concurrent.futures import ThreadPoolExecutor
-
+import json
+import uuid
 from abc import ABC
 from collections.abc import Generator
-import json
-from typing import Generic, Type, TypeVar, Union
-import uuid
+from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
+from typing import Generic, Optional, TypeVar, Union
 
 import httpx
+from pydantic import BaseModel
 from yarl import URL
 
-from ..core.server.__base.request_reader import RequestReader
-from ..core.server.__base.response_writer import ResponseWriter
-from ..core.server.tcp.request_reader import TCPReaderWriter
+from ..config.config import InstallMethod
 from ..core.entities.invocation import InvokeType
 from ..core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamBase,
     PluginInStreamEvent,
 )
-
+from ..core.server.__base.request_reader import RequestReader
+from ..core.server.__base.response_writer import ResponseWriter
+from ..core.server.tcp.request_reader import TCPReaderWriter
 
 #################################################
 # Session
@@ -126,9 +120,9 @@ class Session:
         self._register_invocations()
 
     def _register_invocations(self) -> None:
-        from ..invocations.tool import ToolInvocation
-        from ..invocations.storage import StorageInvocation
         from ..invocations.file import File
+        from ..invocations.storage import StorageInvocation
+        from ..invocations.tool import ToolInvocation
 
         self.model = ModelInvocations(self)
         self.tool = ToolInvocation(self)
@@ -195,7 +189,7 @@ class BackwardsInvocation(Generic[T], ABC):
     def _backwards_invoke(
         self,
         type: InvokeType,
-        data_type: Type[T],
+        data_type: type[T],
         data: dict,
     ) -> Generator[T, None, None]:
         """
@@ -206,15 +200,13 @@ class BackwardsInvocation(Generic[T], ABC):
         if not self.session:
             raise Exception("current tool runtime does not support backwards invoke")
         if self.session.install_method in [InstallMethod.Local, InstallMethod.Remote]:
-            return self._full_duplex_backwards_invoke(
-                backwards_request_id, type, data_type, data
-            )
+            return self._full_duplex_backwards_invoke(backwards_request_id, type, data_type, data)
         return self._http_backwards_invoke(backwards_request_id, type, data_type, data)
 
     def _line_converter_wrapper(
         self,
         generator: Generator[PluginInStreamBase | None, None, None],
-        data_type: Type[T],
+        data_type: type[T],
     ) -> Generator[T, None, None]:
         """
         convert string into type T
@@ -246,13 +238,13 @@ class BackwardsInvocation(Generic[T], ABC):
             try:
                 yield data_type(**event.data)
             except Exception as e:
-                raise Exception(f"Failed to parse response: {str(e)}")
+                raise Exception(f"Failed to parse response: {str(e)}") from e
 
     def _http_backwards_invoke(
         self,
         backwards_request_id: str,
         type: InvokeType,
-        data_type: Type[T],
+        data_type: type[T],
         data: dict,
     ) -> Generator[T, None, None]:
         """
@@ -261,11 +253,7 @@ class BackwardsInvocation(Generic[T], ABC):
         if not self.session or not self.session.dify_plugin_daemon_url:
             raise Exception("current tool runtime does not support backwards invoke")
 
-        url = (
-            URL(self.session.dify_plugin_daemon_url)
-            / "backwards-invocation"
-            / "transaction"
-        )
+        url = URL(self.session.dify_plugin_daemon_url) / "backwards-invocation" / "transaction"
         headers = {
             "Dify-Plugin-Session-ID": self.session.session_id,
         }
@@ -281,33 +269,41 @@ class BackwardsInvocation(Generic[T], ABC):
             ),
         )
 
-        with httpx.Client() as client:
-            with client.stream(
+        with (
+            httpx.Client() as client,
+            client.stream(
                 method="POST",
                 url=str(url),
                 headers=headers,
                 content=payload,
-                timeout=(300, 300, 300, 300),  # 300 seconds for connection, read, write, and pool
-            ) as response:
-                def generator():
-                    for line in response.iter_lines():
-                        if not line:
-                            continue
+                timeout=(
+                    300,
+                    300,
+                    300,
+                    300,
+                ),  # 300 seconds for connection, read, write, and pool
+            ) as response,
+        ):
 
-                        data = json.loads(line)
-                        yield PluginInStreamBase(
-                            session_id=data["session_id"],
-                            event=PluginInStreamEvent.value_of(data["event"]),
-                            data=data["data"],
-                        )
+            def generator():
+                for line in response.iter_lines():
+                    if not line:
+                        continue
 
-                yield from self._line_converter_wrapper(generator(), data_type)
+                    data = json.loads(line)
+                    yield PluginInStreamBase(
+                        session_id=data["session_id"],
+                        event=PluginInStreamEvent.value_of(data["event"]),
+                        data=data["data"],
+                    )
+
+            yield from self._line_converter_wrapper(generator(), data_type)
 
     def _full_duplex_backwards_invoke(
         self,
         backwards_request_id: str,
         type: InvokeType,
-        data_type: Type[T],
+        data_type: type[T],
         data: dict,
     ) -> Generator[T, None, None]:
         if not self.session:
@@ -331,6 +327,4 @@ class BackwardsInvocation(Generic[T], ABC):
             )
 
         with self.session.reader.read(filter) as reader:
-            yield from self._line_converter_wrapper(
-                reader.read(timeout_for_round=1), data_type
-            )
+            yield from self._line_converter_wrapper(reader.read(timeout_for_round=1), data_type)

@@ -4,15 +4,15 @@ from typing import IO, Optional
 
 from pydantic import ConfigDict
 
-from .ai_model import AIModel
 from ...entities.model import ModelType
-
+from .ai_model import AIModel
 
 
 class Speech2TextModel(AIModel):
     """
     Model class for speech2text model.
     """
+
     model_type: ModelType = ModelType.SPEECH2TEXT
 
     # pydantic configs
@@ -23,9 +23,7 @@ class Speech2TextModel(AIModel):
     ############################################################
 
     @abstractmethod
-    def _invoke(self, model: str, credentials: dict,
-                file: IO[bytes], user: Optional[str] = None) \
-            -> str:
+    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
         """
         Invoke large language model
 
@@ -36,7 +34,7 @@ class Speech2TextModel(AIModel):
         :return: text for given audio file
         """
         raise NotImplementedError
-    
+
     ############################################################
     #            For plugin implementation use only            #
     ############################################################
@@ -51,15 +49,13 @@ class Speech2TextModel(AIModel):
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         # Construct the path to the audio file
-        return os.path.join(current_dir, 'audio.mp3')
-    
+        return os.path.join(current_dir, "audio.mp3")
+
     ############################################################
     #                 For executor use only                    #
     ############################################################
 
-    def invoke(self, model: str, credentials: dict,
-               file: IO[bytes], user: Optional[str] = None) \
-            -> str:
+    def invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
         """
         Invoke large language model
 
@@ -72,4 +68,4 @@ class Speech2TextModel(AIModel):
         try:
             return self._invoke(model, credentials, file, user)
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e

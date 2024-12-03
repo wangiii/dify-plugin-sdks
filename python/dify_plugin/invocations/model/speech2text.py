@@ -5,11 +5,9 @@ from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
 from ...entities.model.speech2text import Speech2TextModelConfig, Speech2TextResult
 
-    
+
 class Speech2TextInvocation(BackwardsInvocation[Speech2TextResult]):
-    def invoke(
-        self, model_config: Speech2TextModelConfig, file: IO[bytes]
-    ) -> str:
+    def invoke(self, model_config: Speech2TextModelConfig, file: IO[bytes]) -> str:
         """
         Invoke speech2text
         """

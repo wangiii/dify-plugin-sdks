@@ -4,9 +4,9 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
+from ...entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
 from ...entities.model.text_embedding import TextEmbeddingResult
 from .ai_model import AIModel
-from ...entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
 
 
 class TextEmbeddingModel(AIModel):
@@ -70,10 +70,7 @@ class TextEmbeddingModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.CONTEXT_SIZE in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.CONTEXT_SIZE in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.CONTEXT_SIZE]
 
         return 1000
@@ -88,10 +85,7 @@ class TextEmbeddingModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.MAX_CHUNKS]
 
         return 1
@@ -123,4 +117,4 @@ class TextEmbeddingModel(AIModel):
         try:
             return self._invoke(model, credentials, texts, user, input_type)
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e

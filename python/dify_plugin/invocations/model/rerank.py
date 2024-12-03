@@ -1,12 +1,10 @@
-from ...entities.model.rerank import RerankModelConfig, RerankResult
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
+from ...entities.model.rerank import RerankModelConfig, RerankResult
 
 
 class RerankInvocation(BackwardsInvocation[RerankResult]):
-    def invoke(
-        self, model_config: RerankModelConfig, docs: list[str], query: str
-    ) -> RerankResult:
+    def invoke(self, model_config: RerankModelConfig, docs: list[str], query: str) -> RerankResult:
         """
         Invoke rerank
         """

@@ -2,14 +2,32 @@ import time
 from json import JSONDecodeError, dumps
 from typing import Optional
 
+from models.text_embedding.jina_tokenizer import JinaTokenizer
 from requests import post
 
 from dify_plugin import TextEmbeddingModel
 from dify_plugin.entities import I18nObject
-from dify_plugin.entities.model import AIModelEntity, EmbeddingInputType, FetchFrom, ModelPropertyKey, ModelType, PriceType
-from dify_plugin.entities.model.text_embedding import EmbeddingUsage, TextEmbeddingResult
-from dify_plugin.errors.model import CredentialsValidateFailedError, InvokeAuthorizationError, InvokeBadRequestError, InvokeConnectionError, InvokeError, InvokeRateLimitError, InvokeServerUnavailableError
-from models.text_embedding.jina_tokenizer import JinaTokenizer
+from dify_plugin.entities.model import (
+    AIModelEntity,
+    EmbeddingInputType,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+    PriceType,
+)
+from dify_plugin.entities.model.text_embedding import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
+from dify_plugin.errors.model import (
+    CredentialsValidateFailedError,
+    InvokeAuthorizationError,
+    InvokeBadRequestError,
+    InvokeConnectionError,
+    InvokeError,
+    InvokeRateLimitError,
+    InvokeServerUnavailableError,
+)
 
 
 class JinaTextEmbeddingModel(TextEmbeddingModel):
@@ -41,8 +59,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             raise CredentialsValidateFailedError("api_key is required")
 
         base_url = credentials.get("base_url", self.api_base)
-        if base_url.endswith("/"):
-            base_url = base_url[:-1]
+        base_url = base_url.removesuffix("/")
 
         url = base_url + "/embeddings"
         headers = {
@@ -63,7 +80,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         try:
             response = post(url, headers=headers, data=dumps(data))
         except Exception as e:
-            raise InvokeConnectionError(str(e))
+            raise InvokeConnectionError(str(e)) from e
 
         if response.status_code != 200:
             try:
@@ -80,7 +97,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             except JSONDecodeError as e:
                 raise InvokeServerUnavailableError(
                     f"Failed to convert response to json: {e} with text: {response.text}"
-                )
+                ) from e
 
         try:
             resp = response.json()
@@ -88,12 +105,10 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             usage = resp["usage"]
         except Exception as e:
             raise InvokeServerUnavailableError(
-                f"Failed to convert response to json: {e} with text: {response.text}"
-            )
+                "Failed to convert response to json: " f"{e} with text: {response.text}"
+            ) from e
 
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=usage["total_tokens"]
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
 
         result = TextEmbeddingResult(
             model=model,
@@ -130,7 +145,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
         try:
             self._invoke(model=model, credentials=credentials, texts=["ping"])
         except Exception as e:
-            raise CredentialsValidateFailedError(f"Credentials validation failed: {e}")
+            raise CredentialsValidateFailedError(f"Credentials validation failed: {e}") from e
 
     @property
     def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:
@@ -142,9 +157,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError, InvokeBadRequestError],
         }
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -174,9 +187,7 @@ class JinaTextEmbeddingModel(TextEmbeddingModel):
 
         return usage
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """

@@ -1,6 +1,9 @@
+import contextlib
 import time
-from typing import Mapping
+from collections.abc import Mapping
+
 from werkzeug import Request, Response
+
 from dify_plugin import Endpoint
 
 text = """<pre>
@@ -18,6 +21,7 @@ text = """<pre>
 </pre>
 """
 
+
 class Duck(Endpoint):
     def _invoke(self, r: Request, values: Mapping, settings: Mapping) -> Response:
         """
@@ -32,10 +36,8 @@ class Duck(Endpoint):
 
             visitors += 1
 
-            try:
+            with contextlib.suppress(Exception):
                 self.session.storage.set("visitors", str(visitors).encode())
-            except Exception:
-                pass
 
             yield f"it's your {visitors} time visit this page! <br>"
 

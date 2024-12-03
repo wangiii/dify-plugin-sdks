@@ -13,9 +13,7 @@ class ToolInvocation(BackwardsInvocation[ToolInvokeMessage]):
         """
         Invoke builtin tool
         """
-        return self.invoke(
-            ToolProviderType.BUILT_IN, provider, tool_name, parameters
-        )
+        return self.invoke(ToolProviderType.BUILT_IN, provider, tool_name, parameters)
 
     def invoke_workflow_tool(
         self, provider: str, tool_name: str, parameters: dict[str, Any]
@@ -23,9 +21,7 @@ class ToolInvocation(BackwardsInvocation[ToolInvokeMessage]):
         """
         Invoke workflow tool
         """
-        return self.invoke(
-            ToolProviderType.WORKFLOW, provider, tool_name, parameters
-        )
+        return self.invoke(ToolProviderType.WORKFLOW, provider, tool_name, parameters)
 
     def invoke_api_tool(
         self, provider: str, tool_name: str, parameters: dict[str, Any]

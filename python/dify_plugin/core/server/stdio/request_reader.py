@@ -1,13 +1,13 @@
-from json import loads
 import sys
-from typing import Generator
+from collections.abc import Generator
+from json import loads
+
+from gevent.os import tp_read
+
 from ....core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-
-from gevent.os import tp_read
-
 from ....core.server.__base.request_reader import RequestReader
 from .response_writer import StdioResponseWriter
 
@@ -29,10 +29,7 @@ class StdioRequestReader(RequestReader):
             if len(lines) == 0:
                 continue
 
-            if lines[-1] != b"":
-                buffer = lines[-1]
-            else:
-                buffer = b""
+            buffer = lines[-1]
 
             lines = lines[:-1]
             for line in lines:

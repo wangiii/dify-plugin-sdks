@@ -1,9 +1,8 @@
+import threading
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-import threading
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ....core.entities.plugin.io import PluginInStream
 
@@ -43,9 +42,7 @@ class RequestReader(ABC):
         except Exception as e:
             data.writer.error(
                 session_id=session_id,
-                data={
-                    "error": f"Failed to process request ({type(e).__name__}): {str(e)}"
-                },
+                data={"error": f"Failed to process request ({type(e).__name__}): {str(e)}"},
             )
 
     def read(self, filter: Callable[["PluginInStream"], bool]) -> FilterReader:

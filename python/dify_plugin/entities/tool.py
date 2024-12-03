@@ -1,5 +1,8 @@
 import base64
+import contextlib
+from enum import Enum
 from typing import Any, Optional, Union
+
 from pydantic import (
     BaseModel,
     Field,
@@ -8,10 +11,9 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from enum import Enum
 
-from ..entities import I18nObject
 from ..core.utils.yaml_loader import load_yaml_file
+from ..entities import I18nObject
 
 
 class CommonParameterType(Enum):
@@ -87,18 +89,13 @@ class ToolInvokeMessage(BaseModel):
             description="The name of the variable, only supports root-level variables",
         )
         variable_value: Any = Field(..., description="The value of the variable")
-        stream: bool = Field(
-            default=False, description="Whether the variable is streamed"
-        )
+        stream: bool = Field(default=False, description="Whether the variable is streamed")
 
         @field_validator("variable_value", "stream")
         @classmethod
         def validate_variable_value_and_stream(cls, v, values):
-            if "stream" in values and values["stream"]:
-                if not isinstance(v, str):
-                    raise ValueError(
-                        "When 'stream' is True, 'variable_value' must be a string."
-                    )
+            if values.get("stream") and not isinstance(v, str):
+                raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
             return v
 
     class MessageType(Enum):
@@ -113,24 +110,15 @@ class ToolInvokeMessage(BaseModel):
         BLOB_CHUNK = "blob_chunk"
 
     type: MessageType
-    message: (
-        TextMessage
-        | JsonMessage
-        | VariableMessage
-        | BlobMessage
-        | BlobChunkMessage
-        | None
-    )
+    message: TextMessage | JsonMessage | VariableMessage | BlobMessage | BlobChunkMessage | None
     meta: Optional[dict] = None
 
     @field_validator("message", mode="before")
     @classmethod
     def decode_blob_message(cls, v):
         if isinstance(v, dict) and "blob" in v:
-            try:
+            with contextlib.suppress(Exception):
                 v["blob"] = base64.b64decode(v["blob"])
-            except Exception:
-                pass
         return v
 
     @field_serializer("message")
@@ -187,14 +175,10 @@ class ToolParameter(BaseModel):
 
     name: str = Field(..., description="The name of the parameter")
     label: I18nObject = Field(..., description="The label presented to the user")
-    human_description: I18nObject = Field(
-        ..., description="The description presented to the user"
-    )
+    human_description: I18nObject = Field(..., description="The description presented to the user")
     type: ToolParameterType = Field(..., description="The type of the parameter")
     scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
-    form: ToolParameterForm = Field(
-        ..., description="The form of the parameter, schema/form/llm"
-    )
+    form: ToolParameterForm = Field(..., description="The form of the parameter, schema/form/llm")
     llm_description: Optional[str] = None
     required: Optional[bool] = False
     default: Optional[Union[int, float, str]] = None
@@ -221,14 +205,10 @@ class ToolOutputSchema(RootModel):
 
 class ToolConfiguration(BaseModel):
     identity: ToolIdentity
-    parameters: list[ToolParameter] = Field(
-        default=[], description="The parameters of the tool"
-    )
+    parameters: list[ToolParameter] = Field(default=[], description="The parameters of the tool")
     description: ToolDescription
     extra: ToolConfigurationExtra
-    has_runtime_parameters: bool = Field(
-        default=False, description="Whether the tool has runtime parameters"
-    )
+    has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
     output_schema: Optional[ToolOutputSchema] = None
 
 
@@ -317,16 +297,13 @@ class ToolProviderConfiguration(BaseModel):
         alias="credentials_for_provider",
         description="The credentials schema of the tool provider",
     )
-    tools: list[ToolConfiguration] = Field(
-        default=[], description="The tools of the tool provider"
-    )
+    tools: list[ToolConfiguration] = Field(default=[], description="The tools of the tool provider")
     extra: ToolProviderConfigurationExtra
 
     @model_validator(mode="before")
+    @classmethod
     def validate_credentials_schema(cls, data: dict) -> dict:
-        original_credentials_for_provider: dict[str, dict] = data.get(
-            "credentials_for_provider", {}
-        )
+        original_credentials_for_provider: dict[str, dict] = data.get("credentials_for_provider", {})
 
         credentials_for_provider: list[dict[str, Any]] = []
         for name, credential in original_credentials_for_provider.items():
@@ -337,6 +314,7 @@ class ToolProviderConfiguration(BaseModel):
         return data
 
     @field_validator("tools", mode="before")
+    @classmethod
     def validate_tools(cls, value) -> list[ToolConfiguration]:
         if not isinstance(value, list):
             raise ValueError("tools should be a list")
@@ -353,17 +331,14 @@ class ToolProviderConfiguration(BaseModel):
                     ToolConfiguration(
                         **{
                             "identity": ToolIdentity(**file["identity"]),
-                            "parameters": [
-                                ToolParameter(**param)
-                                for param in file.get("parameters", []) or []
-                            ],
+                            "parameters": [ToolParameter(**param) for param in file.get("parameters", []) or []],
                             "description": ToolDescription(**file["description"]),
                             "extra": ToolConfigurationExtra(**file.get("extra", {})),
                         }
                     )
                 )
             except Exception as e:
-                raise ValueError(f"Error loading tool configuration: {str(e)}")
+                raise ValueError(f"Error loading tool configuration: {str(e)}") from e
 
         return tools
 

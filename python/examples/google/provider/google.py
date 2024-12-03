@@ -1,8 +1,9 @@
 from typing import Any
 
+from tools.google_search import GoogleSearchTool
+
 from dify_plugin import ToolProvider
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
-from tools.google_search import GoogleSearchTool
 
 
 class GoogleProvider(ToolProvider):
@@ -13,4 +14,4 @@ class GoogleProvider(ToolProvider):
             ):
                 pass
         except Exception as e:
-            raise ToolProviderCredentialValidationError(str(e))
+            raise ToolProviderCredentialValidationError(str(e)) from e

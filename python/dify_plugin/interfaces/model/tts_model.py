@@ -1,16 +1,15 @@
-from collections.abc import Generator
 import hashlib
 import logging
 import re
 import uuid
 from abc import abstractmethod
+from collections.abc import Generator
 from typing import Any, Optional
 
 from pydantic import ConfigDict
 
-from .ai_model import AIModel
 from ...entities.model import ModelPropertyKey, ModelType
-
+from .ai_model import AIModel
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +52,7 @@ class TTSModel(AIModel):
         """
         raise NotImplementedError
 
-    def get_tts_model_voices(
-        self, model: str, credentials: dict, language: Optional[str] = None
-    ) -> Optional[list]:
+    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> Optional[list]:
         """
         Get voice for given tts model voices
 
@@ -91,10 +88,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.DEFAULT_VOICE]
 
     def _get_model_audio_type(self, model: str, credentials: dict) -> Optional[str]:
@@ -107,10 +101,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.AUDIO_TYPE]
 
     def _get_model_word_limit(self, model: str, credentials: dict) -> Optional[int]:
@@ -120,10 +111,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.WORD_LIMIT]
 
     def _get_model_workers_limit(self, model: str, credentials: dict) -> Optional[int]:
@@ -133,10 +121,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.MAX_WORKERS]
 
     @staticmethod
@@ -170,7 +155,6 @@ class TTSModel(AIModel):
         namespace_uuid = uuid.UUID("a5da6ef9-b303-596f-8e88-bf8fa40f4b31")
         unique_uuid = uuid.uuid5(namespace_uuid, hex_digest)
         return str(unique_uuid)
-
 
     ############################################################
     #                 For executor use only                    #
@@ -207,4 +191,4 @@ class TTSModel(AIModel):
                 voice=voice,
             )
         except Exception as e:
-            raise self._transform_invoke_error(e)
+            raise self._transform_invoke_error(e) from e

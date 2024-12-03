@@ -1,11 +1,11 @@
-from collections.abc import Callable
 import inspect
 import logging
+from collections.abc import Callable
 from typing import Any, Optional
 
+from ...core.runtime import Session
 from .__base.request_reader import RequestReader
 from .__base.response_writer import ResponseWriter
-from ...core.runtime import Session
 
 logger = logging.getLogger(__file__)
 
@@ -23,16 +23,12 @@ class Router:
     routes: list[Route]
     request_reader: RequestReader
 
-    def __init__(
-        self, request_reader: RequestReader, response_writer: Optional[ResponseWriter]
-    ) -> None:
+    def __init__(self, request_reader: RequestReader, response_writer: Optional[ResponseWriter]) -> None:
         self.routes = []
         self.request_reader = request_reader
         self.response_writer = response_writer
 
-    def register_route(
-        self, f: Callable, filter: Callable[[dict], bool], instance: Any = None
-    ):
+    def register_route(self, f: Callable, filter: Callable[[dict], bool], instance: Any = None):
         sig = inspect.signature(f)
         parameters = list(sig.parameters.values())
         if len(parameters) == 0:
@@ -49,7 +45,7 @@ class Router:
                     data = annotation(**data)
                 except TypeError as e:
                     if not self.response_writer:
-                        logger.error("failed to route request: %s", e)
+                        logger.exception("failed to route request: %s")
                     else:
                         self.response_writer.error(
                             session_id=session.session_id,
@@ -67,7 +63,7 @@ class Router:
                     data = annotation(**data)
                 except TypeError as e:
                     if not self.response_writer:
-                        logger.error("failed to route request: %s", e)
+                        logger.exception("failed to route request: %s")
                     else:
                         self.response_writer.error(
                             session_id=session.session_id,

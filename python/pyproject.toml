@@ -33,3 +33,8 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[dependency-groups]
+lint = [
+    "ruff>=0.8.1",
+]

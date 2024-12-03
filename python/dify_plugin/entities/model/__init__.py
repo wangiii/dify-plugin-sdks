@@ -1,7 +1,9 @@
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
 from ...entities import I18nObject
 
 
@@ -40,8 +42,9 @@ PARAMETER_RULE_TEMPLATE: dict[DefaultParameterName, dict] = {
         },
         "type": "float",
         "help": {
-            "en_US": "Controls randomness. Lower temperature results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive. Higher temperature results in more random completions.",
-            "zh_Hans": "温度控制随机性。较低的温度会导致较少的随机完成。随着温度接近零，模型将变得确定性和重复性。较高的温度会导致更多的随机完成。",
+            "en_US": "Controls randomness. Lower temperature results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive. Higher temperature results in more random completions.",  # noqa: E501
+            "zh_Hans": "温度控制随机性。较低的温度会导致较少的随机完成。随着温度接近零，模型将变得确定性和重复性。"
+            "较高的温度会导致更多的随机完成。",
         },
         "required": False,
         "default": 0.0,
@@ -56,7 +59,8 @@ PARAMETER_RULE_TEMPLATE: dict[DefaultParameterName, dict] = {
         },
         "type": "float",
         "help": {
-            "en_US": "Controls diversity via nucleus sampling: 0.5 means half of all likelihood-weighted options are considered.",
+            "en_US": "Controls diversity via nucleus sampling: "
+            "0.5 means half of all likelihood-weighted options are considered.",
             "zh_Hans": "通过核心采样控制多样性：0.5表示考虑了一半的所有可能性加权选项。",
         },
         "required": False,
@@ -104,7 +108,8 @@ PARAMETER_RULE_TEMPLATE: dict[DefaultParameterName, dict] = {
         },
         "type": "int",
         "help": {
-            "en_US": "Specifies the upper limit on the length of generated results. If the generated results are truncated, you can increase this parameter.",
+            "en_US": "Specifies the upper limit on the length of generated results. "
+            "If the generated results are truncated, you can increase this parameter.",
             "zh_Hans": "指定生成结果长度的上限。如果生成结果截断，可以调大该参数。",
         },
         "required": False,
@@ -120,7 +125,8 @@ PARAMETER_RULE_TEMPLATE: dict[DefaultParameterName, dict] = {
         },
         "type": "string",
         "help": {
-            "en_US": "Set a response format, ensure the output from llm is a valid code block as possible, such as JSON, XML, etc.",
+            "en_US": "Set a response format, ensure the output from llm is a valid code block as possible, "
+            "such as JSON, XML, etc.",
             "zh_Hans": "设置一个返回格式，确保llm的输出尽可能是有效的代码块，如JSON、XML等",
         },
         "required": False,
@@ -227,10 +233,10 @@ class ProviderModel(BaseModel):
     """
 
     @model_validator(mode="before")
+    @classmethod
     def validate_label(cls, data: dict) -> dict:
-        if isinstance(data, dict):
-            if not data.get("label"):
-                data["label"] = I18nObject(en_US=data["model"])
+        if isinstance(data, dict) and not data.get("label"):
+            data["label"] = I18nObject(en_US=data["model"])
 
         return data
 
@@ -253,6 +259,7 @@ class ParameterRule(BaseModel):
     options: list[str] = []
 
     @model_validator(mode="before")
+    @classmethod
     def validate_label(cls, data: dict) -> dict:
         if isinstance(data, dict):
             if not data.get("label"):
@@ -261,16 +268,10 @@ class ParameterRule(BaseModel):
             # check if there is a template
             if "use_template" in data:
                 try:
-                    default_parameter_name = DefaultParameterName.value_of(
-                        data["use_template"]
-                    )
-                    default_parameter_rule = PARAMETER_RULE_TEMPLATE.get(
-                        default_parameter_name
-                    )
+                    default_parameter_name = DefaultParameterName.value_of(data["use_template"])
+                    default_parameter_rule = PARAMETER_RULE_TEMPLATE.get(default_parameter_name)
                     if not default_parameter_rule:
-                        raise Exception(
-                            f"Invalid model parameter rule name {default_parameter_name}"
-                        )
+                        raise Exception(f"Invalid model parameter rule name {default_parameter_name}")
                     copy_default_parameter_rule = default_parameter_rule.copy()
                     copy_default_parameter_rule.update(data)
                     data = copy_default_parameter_rule

@@ -1,6 +1,6 @@
+from dpkt.http import Request as DpktRequest
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
-from dpkt.http import Request as DpktRequest
 
 
 def parse_raw_request(raw_data: bytes):

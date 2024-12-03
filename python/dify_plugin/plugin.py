@@ -1,34 +1,33 @@
 import base64
-from typing import Any, Optional
+import logging
 import uuid
+from collections.abc import Generator
+from typing import Any, Optional
+
 from pydantic import RootModel
 
 from dify_plugin.core.entities.message import InitializeMessage
 from dify_plugin.entities.tool import ToolInvokeMessage
 
-from .core.server.__base.request_reader import RequestReader
-from .core.server.__base.response_writer import ResponseWriter
-from .core.server.aws.request_reader import AWSLambdaRequestReader
-from .core.server.stdio.request_reader import StdioRequestReader
-from .core.server.stdio.response_writer import StdioResponseWriter
-from .core.server.tcp.request_reader import TCPReaderWriter
-from collections.abc import Generator
-import logging
 from .config.config import DifyPluginEnv, InstallMethod
+from .config.logger_format import plugin_logger_handler
 from .core.entities.plugin.request import (
+    EndpointActions,
     ModelActions,
     PluginInvokeType,
     ToolActions,
-    EndpointActions,
 )
-from .core.runtime import Session
-from .core.server.io_server import IOServer
-from .core.server.router import Router
-from .config.logger_format import plugin_logger_handler
-
 from .core.plugin_executor import PluginExecutor
 from .core.plugin_registration import PluginRegistration
-
+from .core.runtime import Session
+from .core.server.__base.request_reader import RequestReader
+from .core.server.__base.response_writer import ResponseWriter
+from .core.server.aws.request_reader import AWSLambdaRequestReader
+from .core.server.io_server import IOServer
+from .core.server.router import Router
+from .core.server.stdio.request_reader import StdioRequestReader
+from .core.server.stdio.response_writer import StdioResponseWriter
+from .core.server.tcp.request_reader import TCPReaderWriter
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -43,11 +42,11 @@ class Plugin(IOServer, Router):
         # load plugin configuration
         self.registration = PluginRegistration(config)
 
-        if config.INSTALL_METHOD == InstallMethod.Local:
+        if InstallMethod.Local == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_local_stream(config)
-        elif config.INSTALL_METHOD == InstallMethod.Remote:
+        elif InstallMethod.Remote == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_remote_stream(config)
-        elif config.INSTALL_METHOD == InstallMethod.AWSLambda:
+        elif InstallMethod.AWSLambda == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_aws_stream(config)
         else:
             raise ValueError("Invalid install method")
@@ -64,9 +63,7 @@ class Plugin(IOServer, Router):
         # register io routes
         self._register_request_routes()
 
-    def _launch_local_stream(
-        self, config: DifyPluginEnv
-    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_local_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch local stream
         """
@@ -77,9 +74,7 @@ class Plugin(IOServer, Router):
         self._log_configuration()
         return reader, writer
 
-    def _launch_remote_stream(
-        self, config: DifyPluginEnv
-    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_remote_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch remote stream
         """
@@ -165,15 +160,11 @@ class Plugin(IOServer, Router):
 
         self._log_configuration()
 
-    def _launch_aws_stream(
-        self, config: DifyPluginEnv
-    ) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_aws_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
         Launch AWS stream
         """
-        aws_stream = AWSLambdaRequestReader(
-            config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT
-        )
+        aws_stream = AWSLambdaRequestReader(config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT)
         aws_stream.launch()
 
         return aws_stream, None

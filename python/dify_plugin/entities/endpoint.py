@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
-from ..entities.tool import ProviderConfig
 
 from ..core.utils.yaml_loader import load_yaml_file
+from ..entities.tool import ProviderConfig
 
 
 class EndpointConfigurationExtra(BaseModel):
@@ -22,6 +22,7 @@ class EndpointProviderConfiguration(BaseModel):
     endpoints: list[EndpointConfiguration] = Field(default_factory=list)
 
     @field_validator("endpoints", mode="before")
+    @classmethod
     def validate_endpoints(cls, value) -> list[EndpointConfiguration]:
         if not isinstance(value, list):
             raise ValueError("endpoints should be a list")
@@ -36,6 +37,6 @@ class EndpointProviderConfiguration(BaseModel):
                 file = load_yaml_file(endpoint)
                 endpoints.append(EndpointConfiguration(**file))
             except Exception as e:
-                raise ValueError(f"Error loading endpoint configuration: {str(e)}")
+                raise ValueError(f"Error loading endpoint configuration: {str(e)}") from e
 
         return endpoints

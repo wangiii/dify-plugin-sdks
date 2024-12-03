@@ -1,6 +1,7 @@
 from collections.abc import Generator
-from dify_plugin.entities.tool import ToolInvokeMessage
+
 from dify_plugin import Tool
+from dify_plugin.entities.tool import ToolInvokeMessage
 
 
 class UploadFileTool(Tool):

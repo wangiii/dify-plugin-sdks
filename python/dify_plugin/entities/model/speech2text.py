@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+
 from ...entities.model import BaseModelConfig, ModelType
 
 
@@ -11,9 +12,10 @@ class Speech2TextModelConfig(BaseModelConfig):
 
     model_config = ConfigDict(protected_namespaces=())
 
-    
+
 class Speech2TextResult(BaseModel):
     """
     Model class for rerank result.
     """
+
     result: str

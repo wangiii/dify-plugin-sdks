@@ -1,16 +1,11 @@
-from decimal import Decimal
 import json
 import time
+from decimal import Decimal
 from typing import Optional
 from urllib.parse import urljoin
 
 import requests
 
-from ....entities.model.text_embedding import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
-from ....interfaces.model.text_embedding_model import TextEmbeddingModel
 from ....entities import I18nObject
 from ....entities.model import (
     AIModelEntity,
@@ -21,9 +16,14 @@ from ....entities.model import (
     PriceConfig,
     PriceType,
 )
+from ....entities.model.text_embedding import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from ....errors.model import (
     CredentialsValidateFailedError,
 )
+from ....interfaces.model.text_embedding_model import TextEmbeddingModel
 from .common import _CommonOaiApiCompat
 
 
@@ -121,13 +121,9 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             batched_embeddings += embeddings_batch
 
         # calc usage
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=used_tokens
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
-        return TextEmbeddingResult(
-            embeddings=batched_embeddings, usage=usage, model=model
-        )
+        return TextEmbeddingResult(embeddings=batched_embeddings, usage=usage, model=model)
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> list[int]:
         """
@@ -179,22 +175,16 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             try:
                 json_result = response.json()
             except json.JSONDecodeError as e:
-                raise CredentialsValidateFailedError(
-                    "Credentials validation failed: JSON decode error"
-                )
+                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error") from e
 
             if "model" not in json_result:
-                raise CredentialsValidateFailedError(
-                    "Credentials validation failed: invalid response"
-                )
+                raise CredentialsValidateFailedError("Credentials validation failed: invalid response")
         except CredentialsValidateFailedError:
             raise
         except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+            raise CredentialsValidateFailedError(str(ex)) from ex
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -204,9 +194,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             model_type=ModelType.TEXT_EMBEDDING,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    credentials.get("context_size", 512)
-                ),
+                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", 512)),
                 ModelPropertyKey.MAX_CHUNKS: 1,
             },
             parameter_rules=[],
@@ -219,9 +207,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
         return entity
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 

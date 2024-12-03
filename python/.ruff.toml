@@ -1,0 +1,44 @@
+line-length = 120
+
+[format]
+quote-style = "double"
+
+[lint]
+preview = true
+select = [
+    "B",       # flake8-bugbear rules
+    "C4",      # flake8-comprehensions
+    "E",       # pycodestyle E rules
+    "F",       # pyflakes rules
+    "FURB",    # refurb rules
+    "I",       # isort rules
+    "N",       # pep8-naming
+    "PT",      # flake8-pytest-style rules
+    "PLC0208", # iteration-over-set
+    "PLC2801", # unnecessary-dunder-call
+    "PLC0414", # useless-import-alias
+    "PLR0402", # manual-from-import
+    "PLR1711", # useless-return
+    "PLR1714", # repeated-equality-comparison
+    "RUF013",  # implicit-optional
+    "RUF019",  # unnecessary-key-check
+    "RUF100",  # unused-noqa
+    "RUF101",  # redirected-noqa
+    "RUF200",  # invalid-pyproject-toml
+    "S506",    # unsafe-yaml-load
+    "SIM",     # flake8-simplify rules
+    "TRY400",  # error-instead-of-exception
+    "TRY401",  # verbose-log-message
+    "UP",      # pyupgrade rules
+    "W191",    # tab-indentation
+    "W605",    # invalid-escape-sequence
+]
+
+ignore = [
+    "E402", # module-import-not-at-top-of-file
+    "N815", # mixed-case-variable-in-class-scope
+]
+
+
+[lint.pyflakes]
+extend-generics = ["_pytest.monkeypatch", "tests.integration_tests"]

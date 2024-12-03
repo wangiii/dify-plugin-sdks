@@ -17,7 +17,7 @@ def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> 
     positions = load_yaml_file(position_file_name, ignore_error=True)
     position_map = {}
     index = 0
-    for _, name in enumerate(positions):
+    for name in positions:
         if name and isinstance(name, str):
             position_map[name.strip()] = index
             index += 1
@@ -25,9 +25,9 @@ def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> 
 
 
 def sort_by_position_map(
-        position_map: dict[str, int],
-        data: list[Any],
-        name_func: Callable[[Any], str],
+    position_map: dict[str, int],
+    data: list[Any],
+    name_func: Callable[[Any], str],
 ) -> list[Any]:
     """
     Sort the objects by the position map.
@@ -40,13 +40,13 @@ def sort_by_position_map(
     if not position_map or not data:
         return data
 
-    return sorted(data, key=lambda x: position_map.get(name_func(x), float('inf')))
+    return sorted(data, key=lambda x: position_map.get(name_func(x), float("inf")))
 
 
 def sort_to_dict_by_position_map(
-        position_map: dict[str, int],
-        data: list[Any],
-        name_func: Callable[[Any], str],
+    position_map: dict[str, int],
+    data: list[Any],
+    name_func: Callable[[Any], str],
 ) -> OrderedDict[str, Any]:
     """
     Sort the objects into a ordered dict by the position map.

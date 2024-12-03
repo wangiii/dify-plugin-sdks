@@ -1,12 +1,10 @@
-from ...entities.model.text_embedding import TextEmbeddingResult
 from ...core.entities.invocation import InvokeType
 from ...core.runtime import BackwardsInvocation
+from ...entities.model.text_embedding import TextEmbeddingResult
 
 
 class TextEmbeddingInvocation(BackwardsInvocation[TextEmbeddingResult]):
-    def invoke(
-        self, model_config: TextEmbeddingResult, texts: list[str]
-    ) -> TextEmbeddingResult:
+    def invoke(self, model_config: TextEmbeddingResult, texts: list[str]) -> TextEmbeddingResult:
         """
         Invoke text embedding
         """

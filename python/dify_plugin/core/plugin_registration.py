@@ -1,36 +1,37 @@
-from collections.abc import Mapping
 import os
-from typing import Type, TypeVar
+from collections.abc import Mapping
+from pathlib import Path
+from typing import TypeVar
 
-from werkzeug import Request
 import werkzeug
 import werkzeug.exceptions
+from werkzeug import Request
 from werkzeug.routing import Map, Rule
 
 from ..config.config import DifyPluginEnv
-from .entities.plugin.setup import (
-    PluginAsset,
-    PluginConfiguration,
-)
-from ..interfaces.model.ai_model import AIModel
-from ..entities.model.provider import ModelProviderConfiguration
-from ..interfaces.model.large_language_model import LargeLanguageModel
-from ..interfaces.model import ModelProvider
-from ..entities.model import ModelType
-from ..interfaces.model.moderation_model import ModerationModel
-from ..interfaces.model.rerank_model import RerankModel
-from ..interfaces.model.speech2text_model import Speech2TextModel
-from ..interfaces.model.text_embedding_model import TextEmbeddingModel
-from ..interfaces.model.tts_model import TTSModel
-from ..entities.tool import ToolConfiguration, ToolProviderConfiguration
-from ..interfaces.tool import Tool, ToolProvider
-from ..entities.endpoint import EndpointProviderConfiguration
-from ..interfaces.endpoint import Endpoint
 from ..core.utils.class_loader import (
     load_multi_subclasses_from_source,
     load_single_subclass_from_source,
 )
 from ..core.utils.yaml_loader import load_yaml_file
+from ..entities.endpoint import EndpointProviderConfiguration
+from ..entities.model import ModelType
+from ..entities.model.provider import ModelProviderConfiguration
+from ..entities.tool import ToolConfiguration, ToolProviderConfiguration
+from ..interfaces.endpoint import Endpoint
+from ..interfaces.model import ModelProvider
+from ..interfaces.model.ai_model import AIModel
+from ..interfaces.model.large_language_model import LargeLanguageModel
+from ..interfaces.model.moderation_model import ModerationModel
+from ..interfaces.model.rerank_model import RerankModel
+from ..interfaces.model.speech2text_model import Speech2TextModel
+from ..interfaces.model.text_embedding_model import TextEmbeddingModel
+from ..interfaces.model.tts_model import TTSModel
+from ..interfaces.tool import Tool, ToolProvider
+from .entities.plugin.setup import (
+    PluginAsset,
+    PluginConfiguration,
+)
 
 T = TypeVar("T")
 
@@ -42,8 +43,8 @@ class PluginRegistration:
         str,
         tuple[
             ToolProviderConfiguration,
-            Type[ToolProvider],
-            dict[str, tuple[ToolConfiguration, Type[Tool]]],
+            type[ToolProvider],
+            dict[str, tuple[ToolConfiguration, type[Tool]]],
         ],
     ]
 
@@ -87,10 +88,8 @@ class PluginRegistration:
         with os.scandir("_assets") as entries:
             for entry in entries:
                 if entry.is_file():
-                    with open(entry, "rb") as f:
-                        self.files.append(
-                            PluginAsset(filename=entry.name, data=f.read())
-                        )
+                    entry_bytes = Path(entry).read_bytes()
+                    self.files.append(PluginAsset(filename=entry.name, data=entry_bytes))
 
     def _load_plugin_configuration(self):
         """
@@ -113,7 +112,7 @@ class PluginRegistration:
                 endpoint_configuration = EndpointProviderConfiguration(**fs)
                 self.endpoints_configuration.append(endpoint_configuration)
         except Exception as e:
-            raise ValueError(f"Error loading plugin configuration: {str(e)}")
+            raise ValueError(f"Error loading plugin configuration: {str(e)}") from e
 
     def _resolve_tool_providers(self):
         """
@@ -151,15 +150,11 @@ class PluginRegistration:
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)
 
-    def _is_strict_subclass(self, cls: Type[T], *parent_cls: Type[T]) -> bool:
+    def _is_strict_subclass(self, cls: type[T], *parent_cls: type[T]) -> bool:
         """
         check if the class is a strict subclass of one of the parent classes
         """
-        for parent in parent_cls:
-            if issubclass(cls, parent) and cls != parent:
-                return True
-
-        return False
+        return any(issubclass(cls, parent) and cls != parent for parent in parent_cls)
 
     def _resolve_model_providers(self):
         """
@@ -225,11 +220,7 @@ class PluginRegistration:
                     parent_type=Endpoint,
                 )
 
-                self.endpoints.add(
-                    Rule(
-                        endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls
-                    )
-                )
+                self.endpoints.add(Rule(endpoint.path, methods=[endpoint.method], endpoint=endpoint_cls))
 
     def _resolve_plugin_cls(self):
         """
@@ -286,15 +277,11 @@ class PluginRegistration:
         """
         for provider_registration in self.models_mapping:
             if provider_registration == provider:
-                registration = self.models_mapping[provider_registration][2].get(
-                    model_type
-                )
+                registration = self.models_mapping[provider_registration][2].get(model_type)
                 if registration:
                     return registration
 
-    def dispatch_endpoint_request(
-        self, request: Request
-    ) -> tuple[Type[Endpoint], Mapping]:
+    def dispatch_endpoint_request(self, request: Request) -> tuple[type[Endpoint], Mapping]:
         """
         dispatch endpoint request, match the request to the registered endpoints
 
@@ -305,4 +292,4 @@ class PluginRegistration:
             endpoint, values = adapter.match()
             return endpoint, values
         except werkzeug.exceptions.HTTPException as e:
-            raise ValueError(f"Failed to dispatch endpoint request: {str(e)}")
+            raise ValueError(f"Failed to dispatch endpoint request: {str(e)}") from e
