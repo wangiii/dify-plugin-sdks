@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from enum import Enum
 
 from pydantic import BaseModel
@@ -37,4 +36,4 @@ class InitializeMessage(BaseModel):
         key: str
 
     type: Type
-    data: dict | Sequence
+    data: dict | list
