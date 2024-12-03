@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from ....entities import I18nObject
+from dify_plugin.entities import I18nObject
 
 
 class PluginArch(Enum):

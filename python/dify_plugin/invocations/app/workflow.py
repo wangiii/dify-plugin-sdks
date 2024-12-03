@@ -1,8 +1,8 @@
 from collections.abc import Generator
 from typing import Literal, overload
 
-from ...core.entities.invocation import InvokeType
-from ...core.runtime import BackwardsInvocation
+from dify_plugin.core.entities.invocation import InvokeType
+from dify_plugin.core.runtime import BackwardsInvocation
 
 
 class WorkflowAppInvocation(BackwardsInvocation[dict]):

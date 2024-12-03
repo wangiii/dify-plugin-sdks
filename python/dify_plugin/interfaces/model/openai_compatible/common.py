@@ -1,6 +1,6 @@
 import requests
 
-from ....errors.model import (
+from dify_plugin.errors.model import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
     InvokeConnectionError,

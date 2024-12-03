@@ -7,21 +7,21 @@ from typing import Optional, Union
 
 from pydantic import ConfigDict
 
-from ...entities.model import (
+from dify_plugin.entities.model import (
     ModelPropertyKey,
     ModelType,
     ParameterRule,
     ParameterType,
     PriceType,
 )
-from ...entities.model.llm import (
+from dify_plugin.entities.model.llm import (
     LLMMode,
     LLMResult,
     LLMResultChunk,
     LLMResultChunkDelta,
     LLMUsage,
 )
-from ...entities.model.message import (
+from dify_plugin.entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
     PromptMessageContentType,

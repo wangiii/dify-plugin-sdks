@@ -9,12 +9,12 @@ from gevent.select import select
 
 from dify_plugin.core.entities.message import InitializeMessage
 
-from ....core.entities.plugin.io import (
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-from ....core.server.__base.request_reader import RequestReader
-from ....core.server.__base.response_writer import ResponseWriter
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
 logger = logging.getLogger(__name__)
 

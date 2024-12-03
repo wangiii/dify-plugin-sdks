@@ -3,9 +3,9 @@ import logging
 from collections.abc import Callable
 from typing import Any, Optional
 
-from ...core.runtime import Session
-from .__base.request_reader import RequestReader
-from .__base.response_writer import ResponseWriter
+from dify_plugin.core.runtime import Session
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
 logger = logging.getLogger(__file__)
 

@@ -1,15 +1,15 @@
 from collections.abc import Generator
 from typing import Literal, cast, overload
 
-from ...core.entities.invocation import InvokeType
-from ...core.runtime import BackwardsInvocation
-from ...entities.model.llm import (
+from dify_plugin.core.entities.invocation import InvokeType
+from dify_plugin.core.runtime import BackwardsInvocation
+from dify_plugin.entities.model.llm import (
     LLMModelConfig,
     LLMResult,
     LLMResultChunk,
     SummaryResult,
 )
-from ...entities.model.message import PromptMessage, PromptMessageTool
+from dify_plugin.entities.model.message import PromptMessage, PromptMessageTool
 
 
 class LLMInvocation(BackwardsInvocation[LLMResult | LLMResultChunk]):

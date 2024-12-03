@@ -1,9 +1,9 @@
 from binascii import unhexlify
 from collections.abc import Generator
 
-from ...core.entities.invocation import InvokeType
-from ...core.runtime import BackwardsInvocation
-from ...entities.model.tts import TTSModelConfig, TTSResult
+from dify_plugin.core.entities.invocation import InvokeType
+from dify_plugin.core.runtime import BackwardsInvocation
+from dify_plugin.entities.model.tts import TTSModelConfig, TTSResult
 
 
 class TTSInvocation(BackwardsInvocation[TTSResult]):

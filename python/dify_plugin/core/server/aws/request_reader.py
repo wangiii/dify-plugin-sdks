@@ -4,12 +4,12 @@ from queue import Queue
 
 from flask import Flask, request
 
-from ....core.entities.plugin.io import (
+from dify_plugin.core.entities.plugin.io import (
     PluginInStream,
     PluginInStreamEvent,
 )
-from ....core.server.__base.request_reader import RequestReader
-from .response_writer import AWSResponseWriter
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.aws.response_writer import AWSResponseWriter
 
 
 class AWSLambdaRequestReader(RequestReader):

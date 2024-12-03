@@ -1,6 +1,6 @@
 from queue import Queue
 
-from ....core.server.__base.response_writer import ResponseWriter
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 
 
 class AWSResponseWriter(ResponseWriter):

@@ -4,9 +4,9 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
-    from ....core.entities.plugin.io import PluginInStream
+    from dify_plugin.core.entities.plugin.io import PluginInStream
 
-from .filter_reader import (
+from dify_plugin.core.server.__base.filter_reader import (
     FilterReader,
 )
 

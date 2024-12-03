@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from ...entities import I18nObject
+from dify_plugin.entities import I18nObject
 
 
 class DefaultParameterName(Enum):

@@ -8,30 +8,25 @@ import werkzeug.exceptions
 from werkzeug import Request
 from werkzeug.routing import Map, Rule
 
-from ..config.config import DifyPluginEnv
-from ..core.utils.class_loader import (
-    load_multi_subclasses_from_source,
-    load_single_subclass_from_source,
-)
-from ..core.utils.yaml_loader import load_yaml_file
-from ..entities.endpoint import EndpointProviderConfiguration
-from ..entities.model import ModelType
-from ..entities.model.provider import ModelProviderConfiguration
-from ..entities.tool import ToolConfiguration, ToolProviderConfiguration
-from ..interfaces.endpoint import Endpoint
-from ..interfaces.model import ModelProvider
-from ..interfaces.model.ai_model import AIModel
-from ..interfaces.model.large_language_model import LargeLanguageModel
-from ..interfaces.model.moderation_model import ModerationModel
-from ..interfaces.model.rerank_model import RerankModel
-from ..interfaces.model.speech2text_model import Speech2TextModel
-from ..interfaces.model.text_embedding_model import TextEmbeddingModel
-from ..interfaces.model.tts_model import TTSModel
-from ..interfaces.tool import Tool, ToolProvider
-from .entities.plugin.setup import (
-    PluginAsset,
-    PluginConfiguration,
-)
+from dify_plugin.config.config import DifyPluginEnv
+from dify_plugin.core.entities.plugin.setup import PluginAsset, PluginConfiguration
+from dify_plugin.core.utils.class_loader import load_multi_subclasses_from_source, load_single_subclass_from_source
+from dify_plugin.core.utils.yaml_loader import load_yaml_file
+from dify_plugin.entities.endpoint import EndpointProviderConfiguration
+from dify_plugin.entities.model import ModelType
+from dify_plugin.entities.model.provider import ModelProviderConfiguration
+from dify_plugin.entities.tool import ToolConfiguration, ToolProviderConfiguration
+from dify_plugin.interfaces.endpoint import Endpoint
+from dify_plugin.interfaces.model import ModelProvider
+from dify_plugin.interfaces.model.ai_model import AIModel
+from dify_plugin.interfaces.model.large_language_model import LargeLanguageModel
+from dify_plugin.interfaces.model.moderation_model import ModerationModel
+from dify_plugin.interfaces.model.rerank_model import RerankModel
+from dify_plugin.interfaces.model.speech2text_model import Speech2TextModel
+from dify_plugin.interfaces.model.text_embedding_model import TextEmbeddingModel
+from dify_plugin.interfaces.model.tts_model import TTSModel
+from dify_plugin.interfaces.tool import Tool, ToolProvider
+
 
 T = TypeVar("T")
 

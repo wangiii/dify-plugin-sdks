@@ -3,12 +3,12 @@ from urllib.parse import urljoin
 
 import requests
 
-from ....errors.model import (
+from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
     InvokeBadRequestError,
 )
-from ....interfaces.model.speech2text_model import Speech2TextModel
-from .common import _CommonOaiApiCompat
+from dify_plugin.interfaces.model.speech2text_model import Speech2TextModel
+from dify_plugin.interfaces.model.openai_compatible.common import _CommonOaiApiCompat
 
 
 class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):

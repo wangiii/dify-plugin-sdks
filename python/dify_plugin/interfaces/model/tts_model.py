@@ -8,8 +8,8 @@ from typing import Any, Optional
 
 from pydantic import ConfigDict
 
-from ...entities.model import ModelPropertyKey, ModelType
-from .ai_model import AIModel
+from dify_plugin.entities.model import ModelPropertyKey, ModelType
+from dify_plugin.interfaces.model.ai_model import AIModel
 
 logger = logging.getLogger(__name__)
 

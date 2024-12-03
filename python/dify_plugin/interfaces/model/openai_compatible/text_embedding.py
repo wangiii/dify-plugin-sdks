@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 
 import requests
 
-from ....entities import I18nObject
-from ....entities.model import (
+from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model import (
     AIModelEntity,
     EmbeddingInputType,
     FetchFrom,
@@ -16,15 +16,15 @@ from ....entities.model import (
     PriceConfig,
     PriceType,
 )
-from ....entities.model.text_embedding import (
+from dify_plugin.entities.model.text_embedding import (
     EmbeddingUsage,
     TextEmbeddingResult,
 )
-from ....errors.model import (
+from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
 )
-from ....interfaces.model.text_embedding_model import TextEmbeddingModel
-from .common import _CommonOaiApiCompat
+from dify_plugin.interfaces.model.text_embedding_model import TextEmbeddingModel
+from dify_plugin.interfaces.model.openai_compatible.common import _CommonOaiApiCompat
 
 
 class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):

@@ -4,9 +4,9 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from ...entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
-from ...entities.model.text_embedding import TextEmbeddingResult
-from .ai_model import AIModel
+from dify_plugin.entities.model import EmbeddingInputType, ModelPropertyKey, ModelType
+from dify_plugin.entities.model.text_embedding import TextEmbeddingResult
+from dify_plugin.interfaces.model.ai_model import AIModel
 
 
 class TextEmbeddingModel(AIModel):

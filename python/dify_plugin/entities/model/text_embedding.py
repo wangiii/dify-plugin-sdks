@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from ...entities.model import BaseModelConfig, ModelType, ModelUsage
+from dify_plugin.entities.model import BaseModelConfig, ModelType, ModelUsage
 
 
 class EmbeddingUsage(ModelUsage):

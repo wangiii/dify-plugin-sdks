@@ -4,15 +4,15 @@ from typing import Optional
 from requests import HTTPError, post
 from yarl import URL
 
-from ....entities import I18nObject
-from ....entities.model import AIModelEntity, FetchFrom, ModelType
-from ....entities.model.rerank import RerankDocument, RerankResult
-from ....errors.model import (
+from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model import AIModelEntity, FetchFrom, ModelType
+from dify_plugin.entities.model.rerank import RerankDocument, RerankResult
+from dify_plugin.errors.model import (
     CredentialsValidateFailedError,
     InvokeError,
     InvokeServerUnavailableError,
 )
-from ..rerank_model import RerankModel
+from dify_plugin.interfaces.model.rerank_model import RerankModel
 
 
 class OAICompatRerankModel(RerankModel):

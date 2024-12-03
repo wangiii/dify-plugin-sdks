@@ -7,8 +7,8 @@ from urllib.parse import urljoin
 
 import requests
 
-from ....entities import I18nObject
-from ....entities.model import (
+from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model import (
     AIModelEntity,
     DefaultParameterName,
     FetchFrom,
@@ -19,13 +19,13 @@ from ....entities.model import (
     ParameterType,
     PriceConfig,
 )
-from ....entities.model.llm import (
+from dify_plugin.entities.model.llm import (
     LLMMode,
     LLMResult,
     LLMResultChunk,
     LLMResultChunkDelta,
 )
-from ....entities.model.message import (
+from dify_plugin.entities.model.message import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
     PromptMessage,
@@ -37,9 +37,9 @@ from ....entities.model.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from ....errors.model import CredentialsValidateFailedError, InvokeError
-from ..large_language_model import LargeLanguageModel
-from .common import _CommonOaiApiCompat
+from dify_plugin.errors.model import CredentialsValidateFailedError, InvokeError
+from dify_plugin.interfaces.model.large_language_model import LargeLanguageModel
+from dify_plugin.interfaces.model.openai_compatible.common import _CommonOaiApiCompat
 
 logger = logging.getLogger(__name__)
 

@@ -3,8 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from ....core.entities.message import SessionMessage
-from .writer_entities import Event, StreamOutputMessage
+from dify_plugin.core.entities.message import SessionMessage
+from dify_plugin.core.server.__base.writer_entities import Event, StreamOutputMessage
 
 
 class ResponseWriter(ABC):

@@ -3,8 +3,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from ....entities.model import ModelType
-from ....entities.model.message import (
+from dify_plugin.entities.model import ModelType
+from dify_plugin.entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
     PromptMessageRole,

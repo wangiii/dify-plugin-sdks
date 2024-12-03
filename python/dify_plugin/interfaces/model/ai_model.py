@@ -5,8 +5,8 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from ...entities import I18nObject
-from ...entities.model import (
+from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model import (
     PARAMETER_RULE_TEMPLATE,
     AIModelEntity,
     DefaultParameterName,
@@ -15,7 +15,7 @@ from ...entities.model import (
     PriceInfo,
     PriceType,
 )
-from ...errors.model import InvokeAuthorizationError, InvokeError
+from dify_plugin.errors.model import InvokeAuthorizationError, InvokeError
 
 
 class AIModel(ABC):

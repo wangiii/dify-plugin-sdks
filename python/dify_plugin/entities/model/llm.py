@@ -4,8 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from ...entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
-from ...entities.model.message import (
+from dify_plugin.entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
+from dify_plugin.entities.model.message import (
     AssistantPromptMessage,
     PromptMessage,
 )

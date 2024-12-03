@@ -57,6 +57,18 @@
             "env": {
                 "GEVENT_SUPPORT": "True"
             }
+        },
+        {
+            "name": "KawaiiFilter",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/kawaii_filter/main.py",
+            "cwd": "${workspaceFolder}/examples/kawaii_filter",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "GEVENT_SUPPORT": "True"
+            }
         }
     ]
 }

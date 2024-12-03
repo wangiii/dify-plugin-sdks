@@ -4,8 +4,8 @@ from typing import Optional
 
 from pydantic import ConfigDict
 
-from ...entities.model import ModelType
-from .ai_model import AIModel
+from dify_plugin.entities.model import ModelType
+from dify_plugin.interfaces.model.ai_model import AIModel
 
 
 class ModerationModel(AIModel):

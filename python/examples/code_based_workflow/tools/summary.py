@@ -9,6 +9,7 @@ class Summary(Tool):
         response = self.session.model.summary.invoke(
             text="Hello, world!",
             instruction="Summarize the text",
+            min_summarize_length=1,
         )
 
         yield self.create_json_message(

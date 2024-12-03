@@ -7,20 +7,14 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 from typing import Optional
 
+from dify_plugin.config.config import DifyPluginEnv
+from dify_plugin.core.entities.plugin.io import PluginInStream, PluginInStreamEvent
+from dify_plugin.core.server.__base.request_reader import RequestReader
+from dify_plugin.core.server.__base.response_writer import ResponseWriter
 from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader
 from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
 from dify_plugin.core.server.tcp.request_reader import TCPReaderWriter
-
-from ...config.config import DifyPluginEnv
-from ...core.entities.plugin.io import (
-    PluginInStream,
-    PluginInStreamEvent,
-)
-from ...errors.model import (
-    InvokeError,
-)
-from .__base.request_reader import RequestReader
-from .__base.response_writer import ResponseWriter
+from dify_plugin.errors.model import InvokeError
 
 logger = logging.getLogger(__name__)
 

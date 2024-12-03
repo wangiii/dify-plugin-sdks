@@ -3,7 +3,7 @@ from collections.abc import Mapping
 
 from werkzeug import Request, Response
 
-from ...core.runtime import Session
+from dify_plugin.core.runtime import Session
 
 
 class Endpoint(ABC):

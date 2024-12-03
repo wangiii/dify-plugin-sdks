@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from ...entities.model import BaseModelConfig, ModelType
+from dify_plugin.entities.model import BaseModelConfig, ModelType
 
 
 class TTSModelConfig(BaseModelConfig):

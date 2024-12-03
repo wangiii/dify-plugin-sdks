@@ -1,9 +1,9 @@
 from collections.abc import Generator
 from typing import Any
 
-from ..core.entities.invocation import InvokeType
-from ..core.runtime import BackwardsInvocation
-from ..entities.tool import ToolInvokeMessage, ToolProviderType
+from dify_plugin.core.entities.invocation import InvokeType
+from dify_plugin.core.runtime import BackwardsInvocation
+from dify_plugin.entities.tool import ToolInvokeMessage, ToolProviderType
 
 
 class ToolInvocation(BackwardsInvocation[ToolInvokeMessage]):

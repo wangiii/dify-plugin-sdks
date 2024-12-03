@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 from typing import Any, Optional
 
-from ...core.runtime import Session
-from ...entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
-from ...file.constants import DIFY_FILE_IDENTITY
-from ...file.file import File
+from dify_plugin.file.entities import FileType
+
+from dify_plugin.core.runtime import Session
+from dify_plugin.entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
+from dify_plugin.file.constants import DIFY_FILE_IDENTITY
+from dify_plugin.file.file import File
 
 
 class ToolProvider(ABC):
@@ -156,11 +158,16 @@ class Tool(ABC):
         """
         for parameter, value in tool_parameters.items():
             if isinstance(value, dict) and value.get("dify_model_identity") == DIFY_FILE_IDENTITY:
-                tool_parameters[parameter] = File(url=value["url"])
+                tool_parameters[parameter] = File(
+                    url=value["url"], mime_type=value.get("mime_type"), type=FileType(value.get("type"))
+                )
             elif isinstance(value, list) and all(
                 isinstance(item, dict) and item.get("dify_model_identity") == DIFY_FILE_IDENTITY for item in value
             ):
-                tool_parameters[parameter] = [File(url=item["url"]) for item in value]
+                tool_parameters[parameter] = [
+                    File(url=item["url"], mime_type=item.get("mime_type"), type=FileType(item.get("type")))
+                    for item in value
+                ]
 
         return tool_parameters
 

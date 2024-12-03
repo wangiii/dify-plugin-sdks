@@ -3,7 +3,7 @@ from collections.abc import Callable, Generator
 from queue import Queue
 from typing import Optional, overload
 
-from ....core.entities.plugin.io import PluginInStream
+from dify_plugin.core.entities.plugin.io import PluginInStream
 
 
 class FilterReader:

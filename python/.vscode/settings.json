@@ -9,6 +9,7 @@
         "Neko",
         "Peekable",
         "Rerank",
+        "scandir",
         "SERP",
         "serpapi",
         "tiktoken",

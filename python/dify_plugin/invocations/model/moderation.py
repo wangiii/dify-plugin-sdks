@@ -1,6 +1,6 @@
-from ...core.entities.invocation import InvokeType
-from ...core.runtime import BackwardsInvocation
-from ...entities.model.moderation import ModerationModelConfig, ModerationResult
+from dify_plugin.core.entities.invocation import InvokeType
+from dify_plugin.core.runtime import BackwardsInvocation
+from dify_plugin.entities.model.moderation import ModerationModelConfig, ModerationResult
 
 
 class ModerationInvocation(BackwardsInvocation[ModerationResult]):
