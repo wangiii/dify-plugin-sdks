@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Literal, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class PromptMessageRole(Enum):
@@ -55,6 +55,8 @@ class PromptMessageContentType(Enum):
 
     TEXT = "text"
     IMAGE = "image"
+    AUDIO = "audio"
+    VIDEO = "video"
     DOCUMENT = "document"
 
 
@@ -73,6 +75,18 @@ class TextPromptMessageContent(PromptMessageContent):
     """
 
     type: PromptMessageContentType = PromptMessageContentType.TEXT
+
+
+class VideoPromptMessageContent(PromptMessageContent):
+    data: str = Field(..., description="Base64 encoded video data")
+    type: PromptMessageContentType = PromptMessageContentType.VIDEO
+    format: str = Field(..., description="Video format")
+
+
+class AudioPromptMessageContent(PromptMessageContent):
+    type: PromptMessageContentType = PromptMessageContentType.AUDIO
+    data: str = Field(..., description="Base64 encoded audio data")
+    format: str = Field(..., description="Audio format")
 
 
 class ImagePromptMessageContent(PromptMessageContent):
