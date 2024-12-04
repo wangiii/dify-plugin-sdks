@@ -147,6 +147,10 @@ class PromptMessage(BaseModel):
                     result.append(ImagePromptMessageContent(**content))
                 elif content.get("type") == PromptMessageContentType.DOCUMENT.value:
                     result.append(DocumentPromptMessageContent(**content))
+                elif content.get("type") == PromptMessageContentType.AUDIO.value:
+                    result.append(AudioPromptMessageContent(**content))
+                elif content.get("type") == PromptMessageContentType.VIDEO.value:
+                    result.append(VideoPromptMessageContent(**content))
             return result
 
 
