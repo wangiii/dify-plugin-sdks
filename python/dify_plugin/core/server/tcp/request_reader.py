@@ -1,4 +1,6 @@
 import logging
+import os
+import signal
 import socket
 import time
 from collections.abc import Generator
@@ -39,6 +41,9 @@ class TCPReaderWriter(RequestReader, ResponseWriter):
         self.reconnect_timeout = reconnect_timeout
         self.alive = False
         self.on_connected = on_connected
+
+        # handle SIGINT to exit the program smoothly due to the gevent limitation
+        signal.signal(signal.SIGINT, lambda *args, **kwargs: os._exit(0))
 
     def launch(self):
         """
