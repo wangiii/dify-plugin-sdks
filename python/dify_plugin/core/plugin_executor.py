@@ -18,6 +18,7 @@ from dify_plugin.interfaces.model.speech2text_model import Speech2TextModel
 from dify_plugin.interfaces.model.text_embedding_model import TextEmbeddingModel
 from dify_plugin.interfaces.model.tts_model import TTSModel
 from dify_plugin.core.entities.plugin.request import (
+    AgentInvokeRequest,
     EndpointInvokeRequest,
     ModelGetAIModelSchemas,
     ModelGetLLMNumTokens,
@@ -73,6 +74,14 @@ class PluginExecutor:
 
         # invoke tool
         yield from tool.invoke(request.tool_parameters)
+
+    def invoke_agent(self, session: Session, request: AgentInvokeRequest):
+        agent_cls = self.registration.get_agent_cls(request.provider, request.agent)
+        if agent_cls is None:
+            raise ValueError(f"Agent `{request.agent}` not found for provider `{request.provider}`")
+
+        agent = agent_cls(session=session)
+        yield from agent.invoke(request.agent_parameters)
 
     def get_tool_runtime_parameters(self, session: Session, data: ToolGetRuntimeParametersRequest):
         tool_cls = self.registration.get_tool_cls(data.provider, data.tool)

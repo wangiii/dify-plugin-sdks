@@ -64,6 +64,7 @@ class PluginConfiguration(BaseModel):
         tools: list[str] = Field(default_factory=list)
         models: list[str] = Field(default_factory=list)
         endpoints: list[str] = Field(default_factory=list)
+        agents: list[str] = Field(default_factory=list)
 
     class Meta(BaseModel):
         class PluginRunner(BaseModel):

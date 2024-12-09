@@ -12,6 +12,7 @@ from dify_plugin.entities.tool import ToolInvokeMessage
 from .config.config import DifyPluginEnv, InstallMethod
 from .config.logger_format import plugin_logger_handler
 from .core.entities.plugin.request import (
+    AgentActions,
     EndpointActions,
     ModelActions,
     PluginInvokeType,
@@ -134,6 +135,15 @@ class Plugin(IOServer, Router):
                 + "\n\n"
             )
 
+        if self.registration.agents_configuration:
+            tcp_stream.write(
+                InitializeMessage(
+                    type=InitializeMessage.Type.AGENT_DECLARATION,
+                    data=List(root=self.registration.agents_configuration).model_dump(),
+                ).model_dump_json()
+                + "\n\n"
+            )
+
         for file in self.registration.files:
             # divide the file into chunks
             chunks = [file.data[i : i + 8192] for i in range(0, len(file.data), 8192)]
@@ -179,6 +189,8 @@ class Plugin(IOServer, Router):
             logger.info(f"Installed model: {model.provider}")
         for endpoint in self.registration.endpoints_configuration:
             logger.info(f"Installed endpoint: {[e.path for e in endpoint.endpoints]}")
+        for agent in self.registration.agents_configuration:
+            logger.info(f"Installed agent: {agent.identity.name}")
 
     def _register_request_routes(self):
         """
@@ -194,6 +206,12 @@ class Plugin(IOServer, Router):
             self.plugin_executer.validate_tool_provider_credentials,
             lambda data: data.get("type") == PluginInvokeType.Tool.value
             and data.get("action") == ToolActions.ValidateCredentials.value,
+        )
+
+        self.register_route(
+            self.plugin_executer.invoke_agent,
+            lambda data: data.get("type") == PluginInvokeType.Agent.value
+            and data.get("action") == AgentActions.InvokeAgent.value,
         )
 
         self.register_route(

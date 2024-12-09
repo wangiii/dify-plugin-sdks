@@ -12,10 +12,12 @@ from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.entities.plugin.setup import PluginAsset, PluginConfiguration
 from dify_plugin.core.utils.class_loader import load_multi_subclasses_from_source, load_single_subclass_from_source
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
+from dify_plugin.entities.agent import AgentProviderConfiguration, AgentStrategyConfiguration
 from dify_plugin.entities.endpoint import EndpointProviderConfiguration
 from dify_plugin.entities.model import ModelType
 from dify_plugin.entities.model.provider import ModelProviderConfiguration
 from dify_plugin.entities.tool import ToolConfiguration, ToolProviderConfiguration
+from dify_plugin.interfaces.agent import AgentStrategy, AgentProvider
 from dify_plugin.interfaces.endpoint import Endpoint
 from dify_plugin.interfaces.model import ModelProvider
 from dify_plugin.interfaces.model.ai_model import AIModel
@@ -40,6 +42,15 @@ class PluginRegistration:
             ToolProviderConfiguration,
             type[ToolProvider],
             dict[str, tuple[ToolConfiguration, type[Tool]]],
+        ],
+    ]
+    agents_configuration: list[AgentProviderConfiguration]
+    agents_mapping: dict[
+        str,
+        tuple[
+            AgentProviderConfiguration,
+            type[AgentProvider],
+            dict[str, tuple[AgentStrategyConfiguration, type[AgentStrategy]]],
         ],
     ]
 
@@ -67,6 +78,8 @@ class PluginRegistration:
         self.endpoints_configuration = []
         self.endpoints = Map()
         self.files = []
+        self.agents_configuration = []
+        self.agents_mapping = {}
 
         # load plugin configuration
         self._load_plugin_configuration()
@@ -106,6 +119,11 @@ class PluginRegistration:
                 fs = load_yaml_file(provider)
                 endpoint_configuration = EndpointProviderConfiguration(**fs)
                 self.endpoints_configuration.append(endpoint_configuration)
+            for provider in self.configuration.plugins.agents:
+                fs = load_yaml_file(provider)
+                agent_provider_configuration = AgentProviderConfiguration(**fs)
+                self.agents_configuration.append(agent_provider_configuration)
+
         except Exception as e:
             raise ValueError(f"Error loading plugin configuration: {str(e)}") from e
 
@@ -144,6 +162,38 @@ class PluginRegistration:
                 tools[tool.identity.name] = (tool, tool_cls)
 
             self.tools_mapping[provider.identity.name] = (provider, cls, tools)
+
+    def _resolve_agent_providers(self):
+        """
+        walk through all the agent providers and strategies and load the classes from sources
+        """
+        for provider in self.agents_configuration:
+            # load class
+            source = provider.extra.python.source
+            # remove extension
+            module_source = os.path.splitext(source)[0]
+            # replace / with .
+            module_source = module_source.replace("/", ".")
+            cls = load_single_subclass_from_source(
+                module_name=module_source,
+                script_path=os.path.join(os.getcwd(), source),
+                parent_type=AgentProvider,
+            )
+
+            strategies = {}
+            for strategy in provider.strategies:
+                strategy_source = strategy.extra.python.source
+                strategy_module_source = os.path.splitext(strategy_source)[0]
+                strategy_module_source = strategy_module_source.replace("/", ".")
+                strategy_cls = load_single_subclass_from_source(
+                    module_name=strategy_module_source,
+                    script_path=os.path.join(os.getcwd(), strategy_source),
+                    parent_type=AgentStrategy,
+                )
+
+                strategies[strategy.identity.name] = (strategy, strategy_cls)
+
+            self.agents_mapping[provider.identity.name] = (provider, cls, strategies)
 
     def _is_strict_subclass(self, cls: type[T], *parent_cls: type[T]) -> bool:
         """
@@ -230,6 +280,9 @@ class PluginRegistration:
         # load endpoints
         self._resolve_endpoints()
 
+        # load agent providers and strategies
+        self._resolve_agent_providers()
+
     def get_tool_provider_cls(self, provider: str):
         """
         get the tool provider class by provider name
@@ -250,6 +303,29 @@ class PluginRegistration:
         for provider_registration in self.tools_mapping:
             if provider_registration == provider:
                 registration = self.tools_mapping[provider_registration][2].get(tool)
+                if registration:
+                    return registration[1]
+
+    def get_agent_provider_cls(self, provider: str):
+        """
+        get the agent provider class by provider name
+        :param provider: provider name
+        :return: agent provider class
+        """
+        for provider_registration in self.agents_mapping:
+            if provider_registration == provider:
+                return self.agents_mapping[provider_registration][1]
+
+    def get_agent_cls(self, provider: str, agent: str):
+        """
+        get the agent class by provider
+        :param provider: provider name
+        :param agent: agent name
+        :return: agent class
+        """
+        for provider_registration in self.agents_mapping:
+            if provider_registration == provider:
+                registration = self.agents_mapping[provider_registration][2].get(agent)
                 if registration:
                     return registration[1]
 

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-from typing import Any, Optional
+from typing import Any, Generic, Optional, Type, TypeVar
 
+from dify_plugin.entities.agent import AgentInvokeMessage
 from dify_plugin.file.entities import FileType
 
 from dify_plugin.core.runtime import Session
@@ -9,100 +10,66 @@ from dify_plugin.entities.tool import ToolInvokeMessage, ToolParameter, ToolRunt
 from dify_plugin.file.constants import DIFY_FILE_IDENTITY
 from dify_plugin.file.file import File
 
-
-class ToolProvider(ABC):
-    def validate_credentials(self, credentials: dict):
-        return self._validate_credentials(credentials)
-
-    @abstractmethod
-    def _validate_credentials(self, credentials: dict):
-        pass
+T = TypeVar("T", bound=ToolInvokeMessage | AgentInvokeMessage)
 
 
-class Tool(ABC):
-    runtime: ToolRuntime
-
-    def __init__(
-        self,
-        runtime: ToolRuntime,
-        session: Session,
-    ):
-        self.runtime = runtime
-        self.session = session
-
-    ############################################################
-    #        Methods that can be implemented by plugin         #
-    ############################################################
-
-    @abstractmethod
-    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
-        pass
-
-    @classmethod
-    def from_credentials(
-        cls,
-        credentials: dict,
-        user_id: Optional[str] = None,
-    ):
-        return cls(
-            runtime=ToolRuntime(credentials=credentials, user_id=user_id, session_id=None),
-            session=Session.empty_session(),  # TODO could not fetch session here
-        )
+class ToolLike(ABC, Generic[T]):
+    response_type: Type[T]
 
     ############################################################
     #            For plugin implementation use only            #
     ############################################################
 
-    def create_text_message(self, text: str) -> ToolInvokeMessage:
-        return ToolInvokeMessage(
+    def create_text_message(self, text: str) -> T:
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.TEXT,
             message=ToolInvokeMessage.TextMessage(text=text),
         )
 
-    def create_json_message(self, json: dict) -> ToolInvokeMessage:
-        return ToolInvokeMessage(
+    def create_json_message(self, json: dict) -> T:
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.JSON,
             message=ToolInvokeMessage.JsonMessage(json_object=json),
         )
 
-    def create_image_message(self, image_url: str) -> ToolInvokeMessage:
+    def create_image_message(self, image_url: str) -> T:
         """
         create an image message
 
         :param image: the url of the image
         :return: the image message
         """
-        return ToolInvokeMessage(
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.IMAGE,
             message=ToolInvokeMessage.TextMessage(text=image_url),
         )
 
-    def create_link_message(self, link: str) -> ToolInvokeMessage:
+    def create_link_message(self, link: str) -> T:
         """
         create a link message
 
         :param link: the url of the link
         :return: the link message
         """
-        return ToolInvokeMessage(
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.LINK,
             message=ToolInvokeMessage.TextMessage(text=link),
         )
 
-    def create_blob_message(self, blob: bytes, meta: Optional[dict] = None) -> ToolInvokeMessage:
+    def create_blob_message(self, blob: bytes, meta: Optional[dict] = None) -> T:
         """
         create a blob message
 
         :param blob: the blob
         :return: the blob message
         """
-        return ToolInvokeMessage(
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.BLOB,
             message=ToolInvokeMessage.BlobMessage(blob=blob),
             meta=meta,
         )
 
-    def create_variable_message(self, variable_name: str, variable_value: Any) -> ToolInvokeMessage:
+    def create_variable_message(self, variable_name: str, variable_value: Any) -> T:
         """
         create a variable message
 
@@ -110,12 +77,12 @@ class Tool(ABC):
         :param variable_value: the value of the variable
         :return: the variable message
         """
-        return ToolInvokeMessage(
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.VARIABLE,
             message=ToolInvokeMessage.VariableMessage(variable_name=variable_name, variable_value=variable_value),
         )
 
-    def create_stream_variable_message(self, variable_name: str, variable_value: str) -> ToolInvokeMessage:
+    def create_stream_variable_message(self, variable_name: str, variable_value: str) -> T:
         """
         create a variable message that will be streamed to the frontend
 
@@ -125,7 +92,7 @@ class Tool(ABC):
         :param variable_value: the value of the variable
         :return: the variable message
         """
-        return ToolInvokeMessage(
+        return self.response_type(
             type=ToolInvokeMessage.MessageType.VARIABLE,
             message=ToolInvokeMessage.VariableMessage(
                 variable_name=variable_name,
@@ -182,6 +149,48 @@ class Tool(ABC):
                 ]
 
         return tool_parameters
+
+
+class ToolProvider(ABC):
+    def validate_credentials(self, credentials: dict):
+        return self._validate_credentials(credentials)
+
+    @abstractmethod
+    def _validate_credentials(self, credentials: dict):
+        pass
+
+
+class Tool(ToolLike[ToolInvokeMessage]):
+    runtime: ToolRuntime
+    session: Session
+
+    def __init__(
+        self,
+        runtime: ToolRuntime,
+        session: Session,
+    ):
+        self.runtime = runtime
+        self.session = session
+        self.response_type = ToolInvokeMessage
+
+    @classmethod
+    def from_credentials(
+        cls,
+        credentials: dict,
+        user_id: Optional[str] = None,
+    ):
+        return cls(
+            runtime=ToolRuntime(credentials=credentials, user_id=user_id, session_id=None),
+            session=Session.empty_session(),  # TODO could not fetch session here
+        )
+
+    ############################################################
+    #        Methods that can be implemented by plugin         #
+    ############################################################
+
+    @abstractmethod
+    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+        pass
 
     ############################################################
     #                 For executor use only                    #
