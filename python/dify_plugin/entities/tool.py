@@ -1,7 +1,8 @@
 import base64
 import contextlib
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Mapping, Optional, Union
+import uuid
 
 from pydantic import (
     BaseModel,
@@ -99,6 +100,18 @@ class ToolInvokeMessage(BaseModel):
                 raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
             return v
 
+    class LogMessage(BaseModel):
+        class LogStatus(Enum):
+            START = "start"
+            ERROR = "error"
+            SUCCESS = "success"
+
+        id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="The id of the log")
+        parent_id: Optional[str] = Field(default=None, description="Leave empty for root log")
+        error: Optional[str] = Field(default=None, description="The error message")
+        status: LogStatus = Field(..., description="The status of the log")
+        data: Mapping[str, Any] = Field(..., description="Detailed log data")
+
     class MessageType(Enum):
         TEXT = "text"
         FILE = "file"
@@ -109,9 +122,10 @@ class ToolInvokeMessage(BaseModel):
         IMAGE_LINK = "image_link"
         VARIABLE = "variable"
         BLOB_CHUNK = "blob_chunk"
+        LOG = "log"
 
     type: MessageType
-    message: TextMessage | JsonMessage | VariableMessage | BlobMessage | BlobChunkMessage | None
+    message: TextMessage | JsonMessage | VariableMessage | BlobMessage | BlobChunkMessage | LogMessage | None
     meta: Optional[dict] = None
 
     @field_validator("message", mode="before")

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Mapping, Optional, Type, TypeVar
 
 from dify_plugin.entities.agent import AgentInvokeMessage
 from dify_plugin.file.entities import FileType
@@ -98,6 +98,47 @@ class ToolLike(ABC, Generic[T]):
                 variable_name=variable_name,
                 variable_value=variable_value,
                 stream=True,
+            ),
+        )
+
+    def create_log_message(
+        self,
+        data: Mapping[str, Any],
+        status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
+        parent: T | None = None,
+    ) -> T:
+        """
+        create a log message with status "start"
+        """
+        return self.response_type(
+            type=ToolInvokeMessage.MessageType.LOG,
+            message=ToolInvokeMessage.LogMessage(
+                data=data,
+                status=status,
+                parent_id=parent.message.id
+                if parent and isinstance(parent.message, ToolInvokeMessage.LogMessage)
+                else None,
+            ),
+        )
+
+    def finish_log_message(
+        self,
+        log: T,
+        status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
+        error: Optional[str] = None,
+    ) -> T:
+        """
+        mark log as finished
+        """
+        assert isinstance(log.message, ToolInvokeMessage.LogMessage)
+        return self.response_type(
+            type=ToolInvokeMessage.MessageType.LOG,
+            message=ToolInvokeMessage.LogMessage(
+                id=log.message.id,
+                data=log.message.data,
+                status=status,
+                parent_id=log.message.parent_id,
+                error=error,
             ),
         )
 
