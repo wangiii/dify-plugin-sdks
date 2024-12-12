@@ -12,17 +12,19 @@ description:
 parameters:
   - name: model
     type: model-selector
+    scope: tool-call&llm
     required: true
     label:
       en_US: Model
       zh_Hans: 模型
       pt_BR: Model
-    human_description:
-      en_US: model for agent
-      zh_Hans: 用于 Agent 的模型
-      pt_BR: model for agent
-    llm_description: model for agent
-    form: llm
+  - name: tools
+    type: array[tools]
+    required: true
+    label:
+      en_US: Tools list
+      zh_Hans: 工具列表
+      pt_BR: Tools list
 extra:
   python:
     source: strategies/function_calling.py

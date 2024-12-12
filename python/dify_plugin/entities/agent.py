@@ -1,13 +1,15 @@
-from typing import Optional
+from enum import Enum
+from typing import Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
 from dify_plugin.entities import I18nObject
 from dify_plugin.entities.tool import (
+    CommonParameterType,
     ToolIdentity,
     ToolInvokeMessage,
     ToolOutputSchema,
-    ToolParameter,
+    ToolParameterOption,
     ToolProviderIdentity,
 )
 
@@ -20,8 +22,29 @@ class AgentStrategyIdentity(ToolIdentity):
     pass
 
 
-class AgentStrategyParameter(ToolParameter):
-    pass
+class AgentStrategyParameter(BaseModel):
+    class ToolParameterType(str, Enum):
+        STRING = CommonParameterType.STRING.value
+        NUMBER = CommonParameterType.NUMBER.value
+        BOOLEAN = CommonParameterType.BOOLEAN.value
+        SELECT = CommonParameterType.SELECT.value
+        SECRET_INPUT = CommonParameterType.SECRET_INPUT.value
+        FILE = CommonParameterType.FILE.value
+        FILES = CommonParameterType.FILES.value
+        MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
+        APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
+        TOOLS_SELECTOR = CommonParameterType.TOOLS_SELECTOR.value
+        # TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
+
+    name: str = Field(..., description="The name of the parameter")
+    label: I18nObject = Field(..., description="The label presented to the user")
+    type: ToolParameterType = Field(..., description="The type of the parameter")
+    scope: str | None = None
+    required: Optional[bool] = False
+    default: Optional[Union[int, float, str]] = None
+    min: Optional[Union[float, int]] = None
+    max: Optional[Union[float, int]] = None
+    options: Optional[list[ToolParameterOption]] = None
 
 
 class AgentStrategyOutputSchema(ToolOutputSchema):

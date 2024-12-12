@@ -28,6 +28,7 @@ class CommonParameterType(Enum):
     APP_SELECTOR = "app-selector"
     MODEL_SELECTOR = "model-selector"
     # TOOL_SELECTOR = "tool-selector"
+    TOOLS_SELECTOR = "array[tools]"
 
 
 class AppSelectorScope(Enum):
@@ -177,7 +178,7 @@ class ToolParameter(BaseModel):
     label: I18nObject = Field(..., description="The label presented to the user")
     human_description: I18nObject = Field(..., description="The description presented to the user")
     type: ToolParameterType = Field(..., description="The type of the parameter")
-    scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
+    scope: str | None = None
     form: ToolParameterForm = Field(..., description="The form of the parameter, schema/form/llm")
     llm_description: Optional[str] = None
     required: Optional[bool] = False
@@ -261,7 +262,7 @@ class ProviderConfig(BaseModel):
 
     name: str = Field(..., description="The name of the credentials")
     type: Config = Field(..., description="The type of the credentials")
-    scope: Optional[AppSelectorScope | ModelConfigScope | ToolSelectorScope] = None
+    scope: str | None = None
     required: bool = False
     default: Optional[Union[int, float, str]] = None
     options: Optional[list[ToolCredentialsOption]] = None
