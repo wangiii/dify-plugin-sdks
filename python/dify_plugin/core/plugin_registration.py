@@ -12,7 +12,7 @@ from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.entities.plugin.setup import PluginAsset, PluginConfiguration
 from dify_plugin.core.utils.class_loader import load_multi_subclasses_from_source, load_single_subclass_from_source
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
-from dify_plugin.entities.agent import AgentProviderConfiguration, AgentStrategyConfiguration
+from dify_plugin.entities.agent import AgentStrategyProviderConfiguration, AgentStrategyConfiguration
 from dify_plugin.entities.endpoint import EndpointProviderConfiguration
 from dify_plugin.entities.model import ModelType
 from dify_plugin.entities.model.provider import ModelProviderConfiguration
@@ -44,11 +44,11 @@ class PluginRegistration:
             dict[str, tuple[ToolConfiguration, type[Tool]]],
         ],
     ]
-    agents_configuration: list[AgentProviderConfiguration]
-    agents_mapping: dict[
+    agent_strategies_configuration: list[AgentStrategyProviderConfiguration]
+    agent_strategies_mapping: dict[
         str,
         tuple[
-            AgentProviderConfiguration,
+            AgentStrategyProviderConfiguration,
             type[AgentProvider],
             dict[str, tuple[AgentStrategyConfiguration, type[AgentStrategy]]],
         ],
@@ -78,8 +78,8 @@ class PluginRegistration:
         self.endpoints_configuration = []
         self.endpoints = Map()
         self.files = []
-        self.agents_configuration = []
-        self.agents_mapping = {}
+        self.agent_strategies_configuration = []
+        self.agent_strategies_mapping = {}
 
         # load plugin configuration
         self._load_plugin_configuration()
@@ -119,10 +119,10 @@ class PluginRegistration:
                 fs = load_yaml_file(provider)
                 endpoint_configuration = EndpointProviderConfiguration(**fs)
                 self.endpoints_configuration.append(endpoint_configuration)
-            for provider in self.configuration.plugins.agents:
+            for provider in self.configuration.plugins.agent_strategies:
                 fs = load_yaml_file(provider)
-                agent_provider_configuration = AgentProviderConfiguration(**fs)
-                self.agents_configuration.append(agent_provider_configuration)
+                agent_provider_configuration = AgentStrategyProviderConfiguration(**fs)
+                self.agent_strategies_configuration.append(agent_provider_configuration)
 
         except Exception as e:
             raise ValueError(f"Error loading plugin configuration: {str(e)}") from e
@@ -167,7 +167,7 @@ class PluginRegistration:
         """
         walk through all the agent providers and strategies and load the classes from sources
         """
-        for provider in self.agents_configuration:
+        for provider in self.agent_strategies_configuration:
             # load class
             source = provider.extra.python.source
             # remove extension
@@ -193,7 +193,7 @@ class PluginRegistration:
 
                 strategies[strategy.identity.name] = (strategy, strategy_cls)
 
-            self.agents_mapping[provider.identity.name] = (provider, cls, strategies)
+            self.agent_strategies_mapping[provider.identity.name] = (provider, cls, strategies)
 
     def _is_strict_subclass(self, cls: type[T], *parent_cls: type[T]) -> bool:
         """
@@ -312,20 +312,20 @@ class PluginRegistration:
         :param provider: provider name
         :return: agent provider class
         """
-        for provider_registration in self.agents_mapping:
+        for provider_registration in self.agent_strategies_mapping:
             if provider_registration == provider:
-                return self.agents_mapping[provider_registration][1]
+                return self.agent_strategies_mapping[provider_registration][1]
 
-    def get_agent_cls(self, provider: str, agent: str):
+    def get_agent_strategy_cls(self, provider: str, agent: str):
         """
         get the agent class by provider
         :param provider: provider name
         :param agent: agent name
         :return: agent class
         """
-        for provider_registration in self.agents_mapping:
+        for provider_registration in self.agent_strategies_mapping:
             if provider_registration == provider:
-                registration = self.agents_mapping[provider_registration][2].get(agent)
+                registration = self.agent_strategies_mapping[provider_registration][2].get(agent)
                 if registration:
                     return registration[1]
 

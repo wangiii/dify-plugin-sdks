@@ -135,11 +135,11 @@ class Plugin(IOServer, Router):
                 + "\n\n"
             )
 
-        if self.registration.agents_configuration:
+        if self.registration.agent_strategies_configuration:
             tcp_stream.write(
                 InitializeMessage(
-                    type=InitializeMessage.Type.AGENT_DECLARATION,
-                    data=List(root=self.registration.agents_configuration).model_dump(),
+                    type=InitializeMessage.Type.AGENT_STRATEGY_DECLARATION,
+                    data=List(root=self.registration.agent_strategies_configuration).model_dump(),
                 ).model_dump_json()
                 + "\n\n"
             )
@@ -189,7 +189,7 @@ class Plugin(IOServer, Router):
             logger.info(f"Installed model: {model.provider}")
         for endpoint in self.registration.endpoints_configuration:
             logger.info(f"Installed endpoint: {[e.path for e in endpoint.endpoints]}")
-        for agent in self.registration.agents_configuration:
+        for agent in self.registration.agent_strategies_configuration:
             logger.info(f"Installed agent: {agent.identity.name}")
 
     def _register_request_routes(self):
@@ -209,9 +209,9 @@ class Plugin(IOServer, Router):
         )
 
         self.register_route(
-            self.plugin_executer.invoke_agent,
+            self.plugin_executer.invoke_agent_strategy,
             lambda data: data.get("type") == PluginInvokeType.Agent.value
-            and data.get("action") == AgentActions.InvokeAgent.value,
+            and data.get("action") == AgentActions.InvokeAgentStrategy.value,
         )
 
         self.register_route(

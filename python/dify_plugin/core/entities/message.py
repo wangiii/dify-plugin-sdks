@@ -25,7 +25,7 @@ class InitializeMessage(BaseModel):
         TOOL_DECLARATION = "tool_declaration"
         MODEL_DECLARATION = "model_declaration"
         ENDPOINT_DECLARATION = "endpoint_declaration"
-        AGENT_DECLARATION = "agent_declaration"
+        AGENT_STRATEGY_DECLARATION = "agent_strategy_declaration"
         END = "end"
 
     class AssetChunk(BaseModel):

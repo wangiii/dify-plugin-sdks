@@ -75,13 +75,15 @@ class PluginExecutor:
         # invoke tool
         yield from tool.invoke(request.tool_parameters)
 
-    def invoke_agent(self, session: Session, request: AgentInvokeRequest):
-        agent_cls = self.registration.get_agent_cls(request.provider, request.agent)
+    def invoke_agent_strategy(self, session: Session, request: AgentInvokeRequest):
+        agent_cls = self.registration.get_agent_strategy_cls(request.agent_strategy_provider, request.agent_strategy)
         if agent_cls is None:
-            raise ValueError(f"Agent `{request.agent}` not found for provider `{request.provider}`")
+            raise ValueError(
+                f"Agent `{request.agent_strategy}` not found for provider `{request.agent_strategy_provider}`"
+            )
 
         agent = agent_cls(session=session)
-        yield from agent.invoke(request.agent_parameters)
+        yield from agent.invoke(request.agent_strategy_parameters)
 
     def get_tool_runtime_parameters(self, session: Session, data: ToolGetRuntimeParametersRequest):
         tool_cls = self.registration.get_tool_cls(data.provider, data.tool)

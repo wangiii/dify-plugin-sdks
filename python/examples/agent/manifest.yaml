@@ -20,7 +20,7 @@ resource:
       enabled: true
       llm: true
 plugins:
-  agents:
+  agent_strategies:
     - "provider/agent.yaml"
 meta:
   version: 0.0.1

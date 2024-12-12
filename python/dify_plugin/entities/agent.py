@@ -12,19 +12,19 @@ from dify_plugin.entities.tool import (
 )
 
 
-class AgentProviderIdentity(ToolProviderIdentity):
+class AgentStrategyProviderIdentity(ToolProviderIdentity):
     pass
 
 
-class AgentIdentity(ToolIdentity):
+class AgentStrategyIdentity(ToolIdentity):
     pass
 
 
-class AgentParameter(ToolParameter):
+class AgentStrategyParameter(ToolParameter):
     pass
 
 
-class AgentOutputSchema(ToolOutputSchema):
+class AgentStrategyOutputSchema(ToolOutputSchema):
     pass
 
 
@@ -36,12 +36,12 @@ class AgentStrategyConfigurationExtra(BaseModel):
 
 
 class AgentStrategyConfiguration(BaseModel):
-    identity: AgentIdentity
-    parameters: list[AgentParameter] = Field(default=[], description="The parameters of the agent")
+    identity: AgentStrategyIdentity
+    parameters: list[AgentStrategyParameter] = Field(default=[], description="The parameters of the agent")
     description: I18nObject
     extra: AgentStrategyConfigurationExtra
     has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
-    output_schema: Optional[AgentOutputSchema] = None
+    output_schema: Optional[AgentStrategyOutputSchema] = None
 
 
 class AgentProviderConfigurationExtra(BaseModel):
@@ -51,11 +51,11 @@ class AgentProviderConfigurationExtra(BaseModel):
     python: Python
 
 
-class AgentProviderConfiguration(BaseModel):
+class AgentStrategyProviderConfiguration(BaseModel):
     class Python(BaseModel):
         source: str
 
-    identity: AgentProviderIdentity
+    identity: AgentStrategyProviderIdentity
     strategies: list[AgentStrategyConfiguration] = Field(default=[], description="The strategies of the agent provider")
     extra: AgentProviderConfigurationExtra
 
@@ -76,8 +76,10 @@ class AgentProviderConfiguration(BaseModel):
                 strategies.append(
                     AgentStrategyConfiguration(
                         **{
-                            "identity": AgentIdentity(**file["identity"]),
-                            "parameters": [AgentParameter(**param) for param in file.get("parameters", []) or []],
+                            "identity": AgentStrategyIdentity(**file["identity"]),
+                            "parameters": [
+                                AgentStrategyParameter(**param) for param in file.get("parameters", []) or []
+                            ],
                             "description": I18nObject(**file["description"]),
                             "extra": AgentStrategyConfigurationExtra(**file.get("extra", {})),
                         }
