@@ -6,8 +6,8 @@ from dify_plugin.entities.agent import AgentInvokeMessage
 from dify_plugin.file.entities import FileType
 
 from dify_plugin.core.runtime import Session
-from dify_plugin.entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime
-from dify_plugin.file.constants import DIFY_FILE_IDENTITY
+from dify_plugin.entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime, ToolSelector
+from dify_plugin.file.constants import DIFY_FILE_IDENTITY, DIFY_TOOL_SELECTOR_IDENTITY
 from dify_plugin.file.file import File
 
 T = TypeVar("T", bound=ToolInvokeMessage | AgentInvokeMessage)
@@ -188,6 +188,13 @@ class ToolLike(ABC, Generic[T]):
                     )
                     for item in value
                 ]
+            elif isinstance(value, dict) and value.get("dify_model_identity") == DIFY_TOOL_SELECTOR_IDENTITY:
+                tool_parameters[parameter] = ToolSelector.model_validate(value)
+            elif isinstance(value, list) and all(
+                isinstance(item, dict) and item.get("dify_model_identity") == DIFY_TOOL_SELECTOR_IDENTITY
+                for item in value
+            ):
+                tool_parameters[parameter] = [ToolSelector.model_validate(item) for item in value]
 
         return tool_parameters
 

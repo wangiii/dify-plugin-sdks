@@ -15,6 +15,7 @@ from pydantic import (
 
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
 from dify_plugin.entities import I18nObject
+from dify_plugin.entities.model.message import PromptMessageTool
 
 
 class CommonParameterType(Enum):
@@ -381,3 +382,47 @@ class ToolProviderType(Enum):
             if mode.value == value:
                 return mode
         raise ValueError(f"invalid mode value {value}")
+
+
+class ToolSelector(BaseModel):
+    class Parameter(BaseModel):
+        name: str = Field(..., description="The name of the parameter")
+        type: ToolParameter.ToolParameterType = Field(..., description="The type of the parameter")
+        required: bool = Field(..., description="Whether the parameter is required")
+        description: str = Field(..., description="The description of the parameter")
+        default: Optional[Union[int, float, str]] = None
+        options: Optional[list[ToolParameterOption]] = None
+
+    provider_id: str = Field(..., description="The id of the provider")
+    tool_name: str = Field(..., description="The name of the tool")
+    tool_description: str = Field(..., description="The description of the tool")
+    tool_configuration: Mapping[str, Any] = Field(..., description="Configuration, type form")
+    tool_parameters: Mapping[str, Parameter] = Field(..., description="Parameters, type llm")
+
+    def to_prompt_message(self) -> PromptMessageTool:
+        """
+        Convert tool selector to prompt message tool, based on openai function calling schema.
+        """
+        tool = PromptMessageTool(
+            name=self.tool_name,
+            description=self.tool_description,
+            parameters={
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        )
+
+        for name, parameter in self.tool_parameters.items():
+            tool.parameters[name] = {
+                "type": parameter.type.value,
+                "description": parameter.description,
+            }
+
+            if parameter.required:
+                tool.parameters["required"].append(name)
+
+            if parameter.options:
+                tool.parameters[name]["enum"] = [option.value for option in parameter.options]
+
+        return tool
