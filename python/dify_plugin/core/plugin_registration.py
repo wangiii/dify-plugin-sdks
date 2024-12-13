@@ -17,7 +17,7 @@ from dify_plugin.entities.endpoint import EndpointProviderConfiguration
 from dify_plugin.entities.model import ModelType
 from dify_plugin.entities.model.provider import ModelProviderConfiguration
 from dify_plugin.entities.tool import ToolConfiguration, ToolProviderConfiguration
-from dify_plugin.interfaces.agent import AgentStrategy, AgentProvider
+from dify_plugin.interfaces.agent import AgentStrategy
 from dify_plugin.interfaces.endpoint import Endpoint
 from dify_plugin.interfaces.model import ModelProvider
 from dify_plugin.interfaces.model.ai_model import AIModel
@@ -49,7 +49,6 @@ class PluginRegistration:
         str,
         tuple[
             AgentStrategyProviderConfiguration,
-            type[AgentProvider],
             dict[str, tuple[AgentStrategyConfiguration, type[AgentStrategy]]],
         ],
     ]
@@ -168,18 +167,6 @@ class PluginRegistration:
         walk through all the agent providers and strategies and load the classes from sources
         """
         for provider in self.agent_strategies_configuration:
-            # load class
-            source = provider.extra.python.source
-            # remove extension
-            module_source = os.path.splitext(source)[0]
-            # replace / with .
-            module_source = module_source.replace("/", ".")
-            cls = load_single_subclass_from_source(
-                module_name=module_source,
-                script_path=os.path.join(os.getcwd(), source),
-                parent_type=AgentProvider,
-            )
-
             strategies = {}
             for strategy in provider.strategies:
                 strategy_source = strategy.extra.python.source
@@ -193,7 +180,7 @@ class PluginRegistration:
 
                 strategies[strategy.identity.name] = (strategy, strategy_cls)
 
-            self.agent_strategies_mapping[provider.identity.name] = (provider, cls, strategies)
+            self.agent_strategies_mapping[provider.identity.name] = (provider, strategies)
 
     def _is_strict_subclass(self, cls: type[T], *parent_cls: type[T]) -> bool:
         """
@@ -325,7 +312,7 @@ class PluginRegistration:
         """
         for provider_registration in self.agent_strategies_mapping:
             if provider_registration == provider:
-                registration = self.agent_strategies_mapping[provider_registration][2].get(agent)
+                registration = self.agent_strategies_mapping[provider_registration][1].get(agent)
                 if registration:
                     return registration[1]
 

@@ -75,12 +75,8 @@ class AgentProviderConfigurationExtra(BaseModel):
 
 
 class AgentStrategyProviderConfiguration(BaseModel):
-    class Python(BaseModel):
-        source: str
-
     identity: AgentStrategyProviderIdentity
     strategies: list[AgentStrategyConfiguration] = Field(default=[], description="The strategies of the agent provider")
-    extra: AgentProviderConfigurationExtra
 
     @field_validator("strategies", mode="before")
     @classmethod
