@@ -19,6 +19,7 @@ from .interfaces.model.speech2text_model import Speech2TextModel
 from .interfaces.model.text_embedding_model import TextEmbeddingModel
 from .interfaces.model.tts_model import TTSModel
 from .interfaces.tool import Tool, ToolProvider
+from .interfaces.agent import AgentProvider, AgentStrategy
 from .invocations.file import File
 from .plugin import Plugin
 
@@ -42,4 +43,6 @@ __all__ = [
     "OAICompatText2SpeechModel",
     "OAICompatRerankModel",
     "File",
+    "AgentProvider",
+    "AgentStrategy",
 ]
