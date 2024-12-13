@@ -14,6 +14,7 @@ class EndpointConfigurationExtra(BaseModel):
 class EndpointConfiguration(BaseModel):
     path: str
     method: str
+    hidden: bool = Field(default=False, description="Whether to hide this endpoint in the UI")
     extra: EndpointConfigurationExtra
 
 
