@@ -103,6 +103,7 @@ class ToolLike(ABC, Generic[T]):
 
     def create_log_message(
         self,
+        label: str,
         data: Mapping[str, Any],
         status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
         parent: T | None = None,
@@ -113,6 +114,7 @@ class ToolLike(ABC, Generic[T]):
         return self.response_type(
             type=ToolInvokeMessage.MessageType.LOG,
             message=ToolInvokeMessage.LogMessage(
+                label=label,
                 data=data,
                 status=status,
                 parent_id=parent.message.id
@@ -135,6 +137,7 @@ class ToolLike(ABC, Generic[T]):
             type=ToolInvokeMessage.MessageType.LOG,
             message=ToolInvokeMessage.LogMessage(
                 id=log.message.id,
+                label=log.message.label,
                 data=log.message.data,
                 status=status,
                 parent_id=log.message.parent_id,

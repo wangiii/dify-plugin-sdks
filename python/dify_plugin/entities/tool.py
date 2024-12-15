@@ -108,6 +108,7 @@ class ToolInvokeMessage(BaseModel):
             SUCCESS = "success"
 
         id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="The id of the log")
+        label: str = Field(..., description="The label of the log")
         parent_id: Optional[str] = Field(default=None, description="Leave empty for root log")
         error: Optional[str] = Field(default=None, description="The error message")
         status: LogStatus = Field(..., description="The status of the log")
