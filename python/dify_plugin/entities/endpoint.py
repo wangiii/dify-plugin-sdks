@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 
-from ..core.utils.yaml_loader import load_yaml_file
-from ..entities.tool import ProviderConfig
+from dify_plugin.core.utils.yaml_loader import load_yaml_file
+from dify_plugin.entities.tool import ProviderConfig
 
 
 class EndpointConfigurationExtra(BaseModel):

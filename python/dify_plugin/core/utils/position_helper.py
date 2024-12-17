@@ -3,7 +3,7 @@ from collections import OrderedDict
 from collections.abc import Callable
 from typing import Any
 
-from .yaml_loader import load_yaml_file
+from dify_plugin.core.utils.yaml_loader import load_yaml_file
 
 
 def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> dict[str, int]:

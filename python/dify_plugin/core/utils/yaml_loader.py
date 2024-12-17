@@ -3,7 +3,7 @@ import os
 
 import yaml
 
-from ...config.logger_format import plugin_logger_handler
+from dify_plugin.config.logger_format import plugin_logger_handler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
