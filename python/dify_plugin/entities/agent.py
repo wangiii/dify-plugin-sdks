@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Any, Mapping, Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
@@ -8,7 +8,6 @@ from dify_plugin.entities.tool import (
     CommonParameterType,
     ToolIdentity,
     ToolInvokeMessage,
-    ToolOutputSchema,
     ToolParameterOption,
     ToolProviderIdentity,
 )
@@ -47,10 +46,6 @@ class AgentStrategyParameter(BaseModel):
     options: Optional[list[ToolParameterOption]] = None
 
 
-class AgentStrategyOutputSchema(ToolOutputSchema):
-    pass
-
-
 class AgentStrategyConfigurationExtra(BaseModel):
     class Python(BaseModel):
         source: str
@@ -64,7 +59,7 @@ class AgentStrategyConfiguration(BaseModel):
     description: I18nObject
     extra: AgentStrategyConfigurationExtra
     has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
-    output_schema: Optional[AgentStrategyOutputSchema] = None
+    output_schema: Optional[Mapping[str, Any]] = None
 
 
 class AgentProviderConfigurationExtra(BaseModel):

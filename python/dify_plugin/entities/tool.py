@@ -7,7 +7,6 @@ import uuid
 from pydantic import (
     BaseModel,
     Field,
-    RootModel,
     field_serializer,
     field_validator,
     model_validator,
@@ -216,17 +215,13 @@ class ToolConfigurationExtra(BaseModel):
     python: Python
 
 
-class ToolOutputSchema(RootModel):
-    root: dict[str, Any]
-
-
 class ToolConfiguration(BaseModel):
     identity: ToolIdentity
     parameters: list[ToolParameter] = Field(default=[], description="The parameters of the tool")
     description: ToolDescription
     extra: ToolConfigurationExtra
     has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
-    output_schema: Optional[ToolOutputSchema] = None
+    output_schema: Optional[Mapping[str, Any]] = None
 
 
 class ToolLabelEnum(Enum):
@@ -346,12 +341,11 @@ class ToolProviderConfiguration(BaseModel):
                 file = load_yaml_file(tool)
                 tools.append(
                     ToolConfiguration(
-                        **{
-                            "identity": ToolIdentity(**file["identity"]),
-                            "parameters": [ToolParameter(**param) for param in file.get("parameters", []) or []],
-                            "description": ToolDescription(**file["description"]),
-                            "extra": ToolConfigurationExtra(**file.get("extra", {})),
-                        }
+                        identity=ToolIdentity(**file["identity"]),
+                        parameters=[ToolParameter(**param) for param in file.get("parameters", []) or []],
+                        description=ToolDescription(**file["description"]),
+                        extra=ToolConfigurationExtra(**file.get("extra", {})),
+                        output_schema=file.get("output_schema", None),
                     )
                 )
             except Exception as e:
