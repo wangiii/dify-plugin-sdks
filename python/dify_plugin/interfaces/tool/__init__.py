@@ -240,14 +240,14 @@ class Tool(ToolLike[ToolInvokeMessage]):
     ############################################################
 
     @abstractmethod
-    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+    def _invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None, None]:
         pass
 
     ############################################################
     #                 For executor use only                    #
     ############################################################
 
-    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None]:
+    def invoke(self, tool_parameters: dict) -> Generator[ToolInvokeMessage, None, None]:
         # convert parameters into correct types
         tool_parameters = self._convert_parameters(tool_parameters)
         return self._invoke(tool_parameters)
