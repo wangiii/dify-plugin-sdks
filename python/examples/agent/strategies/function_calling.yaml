@@ -25,6 +25,24 @@ parameters:
       en_US: Tools list
       zh_Hans: 工具列表
       pt_BR: Tools list
+  - name: instruction
+    type: string
+    required: true
+    label:
+      en_US: Instruction
+      zh_Hans: 指令
+      pt_BR: Instruction
+    auto_generate:
+      type: prompt_instruction
+    template:
+      enabled: true
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query
+      zh_Hans: 查询
+      pt_BR: Query
 extra:
   python:
     source: strategies/function_calling.py

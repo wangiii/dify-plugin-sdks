@@ -1,6 +1,6 @@
 import base64
 import contextlib
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Mapping, Optional, Union
 import uuid
 
@@ -171,6 +171,17 @@ class ToolParameterOption(BaseModel):
             return value
 
 
+class ParameterAutoGenerate(BaseModel):
+    class Type(StrEnum):
+        PROMPT_INSTRUCTION = "prompt_instruction"
+
+    type: Type
+
+
+class ParameterTemplate(BaseModel):
+    enabled: bool = Field(..., description="Whether the parameter is jinja enabled")
+
+
 class ToolParameter(BaseModel):
     class ToolParameterType(str, Enum):
         STRING = CommonParameterType.STRING.value
@@ -193,6 +204,10 @@ class ToolParameter(BaseModel):
     label: I18nObject = Field(..., description="The label presented to the user")
     human_description: I18nObject = Field(..., description="The description presented to the user")
     type: ToolParameterType = Field(..., description="The type of the parameter")
+    auto_generate: Optional[ParameterAutoGenerate] = Field(
+        default=None, description="The auto generate of the parameter"
+    )
+    template: Optional[ParameterTemplate] = Field(default=None, description="The template of the parameter")
     scope: str | None = None
     form: ToolParameterForm = Field(..., description="The form of the parameter, schema/form/llm")
     llm_description: Optional[str] = None

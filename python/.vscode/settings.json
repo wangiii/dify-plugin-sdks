@@ -2,6 +2,7 @@
     "cSpell.words": [
         "abstractmethods",
         "Configurate",
+        "dify",
         "eventloop",
         "gevent",
         "hexlify",
@@ -14,5 +15,18 @@
         "serpapi",
         "tiktoken",
         "unhexlify"
-    ]
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnType": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit"
+        }
+    },
+    "ruff.lint.args": [
+        "--config=pyproject.toml"
+    ],
+    "ruff.organizeImports": true,
+    "ruff.fixAll": true,
+    "editor.formatOnSave": true
 }

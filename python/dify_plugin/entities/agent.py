@@ -6,6 +6,8 @@ from dify_plugin.core.utils.yaml_loader import load_yaml_file
 from dify_plugin.entities import I18nObject
 from dify_plugin.entities.tool import (
     CommonParameterType,
+    ParameterAutoGenerate,
+    ParameterTemplate,
     ToolIdentity,
     ToolInvokeMessage,
     ToolParameterOption,
@@ -38,6 +40,10 @@ class AgentStrategyParameter(BaseModel):
     name: str = Field(..., description="The name of the parameter")
     label: I18nObject = Field(..., description="The label presented to the user")
     type: ToolParameterType = Field(..., description="The type of the parameter")
+    auto_generate: Optional[ParameterAutoGenerate] = Field(
+        default=None, description="The auto generate of the parameter"
+    )
+    template: Optional[ParameterTemplate] = Field(default=None, description="The template of the parameter")
     scope: str | None = None
     required: Optional[bool] = False
     default: Optional[Union[int, float, str]] = None

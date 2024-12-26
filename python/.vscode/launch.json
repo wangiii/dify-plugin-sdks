@@ -1,14 +1,17 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
         {
-            "name": "Python Current File",
+            "name": "Agents",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/examples/agent/main.py",
+            "cwd": "${workspaceFolder}/examples/agent",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "env": {
+                "GEVENT_SUPPORT": "True"
+            },
         },
         {
             "name": "Tools",
