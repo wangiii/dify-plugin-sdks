@@ -93,12 +93,12 @@ class ToolInvokeMessage(BaseModel):
         variable_value: Any = Field(..., description="The value of the variable")
         stream: bool = Field(default=False, description="Whether the variable is streamed")
 
-        @field_validator("variable_value", "stream")
+        @model_validator(mode="before")
         @classmethod
-        def validate_variable_value_and_stream(cls, v, values):
-            if values.get("stream") and not isinstance(v, str):
+        def validate_variable_value_and_stream(cls, values):
+            if values.get("stream") and not isinstance(values.get("variable_value"), str):
                 raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
-            return v
+            return values
 
     class LogMessage(BaseModel):
         class LogStatus(Enum):
