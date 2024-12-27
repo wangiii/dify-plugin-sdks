@@ -49,6 +49,7 @@ class AgentStrategyParameter(BaseModel):
     default: Optional[Union[int, float, str]] = None
     min: Optional[Union[float, int]] = None
     max: Optional[Union[float, int]] = None
+    precision: Optional[int] = None
     options: Optional[list[ToolParameterOption]] = None
 
 
