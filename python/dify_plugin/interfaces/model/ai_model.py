@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Optional
 
+import gevent.socket
+import gevent.threadpool
 from pydantic import ConfigDict
 
 from dify_plugin.entities import I18nObject
@@ -257,5 +259,14 @@ class AIModel(ABC):
         :return: number of tokens
         """
         import tiktoken
+
+        # check if gevent is patched to main thread
+        import socket
+
+        if socket.socket is gevent.socket.socket:
+            # using gevent real thread to avoid blocking main thread
+            threadpool = gevent.threadpool.ThreadPool(1)
+            result = threadpool.spawn(lambda: len(tiktoken.encoding_for_model("gpt2").encode(text)))
+            return result.get(block=True) or 0
 
         return len(tiktoken.encoding_for_model("gpt2").encode(text))
