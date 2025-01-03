@@ -17,6 +17,7 @@ resource:
     model:
       enabled: true
       llm: true
+      tts: true
     endpoint:
       enabled: true
     app:

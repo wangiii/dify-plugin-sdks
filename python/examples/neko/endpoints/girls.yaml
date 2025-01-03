@@ -1,0 +1,6 @@
+path: "/pink"
+method: "GET"
+extra:
+  python:
+    source: "endpoints/girls.py"
+
