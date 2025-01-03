@@ -96,6 +96,10 @@ class ToolInvokeMessage(BaseModel):
         @model_validator(mode="before")
         @classmethod
         def validate_variable_value_and_stream(cls, values):
+            # skip validation if values is not a dict
+            if not isinstance(values, dict):
+                return values
+
             if values.get("stream") and not isinstance(values.get("variable_value"), str):
                 raise ValueError("When 'stream' is True, 'variable_value' must be a string.")
             return values
@@ -126,6 +130,8 @@ class ToolInvokeMessage(BaseModel):
         LOG = "log"
 
     type: MessageType
+    # TODO: pydantic will validate and construct the message one by one, until it encounters a correct type
+    # we need to optimize the construction process
     message: TextMessage | JsonMessage | VariableMessage | BlobMessage | BlobChunkMessage | LogMessage | None
     meta: Optional[dict] = None
 
