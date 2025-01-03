@@ -34,6 +34,16 @@ class LLMInvocation(BackwardsInvocation[LLMResultChunk]):
         stream: Literal[False] = False,
     ) -> LLMResult: ...
 
+    @overload
+    def invoke(
+        self,
+        model_config: LLMModelConfig,
+        prompt_messages: list[PromptMessage],
+        tools: list[PromptMessageTool] | None = None,
+        stop: list[str] | None = None,
+        stream: bool = True,
+    ) -> Generator[LLMResultChunk, None, None] | LLMResult: ...
+
     def invoke(
         self,
         model_config: LLMModelConfig,

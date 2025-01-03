@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from dify_plugin.entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
 from dify_plugin.entities.model.message import (
@@ -139,6 +139,6 @@ class LLMModelConfig(BaseModelConfig):
 
     model_type: ModelType = ModelType.LLM
     mode: str
-    completion_params: dict | None = None
+    completion_params: dict = Field(default_factory=dict)
 
     model_config = ConfigDict(protected_namespaces=())

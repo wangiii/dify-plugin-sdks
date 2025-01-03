@@ -1,10 +1,10 @@
 from dify_plugin.core.entities.invocation import InvokeType
 from dify_plugin.core.runtime import BackwardsInvocation
-from dify_plugin.entities.model.text_embedding import TextEmbeddingResult
+from dify_plugin.entities.model.text_embedding import TextEmbeddingResult, TextEmbeddingModelConfig
 
 
 class TextEmbeddingInvocation(BackwardsInvocation[TextEmbeddingResult]):
-    def invoke(self, model_config: TextEmbeddingResult, texts: list[str]) -> TextEmbeddingResult:
+    def invoke(self, model_config: TextEmbeddingModelConfig, texts: list[str]) -> TextEmbeddingResult:
         """
         Invoke text embedding
         """
