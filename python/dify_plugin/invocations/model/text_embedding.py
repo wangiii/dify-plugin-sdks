@@ -1,10 +1,16 @@
 from dify_plugin.core.entities.invocation import InvokeType
 from dify_plugin.core.runtime import BackwardsInvocation
+from dify_plugin.entities.model import EmbeddingInputType
 from dify_plugin.entities.model.text_embedding import TextEmbeddingResult, TextEmbeddingModelConfig
 
 
 class TextEmbeddingInvocation(BackwardsInvocation[TextEmbeddingResult]):
-    def invoke(self, model_config: TextEmbeddingModelConfig, texts: list[str]) -> TextEmbeddingResult:
+    def invoke(
+        self,
+        model_config: TextEmbeddingModelConfig,
+        texts: list[str],
+        input_type: EmbeddingInputType = EmbeddingInputType.QUERY,
+    ) -> TextEmbeddingResult:
         """
         Invoke text embedding
         """
@@ -14,6 +20,7 @@ class TextEmbeddingInvocation(BackwardsInvocation[TextEmbeddingResult]):
             {
                 **model_config.model_dump(),
                 "texts": texts,
+                "input_type": input_type.value,
             },
         ):
             return data
