@@ -1,10 +1,8 @@
 [project]
 name = "dify_plugin"
-version = "0.0.1-beta58"
+version = "0.0.1-beta59"
 description = "Dify Plugin SDK"
-authors = [
-    {name = "langgenius", email = "hello@dify.ai"},
-]
+authors = [{ name = "langgenius", email = "hello@dify.ai" }]
 dependencies = [
     "Flask~=3.0.3",
     "Werkzeug~=3.0.3",
@@ -22,7 +20,7 @@ dependencies = [
 ]
 requires-python = ">=3.11"
 readme = "README.md"
-license = {text = "Apache2.0"}
+license = { text = "Apache2.0" }
 keywords = ["dify", "plugin", "sdk"]
 
 [project.urls]
@@ -35,6 +33,4 @@ build-backend = "pdm.backend"
 distribution = true
 
 [dependency-groups]
-lint = [
-    "ruff>=0.8.1",
-]
+lint = ["ruff>=0.8.1"]
