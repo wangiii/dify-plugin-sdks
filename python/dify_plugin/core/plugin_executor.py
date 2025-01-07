@@ -113,7 +113,7 @@ class PluginExecutor:
 
         provider_instance.validate_provider_credentials(data.credentials)
 
-        return {"result": True}
+        return {"result": True, "credentials": data.credentials}
 
     def validate_model_credentials(self, session: Session, data: ModelValidateModelCredentialsRequest):
         provider_instance = self.registration.get_model_provider_instance(data.provider)
@@ -126,7 +126,7 @@ class PluginExecutor:
 
         model_instance.validate_credentials(data.model, data.credentials)
 
-        return {"result": True}
+        return {"result": True, "credentials": data.credentials}
 
     def invoke_llm(self, session: Session, data: ModelInvokeLLMRequest):
         model_instance = self.registration.get_model_instance(data.provider, data.model_type)
