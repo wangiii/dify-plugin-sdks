@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
-from collections.abc import Generator
-from typing import Any, Generic, Mapping, Optional, Type, TypeVar
-
-from dify_plugin.entities.agent import AgentInvokeMessage
-from dify_plugin.file.entities import FileType
+from collections.abc import Generator, Mapping
+from typing import Any, Generic, Optional, Type, TypeVar
 
 from dify_plugin.core.runtime import Session
+from dify_plugin.entities.agent import AgentInvokeMessage
 from dify_plugin.entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime, ToolSelector
 from dify_plugin.file.constants import DIFY_FILE_IDENTITY, DIFY_TOOL_SELECTOR_IDENTITY
+from dify_plugin.file.entities import FileType
 from dify_plugin.file.file import File
 
 T = TypeVar("T", bound=ToolInvokeMessage | AgentInvokeMessage)

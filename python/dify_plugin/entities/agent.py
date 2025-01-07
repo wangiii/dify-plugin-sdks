@@ -1,5 +1,7 @@
+from collections.abc import Mapping
 from enum import Enum
-from typing import Any, Mapping, Optional, Union
+from typing import Any, Optional, Union
+
 from pydantic import BaseModel, Field, field_validator
 
 from dify_plugin.core.utils.yaml_loader import load_yaml_file

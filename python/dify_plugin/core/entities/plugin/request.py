@@ -19,7 +19,7 @@ class PluginInvokeType(Enum):
     Tool = "tool"
     Model = "model"
     Endpoint = "endpoint"
-    Agent = "agent"
+    Agent = "agent_strategy"
 
 
 class AgentActions(Enum):
@@ -70,7 +70,7 @@ class AgentInvokeRequest(PluginAccessRequest):
     action: AgentActions = AgentActions.InvokeAgentStrategy
     agent_strategy_provider: str
     agent_strategy: str
-    agent_strategy_parameters: dict[str, Any]
+    agent_strategy_params: dict[str, Any]
 
 
 class ToolValidateCredentialsRequest(PluginAccessRequest):

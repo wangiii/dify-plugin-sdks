@@ -12,7 +12,7 @@ from dify_plugin.config.config import DifyPluginEnv
 from dify_plugin.core.entities.plugin.setup import PluginAsset, PluginConfiguration
 from dify_plugin.core.utils.class_loader import load_multi_subclasses_from_source, load_single_subclass_from_source
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
-from dify_plugin.entities.agent import AgentStrategyProviderConfiguration, AgentStrategyConfiguration
+from dify_plugin.entities.agent import AgentStrategyConfiguration, AgentStrategyProviderConfiguration
 from dify_plugin.entities.endpoint import EndpointProviderConfiguration
 from dify_plugin.entities.model import ModelType
 from dify_plugin.entities.model.provider import ModelProviderConfiguration
@@ -28,7 +28,6 @@ from dify_plugin.interfaces.model.speech2text_model import Speech2TextModel
 from dify_plugin.interfaces.model.text_embedding_model import TextEmbeddingModel
 from dify_plugin.interfaces.model.tts_model import TTSModel
 from dify_plugin.interfaces.tool import Tool, ToolProvider
-
 
 T = TypeVar("T")
 

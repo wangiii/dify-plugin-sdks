@@ -4,6 +4,7 @@ from gevent import monkey
 monkey.patch_all(sys=True)
 
 from dify_plugin.config.config import DifyPluginEnv
+from dify_plugin.interfaces.agent import AgentProvider, AgentStrategy
 from dify_plugin.interfaces.endpoint import Endpoint
 from dify_plugin.interfaces.model import ModelProvider
 from dify_plugin.interfaces.model.large_language_model import LargeLanguageModel
@@ -19,7 +20,6 @@ from dify_plugin.interfaces.model.speech2text_model import Speech2TextModel
 from dify_plugin.interfaces.model.text_embedding_model import TextEmbeddingModel
 from dify_plugin.interfaces.model.tts_model import TTSModel
 from dify_plugin.interfaces.tool import Tool, ToolProvider
-from dify_plugin.interfaces.agent import AgentProvider, AgentStrategy
 from dify_plugin.invocations.file import File
 from dify_plugin.plugin import Plugin
 
