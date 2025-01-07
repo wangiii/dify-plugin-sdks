@@ -1,8 +1,9 @@
 import base64
 import contextlib
-from enum import Enum, StrEnum
-from typing import Any, Mapping, Optional, Union
 import uuid
+from collections.abc import Mapping
+from enum import Enum, StrEnum
+from typing import Any, Optional, Union
 
 from pydantic import (
     BaseModel,

@@ -45,7 +45,7 @@ class ToolInvocation(BackwardsInvocation[ToolInvokeMessage]):
             InvokeType.Tool,
             ToolInvokeMessage,
             {
-                "provider_type": provider_type.value,
+                "tool_type": provider_type.value,
                 "provider": provider,
                 "tool": tool_name,
                 "tool_parameters": parameters,

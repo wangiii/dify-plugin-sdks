@@ -50,7 +50,7 @@ class LLMInvocation(BackwardsInvocation[LLMResultChunk]):
             "prompt_messages": [message.model_dump() for message in prompt_messages],
             "tools": [tool.model_dump() for tool in tools] if tools else None,
             "stop": stop,
-            "stream": True,
+            "stream": stream,
         }
 
         if stream:
