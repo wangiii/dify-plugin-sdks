@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from collections.abc import Generator
-from typing import Optional, Union
+from collections.abc import Generator, Mapping
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -65,6 +65,8 @@ class ToolEntity(BaseModel):
     output_schema: Optional[dict] = None
     has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
 
+    # runtime parameters
+    runtime_parameters: Mapping[str, Any] = {}
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
@@ -120,6 +122,7 @@ class AgentStrategy(ToolLike[AgentInvokeMessage]):
             llm_usage.prompt_price += usage.prompt_price
             llm_usage.completion_price += usage.completion_price
             llm_usage.total_price += usage.total_price
+            llm_usage.total_tokens += usage.total_tokens
 
     def recalc_llm_max_tokens(
         self, model_entity: AIModelEntity, prompt_messages: list[PromptMessage], parameters: dict
