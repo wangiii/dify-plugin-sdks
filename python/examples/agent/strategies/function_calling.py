@@ -1,4 +1,5 @@
 import json
+import time
 from collections.abc import Generator
 from copy import deepcopy
 from typing import Any, Optional, cast
@@ -24,6 +25,7 @@ class FunctionCallingParams(BaseModel):
     instruction: str | None
     model: AgentModelConfig
     tools: list[ToolEntity] | None
+    maximum_iterations: int = 3
 
 
 class ToolInvokeMeta(BaseModel):
@@ -82,7 +84,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
         prompt_messages_tools = self._init_prompt_tools(tools)
 
         iteration_step = 1
-        max_iteration_steps = 3
+        max_iteration_steps = fc_params.maximum_iterations
         current_thoughts: list[PromptMessage] = []
         # continue to run until there is not any tool call
         function_call_state = True
@@ -91,12 +93,19 @@ class FunctionCallingAgentStrategy(AgentStrategy):
 
         while function_call_state and iteration_step <= max_iteration_steps:
             function_call_state = False
-
+            round_started_at = time.perf_counter()
+            round_log = self.create_log_message(
+                label=f"ROUND {iteration_step}",
+                data={},
+                metadata={
+                    "started_at": round_started_at,
+                },
+                status=ToolInvokeMessage.LogMessage.LogStatus.START,
+            )
+            yield round_log
             if iteration_step == max_iteration_steps:
                 # the last iteration, remove all tools
                 prompt_messages_tools = []
-
-            message_file_ids: list[str] = []
 
             # recalc llm max tokens
             prompt_messages = self._organize_prompt_messages(
@@ -105,6 +114,15 @@ class FunctionCallingAgentStrategy(AgentStrategy):
             if model.completion_params:
                 self.recalc_llm_max_tokens(model.entity, prompt_messages, model.completion_params)
             # invoke model
+            model_started_at = time.perf_counter()
+            model_log = self.create_log_message(
+                label=f"{model.model} Thought",
+                data={},
+                metadata={"start_at": model_started_at, "provider": model.provider},
+                parent=round_log,
+                status=ToolInvokeMessage.LogMessage.LogStatus.START,
+            )
+            yield model_log
             chunks: Generator[LLMResultChunk, None, None] | LLMResult = self.session.model.llm.invoke(
                 model_config=LLMModelConfig(**model.model_dump(mode="json")),
                 prompt_messages=prompt_messages,
@@ -123,16 +141,9 @@ class FunctionCallingAgentStrategy(AgentStrategy):
             tool_call_inputs = ""
 
             current_llm_usage = None
-            root = self.create_log_message(
-                label=f"Round {iteration_step}",
-                data={"thought": f"thought{iteration_step} start"},
-                status=ToolInvokeMessage.LogMessage.LogStatus.START,
-            )
-            yield root
 
             if isinstance(chunks, Generator):
                 is_first_chunk = True
-                root = self.create_log_message(data={}, label="root")
                 for chunk in chunks:
                     if is_first_chunk:
                         is_first_chunk = False
@@ -188,7 +199,23 @@ class FunctionCallingAgentStrategy(AgentStrategy):
 
                 if not result.message.content:
                     result.message.content = ""
-
+            yield self.finish_log_message(
+                log=model_log,
+                data={
+                    "output": response,
+                    "tool_name": tool_call_names,
+                    "tool_input": tool_call_inputs,
+                },
+                metadata={
+                    "started_at": model_started_at,
+                    "finished_at": time.perf_counter(),
+                    "elapsed_time": time.perf_counter() - model_started_at,
+                    "provider": model.provider,
+                    "total_price": current_llm_usage.total_price if current_llm_usage else 0,
+                    "currency": current_llm_usage.currency if current_llm_usage else "",
+                    "total_tokens": current_llm_usage.total_tokens if current_llm_usage else 0,
+                },
+            )
             assistant_message = AssistantPromptMessage(content="", tool_calls=[])
             if tool_calls:
                 assistant_message.tool_calls = [
@@ -206,21 +233,24 @@ class FunctionCallingAgentStrategy(AgentStrategy):
 
             current_thoughts.append(assistant_message)
 
-            # save thought
-            thought = {
-                "tool_name": tool_call_names,
-                "tool_input": tool_call_inputs,
-                "thought": response,
-                "messages_ids": [],
-                "llm_usage": current_llm_usage,
-            }
-            yield self.create_log_message(data={"thought": thought}, label="thought", parent=root)
             final_answer += response + "\n"
 
             # call tools
             tool_responses = []
             for tool_call_id, tool_call_name, tool_call_args in tool_calls:
                 tool_instance = tool_instances[tool_call_name]
+                tool_call_started_at = time.perf_counter()
+                tool_call_log = self.create_log_message(
+                    label=f"CALL {tool_call_name}",
+                    data={},
+                    metadata={
+                        "started_at": time.perf_counter(),
+                        "provider": tool_instance.identity.provider,
+                    },
+                    parent=round_log,
+                    status=ToolInvokeMessage.LogMessage.LogStatus.START,
+                )
+                yield tool_call_log
                 if not tool_instance:
                     tool_response = {
                         "tool_call_id": tool_call_id,
@@ -234,7 +264,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                         provider_type=ToolProviderType.BUILT_IN,
                         provider=tool_instance.identity.provider,
                         tool_name=tool_instance.identity.name,
-                        parameters=tool_call_args,
+                        parameters={**tool_instance.runtime_parameters, **tool_call_args},
                     )
                     result = ""
                     for response in tool_invoke_responses:
@@ -267,8 +297,19 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                         "tool_response": result,
                         "meta": tool_invoke_meta.to_dict(),
                     }
-                    yield self.create_log_message(label=tool_call_name, data=tool_response, parent=root)
 
+                yield self.finish_log_message(
+                    log=tool_call_log,
+                    data={
+                        "output": tool_response,
+                    },
+                    metadata={
+                        "started_at": tool_call_started_at,
+                        "provider": tool_instance.identity.provider,
+                        "finished_at": time.perf_counter(),
+                        "elapsed_time": time.perf_counter() - tool_call_started_at,
+                    },
+                )
                 tool_responses.append(tool_response)
                 if tool_response["tool_response"] is not None:
                     current_thoughts.append(
@@ -282,10 +323,35 @@ class FunctionCallingAgentStrategy(AgentStrategy):
             # update prompt tool
             for prompt_tool in prompt_messages_tools:
                 self.update_prompt_message_tool(tool_instances[prompt_tool.name], prompt_tool)
-
+            yield self.finish_log_message(
+                log=round_log,
+                data={
+                    "output": {
+                        "llm_response": response,
+                        "tool_responses": tool_responses,
+                    },
+                },
+                metadata={
+                    "started_at": round_started_at,
+                    "finished_at": time.perf_counter(),
+                    "elapsed_time": time.perf_counter() - round_started_at,
+                    "total_price": current_llm_usage.total_price if current_llm_usage else 0,
+                    "currency": current_llm_usage.currency if current_llm_usage else "",
+                    "total_tokens": current_llm_usage.total_tokens if current_llm_usage else 0,
+                },
+            )
             iteration_step += 1
 
-        yield self.create_json_message({"output": final_answer, "token_usage": llm_usage["usage"]})
+        yield self.create_text_message(final_answer)
+        yield self.create_json_message(
+            {
+                "execution_metadata": {
+                    "total_price": llm_usage["usage"].total_price if llm_usage["usage"] is not None else 0,
+                    "currency": llm_usage["usage"].currency if llm_usage["usage"] is not None else "",
+                    "total_tokens": llm_usage["usage"].total_tokens if llm_usage["usage"] is not None else 0,
+                }
+            }
+        )
 
     def check_tool_calls(self, llm_result_chunk: LLMResultChunk) -> bool:
         """
@@ -363,30 +429,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
         """
         Organize user query
         """
-        # if self.files:
-        #     prompt_message_contents: list[PromptMessageContent] = []
-        #     prompt_message_contents.append(TextPromptMessageContent(data=query))
 
-        #     # get image detail config
-        #     image_detail_config = (
-        #         self.application_generate_entity.file_upload_config.image_config.detail
-        #         if (
-        #             self.application_generate_entity.file_upload_config
-        #             and self.application_generate_entity.file_upload_config.image_config
-        #         )
-        #         else None
-        #     )
-        #     image_detail_config = image_detail_config or ImagePromptMessageContent.DETAIL.LOW
-        #     for file in self.files:
-        #         prompt_message_contents.append(
-        #             file_manager.to_prompt_message_content(
-        #                 file,
-        #                 image_detail_config=image_detail_config,
-        #             )
-        #         )
-
-        #     prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
-        # else:
         prompt_messages.append(UserPromptMessage(content=query))
 
         return prompt_messages

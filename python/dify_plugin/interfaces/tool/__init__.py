@@ -106,6 +106,7 @@ class ToolLike(ABC, Generic[T]):
         data: Mapping[str, Any],
         status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
         parent: T | None = None,
+        metadata: Optional[Mapping[str, Any]] = None,
     ) -> T:
         """
         create a log message with status "start"
@@ -119,6 +120,7 @@ class ToolLike(ABC, Generic[T]):
                 parent_id=parent.message.id
                 if parent and isinstance(parent.message, ToolInvokeMessage.LogMessage)
                 else None,
+                metadata=metadata,
             ),
         )
 
@@ -127,6 +129,8 @@ class ToolLike(ABC, Generic[T]):
         log: T,
         status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
         error: Optional[str] = None,
+        data: Optional[Mapping[str, Any]] = None,
+        metadata: Optional[Mapping[str, Any]] = None,
     ) -> T:
         """
         mark log as finished
@@ -137,10 +141,11 @@ class ToolLike(ABC, Generic[T]):
             message=ToolInvokeMessage.LogMessage(
                 id=log.message.id,
                 label=log.message.label,
-                data=log.message.data,
+                data=data or log.message.data,
                 status=status,
                 parent_id=log.message.parent_id,
                 error=error,
+                metadata=metadata or log.message.metadata,
             ),
         )
 
