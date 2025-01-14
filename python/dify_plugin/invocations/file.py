@@ -1,7 +1,7 @@
 from enum import Enum
 
 import requests
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from dify_plugin.core.entities.invocation import InvokeType
 from dify_plugin.core.runtime import BackwardsInvocation
@@ -31,6 +31,13 @@ class UploadFileResponse(BaseModel):
     extension: str
     mime_type: str
     type: Type
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_type(cls, d):
+        if "type" not in d:
+            d["type"] = cls.Type.from_mime_type(d.get("mime_type", ""))
+        return d
 
     def to_app_parameter(self) -> dict:
         return {
