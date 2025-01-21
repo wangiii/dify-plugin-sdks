@@ -13,11 +13,12 @@ from dify_plugin.core.server.aws.response_writer import AWSResponseWriter
 
 
 class AWSLambdaRequestReader(RequestReader):
-    def __init__(self, port: int, max_single_connection_lifetime: int):
+    def __init__(self, host: str, port: int, max_single_connection_lifetime: int):
         """
         Initialize the AWSLambdaStream and wait for jobs
         """
         self.app = Flask(__name__)
+        self.host = host
         self.port = port
         self.max_single_connection_lifetime = max_single_connection_lifetime
         self.request_queue = Queue[PluginInStream]()
@@ -62,7 +63,7 @@ class AWSLambdaRequestReader(RequestReader):
 
     def _run(self):
         self.app.route("/invoke", methods=["POST"])(self.handler)
-        self.app.run(port=self.port, threaded=True, debug=False)
+        self.app.run(host=self.host, port=self.port, threaded=True, debug=False)
 
     def launch(self):
         """

@@ -173,7 +173,11 @@ class Plugin(IOServer, Router):
         """
         Launch AWS stream
         """
-        aws_stream = AWSLambdaRequestReader(config.AWS_LAMBDA_PORT, config.MAX_REQUEST_TIMEOUT)
+        aws_stream = AWSLambdaRequestReader(
+            config.AWS_LAMBDA_HOST,
+            config.AWS_LAMBDA_PORT,
+            config.MAX_REQUEST_TIMEOUT,
+        )
         aws_stream.launch()
 
         return aws_stream, None
