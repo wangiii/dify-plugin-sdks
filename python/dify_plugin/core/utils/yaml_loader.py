@@ -33,7 +33,7 @@ def load_yaml_file(file_path: str, ignore_error: bool = False) -> dict:
         return {}
     except Exception as e:
         if ignore_error:
-            logger.warning(f"Failed to load YAML file {file_path}: {e}")
+            logger.error(f"Failed to load YAML file {file_path}: {e}")
             return {}
         else:
             raise e
