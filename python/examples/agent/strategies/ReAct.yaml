@@ -1,14 +1,14 @@
 identity:
-  name: function_calling
+  name: ReAct
   author: Dify
   label:
-    en_US: FunctionCalling
-    zh_Hans: FunctionCalling
-    pt_BR: FunctionCalling
+    en_US: ReAct
+    zh_Hans: ReAct
+    pt_BR: ReAct
 description:
-  en_US: Function Calling is a basic strategy for agent, model will use the tools provided to perform the task.
-  zh_Hans: Function Calling 是一个基本的 Agent 策略，模型将使用提供的工具来执行任务。
-  pt_BR: Function Calling is a basic strategy for agent, model will use the tools provided to perform the task.
+  en_US: ReAct is a basic strategy for agent, model will use the tools provided to perform the task.
+  zh_Hans: ReAct 是一个基本的 Agent 策略，模型将使用提供的工具来执行任务。
+  pt_BR: ReAct is a basic strategy for agent, model will use the tools provided to perform the task.
 parameters:
   - name: model
     type: model-selector
@@ -51,8 +51,9 @@ parameters:
       zh_Hans: 最大迭代次数
       pt_BR: Maxium Iterations
     default: 3
-    max: 30
     min: 1
+    max: 30
+
 output_schema:
   type: object
   properties:
@@ -60,8 +61,8 @@ output_schema:
       type: string
     json:
       type: string
-    llm:
+    file:
       type: string
 extra:
   python:
-    source: strategies/function_calling.py
+    source: strategies/ReAct.py

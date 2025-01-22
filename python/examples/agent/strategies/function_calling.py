@@ -72,10 +72,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
         query = fc_params.query
         self.query = query
         instruction = fc_params.instruction
-        init_prompt_messages = [
-            SystemPromptMessage(content=instruction),
-            UserPromptMessage(content=query),
-        ]
+        init_prompt_messages = [SystemPromptMessage(content=instruction)]
         tools = fc_params.tools
         tool_instances = {tool.identity.name: tool for tool in tools} if tools else {}
         model = fc_params.model
@@ -164,8 +161,12 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                         if isinstance(chunk.delta.message.content, list):
                             for content in chunk.delta.message.content:
                                 response += content.data
+                                if not function_call_state or iteration_step == max_iteration_steps:
+                                    yield self.create_text_message(content.data)
                         else:
                             response += str(chunk.delta.message.content)
+                            if not function_call_state or iteration_step == max_iteration_steps:
+                                yield self.create_text_message(str(chunk.delta.message.content))
 
                     if chunk.delta.usage:
                         self.increase_usage(llm_usage, chunk.delta.usage)
@@ -261,7 +262,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                 else:
                     # invoke tool
                     tool_invoke_responses = self.session.tool.invoke(
-                        provider_type=ToolProviderType.BUILT_IN,
+                        provider_type=ToolProviderType(tool_instance.provider_type),
                         provider=tool_instance.identity.provider,
                         tool_name=tool_instance.identity.name,
                         parameters={**tool_instance.runtime_parameters, **tool_call_args},
@@ -342,7 +343,6 @@ class FunctionCallingAgentStrategy(AgentStrategy):
             )
             iteration_step += 1
 
-        yield self.create_text_message(final_answer)
         yield self.create_json_message(
             {
                 "execution_metadata": {
