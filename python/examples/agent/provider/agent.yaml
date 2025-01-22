@@ -12,6 +12,7 @@ identity:
   icon: icon.svg
 strategies:
   - strategies/function_calling.yaml
+  - strategies/ReAct.yaml
 extra:
   python:
     source: provider/agent.py

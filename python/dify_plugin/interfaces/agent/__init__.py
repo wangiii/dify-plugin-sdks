@@ -9,7 +9,7 @@ from dify_plugin.entities.agent import AgentInvokeMessage
 from dify_plugin.entities.model import AIModelEntity, ModelPropertyKey
 from dify_plugin.entities.model.llm import LLMModelConfig, LLMUsage
 from dify_plugin.entities.model.message import PromptMessage, PromptMessageTool
-from dify_plugin.entities.tool import ToolDescription, ToolIdentity, ToolParameter
+from dify_plugin.entities.tool import ToolDescription, ToolIdentity, ToolParameter, ToolProviderType
 from dify_plugin.interfaces.tool import ToolLike, ToolProvider
 
 
@@ -64,6 +64,8 @@ class ToolEntity(BaseModel):
     description: Optional[ToolDescription] = None
     output_schema: Optional[dict] = None
     has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
+    # provider type
+    provider_type: ToolProviderType = ToolProviderType.BUILT_IN
 
     # runtime parameters
     runtime_parameters: Mapping[str, Any] = {}
