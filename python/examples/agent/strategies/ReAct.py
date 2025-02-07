@@ -17,7 +17,7 @@ from dify_plugin.entities.model.message import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from dify_plugin.entities.tool import ToolInvokeMessage, ToolProviderType
+from dify_plugin.entities.tool import LogMetadata, ToolInvokeMessage, ToolProviderType
 from dify_plugin.interfaces.agent import (
     AgentModelConfig,
     AgentScratchpadUnit,
@@ -120,7 +120,7 @@ class ReActAgentStrategy(AgentStrategy):
                 label=f"ROUND {iteration_step}",
                 data={},
                 metadata={
-                    "started_at": round_started_at,
+                    LogMetadata.STARTED_AT: round_started_at,
                 },
                 status=ToolInvokeMessage.LogMessage.LogStatus.START,
             )
@@ -157,7 +157,7 @@ class ReActAgentStrategy(AgentStrategy):
             model_log = self.create_log_message(
                 label=f"{model.model} Thought",
                 data={},
-                metadata={"start_at": model_started_at, "provider": model.provider},
+                metadata={LogMetadata.STARTED_AT: model_started_at, LogMetadata.PROVIDER: model.provider},
                 parent=round_log,
                 status=ToolInvokeMessage.LogMessage.LogStatus.START,
             )
@@ -177,9 +177,6 @@ class ReActAgentStrategy(AgentStrategy):
                     scratchpad.thought = scratchpad.thought or ""
                     scratchpad.agent_response += chunk
                     scratchpad.thought += chunk
-                    if scratchpad.is_final():
-                        yield self.create_text_message(chunk)
-
             scratchpad.thought = (
                 scratchpad.thought.strip() if scratchpad.thought else "I am thinking about how to help you"
             )
@@ -192,21 +189,19 @@ class ReActAgentStrategy(AgentStrategy):
             else:
                 usage_dict["usage"] = LLMUsage.empty_usage()
 
-            if not scratchpad.is_final():
-                pass
+            action = scratchpad.action.to_dict() if scratchpad.action else {"action": scratchpad.agent_response}
+
             yield self.finish_log_message(
                 log=model_log,
-                data={
-                    "output": scratchpad.agent_response,
-                },
+                data={"thought": scratchpad.thought, **action},
                 metadata={
-                    "started_at": model_started_at,
-                    "finished_at": time.perf_counter(),
-                    "elapsed_time": time.perf_counter() - model_started_at,
-                    "provider": model.provider,
-                    "total_price": usage_dict["usage"].total_price if usage_dict["usage"] else 0,
-                    "currency": usage_dict["usage"].currency if usage_dict["usage"] else "",
-                    "total_tokens": usage_dict["usage"].total_tokens if usage_dict["usage"] else 0,
+                    LogMetadata.STARTED_AT: model_started_at,
+                    LogMetadata.FINISHED_AT: time.perf_counter(),
+                    LogMetadata.ELAPSED_TIME: time.perf_counter() - model_started_at,
+                    LogMetadata.PROVIDER: model.provider,
+                    LogMetadata.TOTAL_PRICE: usage_dict["usage"].total_price if usage_dict["usage"] else 0,
+                    LogMetadata.CURRENCY: usage_dict["usage"].currency if usage_dict["usage"] else "",
+                    LogMetadata.TOTAL_TOKENS: usage_dict["usage"].total_tokens if usage_dict["usage"] else 0,
                 },
             )
             if not scratchpad.action:
@@ -232,8 +227,8 @@ class ReActAgentStrategy(AgentStrategy):
                         label=f"CALL {tool_name}",
                         data={},
                         metadata={
-                            "started_at": time.perf_counter(),
-                            "provider": tool_instances[tool_name].identity.provider
+                            LogMetadata.STARTED_AT: time.perf_counter(),
+                            LogMetadata.PROVIDER: tool_instances[tool_name].identity.provider
                             if tool_instances.get(tool_name)
                             else "",
                         },
@@ -255,12 +250,12 @@ class ReActAgentStrategy(AgentStrategy):
                             "meta": tool_invoke_meta.to_dict(),
                         },
                         metadata={
-                            "started_at": tool_call_started_at,
-                            "provider": tool_instances[tool_name].identity.provider
+                            LogMetadata.STARTED_AT: tool_call_started_at,
+                            LogMetadata.PROVIDER: tool_instances[tool_name].identity.provider
                             if tool_instances.get(tool_name)
                             else "",
-                            "finished_at": time.perf_counter(),
-                            "elapsed_time": time.perf_counter() - tool_call_started_at,
+                            LogMetadata.FINISHED_AT: time.perf_counter(),
+                            LogMetadata.ELAPSED_TIME: time.perf_counter() - tool_call_started_at,
                         },
                     )
 
@@ -275,12 +270,12 @@ class ReActAgentStrategy(AgentStrategy):
                     },
                 },
                 metadata={
-                    "started_at": round_started_at,
-                    "finished_at": time.perf_counter(),
-                    "elapsed_time": time.perf_counter() - round_started_at,
-                    "total_price": usage_dict["usage"].total_price if usage_dict["usage"] else 0,
-                    "currency": usage_dict["usage"].currency if usage_dict["usage"] else "",
-                    "total_tokens": usage_dict["usage"].total_tokens if usage_dict["usage"] else 0,
+                    LogMetadata.STARTED_AT: round_started_at,
+                    LogMetadata.FINISHED_AT: time.perf_counter(),
+                    LogMetadata.ELAPSED_TIME: time.perf_counter() - round_started_at,
+                    LogMetadata.TOTAL_PRICE: usage_dict["usage"].total_price if usage_dict["usage"] else 0,
+                    LogMetadata.CURRENCY: usage_dict["usage"].currency if usage_dict["usage"] else "",
+                    LogMetadata.TOTAL_TOKENS: usage_dict["usage"].total_tokens if usage_dict["usage"] else 0,
                 },
             )
             iteration_step += 1
@@ -289,9 +284,9 @@ class ReActAgentStrategy(AgentStrategy):
         yield self.create_json_message(
             {
                 "execution_metadata": {
-                    "total_price": llm_usage["usage"].total_price if llm_usage["usage"] is not None else 0,
-                    "currency": llm_usage["usage"].currency if llm_usage["usage"] is not None else "",
-                    "total_tokens": llm_usage["usage"].total_tokens if llm_usage["usage"] is not None else 0,
+                    LogMetadata.TOTAL_PRICE: llm_usage["usage"].total_price if llm_usage["usage"] is not None else 0,
+                    LogMetadata.CURRENCY: llm_usage["usage"].currency if llm_usage["usage"] is not None else "",
+                    LogMetadata.TOTAL_TOKENS: llm_usage["usage"].total_tokens if llm_usage["usage"] is not None else 0,
                 }
             }
         )

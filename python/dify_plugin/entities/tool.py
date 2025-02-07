@@ -18,6 +18,16 @@ from dify_plugin.entities import I18nObject
 from dify_plugin.entities.model.message import PromptMessageTool
 
 
+class LogMetadata(str, Enum):
+    STARTED_AT = "started_at"
+    FINISHED_AT = "finished_at"
+    ELAPSED_TIME = "elapsed_time"
+    TOTAL_PRICE = "total_price"
+    TOTAL_TOKENS = "total_tokens"
+    PROVIDER = "provider"
+    CURRENCY = "currency"
+
+
 class CommonParameterType(Enum):
     SECRET_INPUT = "secret-input"
     TEXT_INPUT = "text-input"
@@ -117,7 +127,7 @@ class ToolInvokeMessage(BaseModel):
         error: Optional[str] = Field(default=None, description="The error message")
         status: LogStatus = Field(..., description="The status of the log")
         data: Mapping[str, Any] = Field(..., description="Detailed log data")
-        metadata: Optional[Mapping[str, Any]] = Field(default=None, description="The metadata of the log")
+        metadata: Optional[Mapping[LogMetadata, Any]] = Field(default=None, description="The metadata of the log")
 
     class MessageType(Enum):
         TEXT = "text"
