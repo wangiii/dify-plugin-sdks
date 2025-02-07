@@ -4,7 +4,7 @@ from typing import Any, Generic, Optional, Type, TypeVar
 
 from dify_plugin.core.runtime import Session
 from dify_plugin.entities.agent import AgentInvokeMessage
-from dify_plugin.entities.tool import ToolInvokeMessage, ToolParameter, ToolRuntime, ToolSelector
+from dify_plugin.entities.tool import LogMetadata, ToolInvokeMessage, ToolParameter, ToolRuntime, ToolSelector
 from dify_plugin.file.constants import DIFY_FILE_IDENTITY, DIFY_TOOL_SELECTOR_IDENTITY
 from dify_plugin.file.entities import FileType
 from dify_plugin.file.file import File
@@ -106,7 +106,7 @@ class ToolLike(ABC, Generic[T]):
         data: Mapping[str, Any],
         status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
         parent: T | None = None,
-        metadata: Optional[Mapping[str, Any]] = None,
+        metadata: Optional[Mapping[LogMetadata, Any]] = None,
     ) -> T:
         """
         create a log message with status "start"
@@ -130,7 +130,7 @@ class ToolLike(ABC, Generic[T]):
         status: ToolInvokeMessage.LogMessage.LogStatus = ToolInvokeMessage.LogMessage.LogStatus.SUCCESS,
         error: Optional[str] = None,
         data: Optional[Mapping[str, Any]] = None,
-        metadata: Optional[Mapping[str, Any]] = None,
+        metadata: Optional[Mapping[LogMetadata, Any]] = None,
     ) -> T:
         """
         mark log as finished
