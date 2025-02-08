@@ -69,9 +69,6 @@ class WorkflowNodeInvocations:
 
 
 class Session:
-    # class variable to store all sessions
-    _session_pool: set["Session"] = set()
-
     def __init__(
         self,
         session_id: str,
@@ -87,9 +84,6 @@ class Session:
     ) -> None:
         # current session id
         self.session_id: str = session_id
-
-        # add current session to session pool
-        self._session_pool.add(self)
 
         # thread pool executor
         self._executor: ThreadPoolExecutor = executor
@@ -141,19 +135,6 @@ class Session:
             install_method=None,
             dify_plugin_daemon_url=None,
         )
-
-    def __del__(self) -> None:
-        self._session_pool.remove(self)
-
-    def close(self) -> None:
-        self._session_pool.remove(self)
-
-    @classmethod
-    def get_session(cls, session_id: str) -> "Session | None":
-        for session in cls._session_pool:
-            if session.session_id == session_id:
-                return session
-        return None
 
 
 #################################################
