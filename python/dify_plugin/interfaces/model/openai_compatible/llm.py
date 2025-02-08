@@ -1,6 +1,6 @@
 import json
 import logging
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from decimal import Decimal
 from typing import Optional, Union, cast
 from urllib.parse import urljoin
@@ -104,7 +104,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         """
         return self._num_tokens_from_messages(model, prompt_messages, tools, credentials)
 
-    def validate_credentials(self, model: str, credentials: dict) -> None:
+    def validate_credentials(self, model: str, credentials: Mapping) -> None:
         """
         Validate model credentials using requests to ensure compatibility with all providers following
          OpenAI's API standard.
@@ -175,7 +175,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {str(ex)}") from ex
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: Mapping) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -407,6 +407,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         """
         full_assistant_content = ""
         chunk_index = 0
+        is_reasoning_started = False
 
         def create_final_llm_result_chunk(
             id: Optional[str],
@@ -514,8 +515,10 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
 
                 if "delta" in choice:
                     delta = choice["delta"]
-                    delta_content = delta.get("content")
-
+                    delta_content, is_reasoning_started = self._wrap_thinking_by_reasoning_content(
+                        delta, is_reasoning_started
+                    )
+                    delta_content = self._wrap_thinking_by_tag(delta_content)
                     assistant_message_tool_calls = None
 
                     if "tool_calls" in delta and credentials.get("function_calling_type", "no_call") == "tool_call":
@@ -656,6 +659,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         Convert PromptMessage to dict for OpenAI API format
         """
         credentials = credentials or {}
+        message_dict = {}
         if isinstance(message, UserPromptMessage):
             message = cast(UserPromptMessage, message)
             if isinstance(message.content, str):
