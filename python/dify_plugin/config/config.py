@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class InstallMethod(Enum):
     Local = "local"
     Remote = "remote"
-    AWSLambda = "aws_lambda"
+    Serverless = "serverless"
 
 
 class DifyPluginEnv(BaseSettings):
@@ -28,8 +28,12 @@ class DifyPluginEnv(BaseSettings):
     REMOTE_INSTALL_PORT: int = Field(default=5003, description="Remote installation port")
     REMOTE_INSTALL_KEY: Optional[str] = Field(default=None, description="Remote installation key")
 
-    AWS_LAMBDA_HOST: str = Field(default="0.0.0.0", description="AWS Lambda host")
-    AWS_LAMBDA_PORT: int = Field(default=8080, description="AWS Lambda port")
+    SERVERLESS_HOST: str = Field(default="0.0.0.0", description="Serverless host")
+    SERVERLESS_PORT: int = Field(default=8080, description="Serverless port")
+    SERVERLESS_WORKER_CLASS: str = Field(default="gevent", description="Serverless worker class")
+    SERVERLESS_WORKER_CONNECTIONS: int = Field(default=1000, description="Serverless worker connections")
+    SERVERLESS_WORKERS: int = Field(default=5, description="Serverless workers")
+    SERVERLESS_THREADS: int = Field(default=5, description="Serverless threads")
 
     DIFY_PLUGIN_DAEMON_URL: str = Field(default="http://localhost:5002", description="backwards invocation address")
 

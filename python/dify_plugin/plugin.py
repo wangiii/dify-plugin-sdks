@@ -21,7 +21,7 @@ from dify_plugin.core.plugin_registration import PluginRegistration
 from dify_plugin.core.runtime import Session
 from dify_plugin.core.server.__base.request_reader import RequestReader
 from dify_plugin.core.server.__base.response_writer import ResponseWriter
-from dify_plugin.core.server.aws.request_reader import AWSLambdaRequestReader
+from dify_plugin.core.server.serverless.request_reader import ServerlessRequestReader
 from dify_plugin.core.server.io_server import IOServer
 from dify_plugin.core.server.router import Router
 from dify_plugin.core.server.stdio.request_reader import StdioRequestReader
@@ -46,8 +46,8 @@ class Plugin(IOServer, Router):
             request_reader, response_writer = self._launch_local_stream(config)
         elif InstallMethod.Remote == config.INSTALL_METHOD:
             request_reader, response_writer = self._launch_remote_stream(config)
-        elif InstallMethod.AWSLambda == config.INSTALL_METHOD:
-            request_reader, response_writer = self._launch_aws_stream(config)
+        elif InstallMethod.Serverless == config.INSTALL_METHOD:
+            request_reader, response_writer = self._launch_serverless_stream(config)
         else:
             raise ValueError("Invalid install method")
 
@@ -169,18 +169,21 @@ class Plugin(IOServer, Router):
 
         self._log_configuration()
 
-    def _launch_aws_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
+    def _launch_serverless_stream(self, config: DifyPluginEnv) -> tuple[RequestReader, Optional[ResponseWriter]]:
         """
-        Launch AWS stream
+        Launch Serverless stream
         """
-        aws_stream = AWSLambdaRequestReader(
-            config.AWS_LAMBDA_HOST,
-            config.AWS_LAMBDA_PORT,
+        serverless = ServerlessRequestReader(
+            config.SERVERLESS_HOST,
+            config.SERVERLESS_PORT,
+            config.SERVERLESS_WORKER_CLASS,
+            config.SERVERLESS_WORKERS,
+            config.SERVERLESS_THREADS,
             config.MAX_REQUEST_TIMEOUT,
         )
-        aws_stream.launch()
+        serverless.launch()
 
-        return aws_stream, None
+        return serverless, None
 
     def _log_configuration(self):
         """

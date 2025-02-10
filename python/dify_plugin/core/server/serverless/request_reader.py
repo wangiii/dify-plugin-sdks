@@ -9,17 +9,30 @@ from dify_plugin.core.entities.plugin.io import (
     PluginInStreamEvent,
 )
 from dify_plugin.core.server.__base.request_reader import RequestReader
-from dify_plugin.core.server.aws.response_writer import AWSResponseWriter
+from dify_plugin.core.server.serverless.response_writer import ServerlessResponseWriter
 
 
-class AWSLambdaRequestReader(RequestReader):
-    def __init__(self, host: str, port: int, max_single_connection_lifetime: int):
+class ServerlessRequestReader(RequestReader):
+    def __init__(
+        self,
+        host: str = "0.0.0.0",
+        port: int = 8080,
+        worker_class: str = "gevent",
+        workers: int = 5,
+        worker_connections: int = 1000,
+        threads: int = 5,
+        max_single_connection_lifetime: int = 300,
+    ):
         """
-        Initialize the AWSLambdaStream and wait for jobs
+        Initialize the ServerlessStream and wait for jobs
         """
         self.app = Flask(__name__)
         self.host = host
         self.port = port
+        self.workers = workers
+        self.worker_class = worker_class
+        self.threads = threads
+        self.worker_connections = worker_connections
         self.max_single_connection_lifetime = max_single_connection_lifetime
         self.request_queue = Queue[PluginInStream]()
 
@@ -44,7 +57,7 @@ class AWSLambdaRequestReader(RequestReader):
                 endpoint_id=data.get("endpoint_id"),
                 data=data["data"],
                 reader=self,
-                writer=AWSResponseWriter(queue),
+                writer=ServerlessResponseWriter(queue),
             )
             # put request to queue
             self.request_queue.put(plugin_in)
@@ -63,7 +76,7 @@ class AWSLambdaRequestReader(RequestReader):
 
     def _run(self):
         self.app.route("/invoke", methods=["POST"])(self.handler)
-        self.app.run(host=self.host, port=self.port, threaded=True, debug=False)
+        self.app.run(host=self.host, port=self.port, threaded=True)
 
     def launch(self):
         """
