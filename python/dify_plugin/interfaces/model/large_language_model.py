@@ -33,11 +33,6 @@ from dify_plugin.interfaces.model.ai_model import AIModel
 
 logger = logging.getLogger(__name__)
 
-HTML_THINKING_TAG = (
-    '<details style="color:gray;background-color: #f8f8f8;padding: 8px;border-radius: 4px;" open> '
-    "<summary> Thinking... </summary>"
-)
-
 
 class LargeLanguageModel(AIModel):
     """
@@ -451,40 +446,6 @@ if you are not sure about the structure.
                         message=AssistantPromptMessage(content=new_piece, tool_calls=[]),
                     ),
                 )
-
-    def _wrap_thinking_by_reasoning_content(self, delta: dict, is_reasoning: bool) -> tuple[str, bool]:
-        """
-        If the reasoning response is from delta.get("reasoning_content"), we wrap
-        it with HTML details tag.
-
-        :param delta: delta dictionary from LLM streaming response
-        :param is_reasoning: is reasoning
-        :return: tuple of (processed_content, is_reasoning)
-        """
-
-        content = delta.get("content") or ""
-        reasoning_content = delta.get("reasoning_content")
-
-        if reasoning_content:
-            if not is_reasoning:
-                content = HTML_THINKING_TAG + reasoning_content
-                is_reasoning = True
-            else:
-                content = reasoning_content
-        elif is_reasoning:
-            content = "</details>" + content
-            is_reasoning = False
-        return content, is_reasoning
-
-    def _wrap_thinking_by_tag(self, content: str) -> str:
-        """
-        if the reasoning response is a <think>...</think> block from delta.get("content"),
-        we replace <think> to <detail>.
-
-        :param content: delta.get("content")
-        :return: processed_content
-        """
-        return content.replace("<think>", HTML_THINKING_TAG).replace("</think>", "</details>")
 
     def _code_block_mode_stream_processor_with_backtick(
         self,
