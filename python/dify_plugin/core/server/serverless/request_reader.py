@@ -74,8 +74,12 @@ class ServerlessRequestReader(RequestReader):
         except Exception as e:
             return str(e), 500
 
+    def health(self):
+        return "OK", 200
+
     def _run(self):
         self.app.route("/invoke", methods=["POST"])(self.handler)
+        self.app.route("/health", methods=["GET"])(self.health)
         self.app.run(host=self.host, port=self.port, threaded=True)
 
     def launch(self):

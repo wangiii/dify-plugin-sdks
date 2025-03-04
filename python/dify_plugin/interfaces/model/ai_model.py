@@ -21,9 +21,9 @@ from dify_plugin.errors.model import InvokeAuthorizationError, InvokeError
 import socket
 
 if socket.socket is gevent.socket.socket:
-    import gevent.threadpool
+    from concurrent.futures import ThreadPoolExecutor
 
-    threadpool = gevent.threadpool.ThreadPool(1)
+    executor = ThreadPoolExecutor(max_workers=1)
 
 
 class AIModel(ABC):
@@ -264,6 +264,13 @@ class AIModel(ABC):
         :param text: plain text of prompt. You need to convert the original message to plain text
         :return: number of tokens
         """
+
+        # ENHANCEMENT:
+        # to avoid performance issue, do not calculate the number of tokens for too long text
+        # only to promise text length is less than 100000
+        if len(text) >= 100000:
+            return len(text)
+
         import tiktoken
 
         # check if gevent is patched to main thread
@@ -271,7 +278,7 @@ class AIModel(ABC):
 
         if socket.socket is gevent.socket.socket:
             # using gevent real thread to avoid blocking main thread
-            result = threadpool.spawn(lambda: len(tiktoken.encoding_for_model("gpt2").encode(text)))
-            return result.get(block=True) or 0
+            future = executor.submit(lambda: len(tiktoken.encoding_for_model("gpt2").encode(text)))
+            return future.result() or 0
 
         return len(tiktoken.encoding_for_model("gpt2").encode(text))
