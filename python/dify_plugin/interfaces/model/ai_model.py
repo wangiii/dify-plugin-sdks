@@ -21,9 +21,9 @@ from dify_plugin.errors.model import InvokeAuthorizationError, InvokeError
 import socket
 
 if socket.socket is gevent.socket.socket:
-    from concurrent.futures import ThreadPoolExecutor
+    import gevent.threadpool
 
-    executor = ThreadPoolExecutor(max_workers=1)
+    threadpool = gevent.threadpool.ThreadPool(1)
 
 
 class AIModel(ABC):
@@ -278,7 +278,7 @@ class AIModel(ABC):
 
         if socket.socket is gevent.socket.socket:
             # using gevent real thread to avoid blocking main thread
-            future = executor.submit(lambda: len(tiktoken.encoding_for_model("gpt2").encode(text)))
-            return future.result() or 0
+            result = threadpool.spawn(lambda: len(tiktoken.encoding_for_model("gpt2").encode(text)))
+            return result.get(block=True) or 0
 
         return len(tiktoken.encoding_for_model("gpt2").encode(text))
