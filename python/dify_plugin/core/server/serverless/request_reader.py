@@ -88,6 +88,10 @@ class ServerlessRequestReader(RequestReader):
             from gevent.pywsgi import WSGIServer
 
             server = WSGIServer((self.host, self.port), self.app)
+
+            print("* Serving Flask app 'dify_plugin.core.server.serverless.request_reader'")
+            print("* Running on http://%s:%d (Press CTRL+C to quit)" % (self.host, self.port))
+            print("* Server Worker: gevent.wsgi.WSGIServer")
             server.serve_forever()
         else:
             self.app.run(host=self.host, port=self.port, threaded=True)
