@@ -80,7 +80,17 @@ class ServerlessRequestReader(RequestReader):
     def _run(self):
         self.app.route("/invoke", methods=["POST"])(self.handler)
         self.app.route("/health", methods=["GET"])(self.health)
-        self.app.run(host=self.host, port=self.port, threaded=True)
+
+        import socket
+        import gevent.socket
+
+        if socket.socket is gevent.socket.socket:
+            from gevent.pywsgi import WSGIServer
+
+            server = WSGIServer((self.host, self.port), self.app)
+            server.serve_forever()
+        else:
+            self.app.run(host=self.host, port=self.port, threaded=True)
 
     def launch(self):
         """
