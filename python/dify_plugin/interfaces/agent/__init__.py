@@ -1,6 +1,6 @@
+import logging
 from abc import abstractmethod
 from collections.abc import Generator, Mapping
-import logging
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
@@ -84,6 +84,37 @@ class AgentScratchpadUnit(BaseModel):
         Check if the scratchpad unit is final.
         """
         return self.action is not None and self.action.action_name.lower() == "final answer"
+
+
+class ToolInvokeMeta(BaseModel):
+    """
+    Tool invoke meta
+    """
+
+    time_cost: float = Field(..., description="The time cost of the tool invoke")
+    error: Optional[str] = None
+    tool_config: Optional[dict] = None
+
+    @classmethod
+    def empty(cls) -> "ToolInvokeMeta":
+        """
+        Get an empty instance of ToolInvokeMeta
+        """
+        return cls(time_cost=0.0, error=None, tool_config={})
+
+    @classmethod
+    def error_instance(cls, error: str) -> "ToolInvokeMeta":
+        """
+        Get an instance of ToolInvokeMeta with error
+        """
+        return cls(time_cost=0.0, error=error, tool_config={})
+
+    def to_dict(self) -> dict:
+        return {
+            "time_cost": self.time_cost,
+            "error": self.error,
+            "tool_config": self.tool_config,
+        }
 
 
 class ToolEntity(BaseModel):

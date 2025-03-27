@@ -4,7 +4,7 @@ from collections.abc import Generator
 from copy import deepcopy
 from typing import Any, Optional, cast
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from dify_plugin.entities.agent import AgentInvokeMessage
 from dify_plugin.entities.model import ModelFeature
@@ -23,7 +23,7 @@ from dify_plugin.entities.model.message import (
     UserPromptMessage,
 )
 from dify_plugin.entities.tool import LogMetadata, ToolInvokeMessage, ToolProviderType
-from dify_plugin.interfaces.agent import AgentModelConfig, AgentStrategy, ToolEntity
+from dify_plugin.interfaces.agent import AgentModelConfig, AgentStrategy, ToolEntity, ToolInvokeMeta
 
 
 class FunctionCallingParams(BaseModel):
@@ -32,37 +32,6 @@ class FunctionCallingParams(BaseModel):
     model: AgentModelConfig
     tools: list[ToolEntity] | None
     maximum_iterations: int = 3
-
-
-class ToolInvokeMeta(BaseModel):
-    """
-    Tool invoke meta
-    """
-
-    time_cost: float = Field(..., description="The time cost of the tool invoke")
-    error: Optional[str] = None
-    tool_config: Optional[dict] = None
-
-    @classmethod
-    def empty(cls) -> "ToolInvokeMeta":
-        """
-        Get an empty instance of ToolInvokeMeta
-        """
-        return cls(time_cost=0.0, error=None, tool_config={})
-
-    @classmethod
-    def error_instance(cls, error: str) -> "ToolInvokeMeta":
-        """
-        Get an instance of ToolInvokeMeta with error
-        """
-        return cls(time_cost=0.0, error=error, tool_config={})
-
-    def to_dict(self) -> dict:
-        return {
-            "time_cost": self.time_cost,
-            "error": self.error,
-            "tool_config": self.tool_config,
-        }
 
 
 class FunctionCallingAgentStrategy(AgentStrategy):
@@ -84,6 +53,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
         Run FunctionCall agent application
         """
         fc_params = FunctionCallingParams(**parameters)
+
         # init prompt messages
         query = fc_params.query
         self.query = query
@@ -318,7 +288,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                             else:
                                 result += f"tool response: {response.message!r}."
                     except Exception as e:
-                        result = f"tool invoke error: {str(e)}"
+                        result = f"tool invoke error: {e!s}"
                     tool_response = {
                         "tool_call_id": tool_call_id,
                         "tool_call_name": tool_call_name,

@@ -21,6 +21,10 @@ class AgentStrategyProviderIdentity(ToolProviderIdentity):
     pass
 
 
+class AgentStrategyFeature(str, Enum):
+    HISTORY_MESSAGES = "history-messages"
+
+
 class AgentStrategyIdentity(ToolIdentity):
     pass
 
@@ -69,6 +73,7 @@ class AgentStrategyConfiguration(BaseModel):
     extra: AgentStrategyConfigurationExtra
     has_runtime_parameters: bool = Field(default=False, description="Whether the tool has runtime parameters")
     output_schema: Optional[Mapping[str, Any]] = None
+    features: list[AgentStrategyFeature] = Field(default=[], description="The features of the agent")
 
 
 class AgentProviderConfigurationExtra(BaseModel):
@@ -105,6 +110,7 @@ class AgentStrategyProviderConfiguration(BaseModel):
                             ],
                             "description": I18nObject(**file["description"]),
                             "extra": AgentStrategyConfigurationExtra(**file.get("extra", {})),
+                            "features": file.get("features", []),
                         }
                     )
                 )
