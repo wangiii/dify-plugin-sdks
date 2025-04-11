@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from dify_plugin.entities.model import BaseModelConfig, ModelType, ModelUsage, PriceInfo
 from dify_plugin.entities.model.message import (
@@ -86,9 +86,23 @@ class LLMResultChunk(BaseModel):
     """
 
     model: str
-    prompt_messages: list[PromptMessage]
+    prompt_messages: list[PromptMessage] = Field(default_factory=list)
     system_fingerprint: Optional[str] = None
     delta: LLMResultChunkDelta
+
+    @field_validator("prompt_messages", mode="before")
+    def transform_prompt_messages(cls, value):
+        """
+        ISSUE:
+        - https://github.com/langgenius/dify/issues/17799
+        - https://github.com/langgenius/dify-official-plugins/issues/648
+
+        The `prompt_messages` field is deprecated, but to keep backward compatibility
+        we need to always set it to an empty list.
+
+        NOTE: just do not use it anymore, it will be removed in the future.
+        """
+        return []
 
 
 class LLMResult(BaseModel):
@@ -97,15 +111,28 @@ class LLMResult(BaseModel):
     """
 
     model: str
-    prompt_messages: list[PromptMessage]
+    prompt_messages: list[PromptMessage] = Field(default_factory=list)
     message: AssistantPromptMessage
     usage: LLMUsage
     system_fingerprint: Optional[str] = None
 
+    @field_validator("prompt_messages", mode="before")
+    def transform_prompt_messages(cls, value):
+        """
+        ISSUE:
+        - https://github.com/langgenius/dify/issues/17799
+        - https://github.com/langgenius/dify-official-plugins/issues/648
+
+        The `prompt_messages` field is deprecated, but to keep backward compatibility
+        we need to always set it to an empty list.
+
+        NOTE: just do not use it anymore, it will be removed in the future.
+        """
+        return []
+
     def to_llm_result_chunk(self) -> "LLMResultChunk":
         return LLMResultChunk(
             model=self.model,
-            prompt_messages=self.prompt_messages,
             system_fingerprint=self.system_fingerprint,
             delta=LLMResultChunkDelta(
                 index=0,
