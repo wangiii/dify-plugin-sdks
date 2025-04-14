@@ -1,6 +1,5 @@
 import codecs
 import json
-
 import logging
 from collections.abc import Generator
 from decimal import Decimal
@@ -165,7 +164,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             try:
                 json_result = response.json()
             except json.JSONDecodeError:
-                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error")
+                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error") from None
 
             if completion_type is LLMMode.CHAT and json_result.get("object", "") == "":
                 json_result["object"] = "chat.completion"
@@ -187,7 +186,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         except CredentialsValidateFailedError:
             raise
         except Exception as ex:
-            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {str(ex)}")
+            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {ex!s}") from ex
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
@@ -536,7 +535,7 @@ class OAICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                 if chunk_json.get("error") and chunk_json.get("choices") is None:
                     raise ValueError(chunk_json.get("error"))
 
-                if chunk_json:
+                if chunk_json:  # noqa: SIM102
                     if u := chunk_json.get("usage"):
                         usage = u
                 if not chunk_json or len(chunk_json["choices"]) == 0:

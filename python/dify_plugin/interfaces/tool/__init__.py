@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Mapping
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from dify_plugin.core.runtime import Session
 from dify_plugin.entities.agent import AgentInvokeMessage
@@ -13,7 +13,7 @@ T = TypeVar("T", bound=ToolInvokeMessage | AgentInvokeMessage)
 
 
 class ToolLike(ABC, Generic[T]):
-    response_type: Type[T]
+    response_type: type[T]
 
     ############################################################
     #            For plugin implementation use only            #
