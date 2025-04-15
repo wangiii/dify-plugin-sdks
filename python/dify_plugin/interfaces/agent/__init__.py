@@ -277,6 +277,11 @@ class AgentStrategy(ToolLike[AgentInvokeMessage]):
                 ToolParameter.ToolParameterType.FILES,
             }:
                 continue
+            if parameter.type in {
+                ToolParameter.ToolParameterType.SELECT,
+                ToolParameter.ToolParameterType.SECRET_INPUT,
+            }:
+                parameter_type = ToolParameter.ToolParameterType.STRING
             enum = []
             if parameter.type == ToolParameter.ToolParameterType.SELECT:
                 enum = [option.value for option in parameter.options] if parameter.options else []
@@ -311,6 +316,11 @@ class AgentStrategy(ToolLike[AgentInvokeMessage]):
                 ToolParameter.ToolParameterType.FILES,
             }:
                 continue
+            if parameter.type in {
+                ToolParameter.ToolParameterType.SELECT,
+                ToolParameter.ToolParameterType.SECRET_INPUT,
+            }:
+                parameter_type = ToolParameter.ToolParameterType.STRING
             enum = []
             if parameter.type == ToolParameter.ToolParameterType.SELECT:
                 enum = [option.value for option in parameter.options] if parameter.options else []
