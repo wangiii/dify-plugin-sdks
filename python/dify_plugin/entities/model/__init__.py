@@ -199,6 +199,7 @@ class ModelFeature(Enum):
     DOCUMENT = "document"
     VIDEO = "video"
     AUDIO = "audio"
+    STRUCTURED_OUTPUT = "structured-output"
 
 
 class ParameterType(Enum):
