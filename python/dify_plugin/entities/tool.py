@@ -41,6 +41,7 @@ class CommonParameterType(Enum):
     MODEL_SELECTOR = "model-selector"
     # TOOL_SELECTOR = "tool-selector"
     TOOLS_SELECTOR = "array[tools]"
+    ANY = "any"
 
 
 class AppSelectorScope(Enum):
@@ -129,6 +130,32 @@ class ToolInvokeMessage(BaseModel):
         data: Mapping[str, Any] = Field(..., description="Detailed log data")
         metadata: Optional[Mapping[LogMetadata, Any]] = Field(default=None, description="The metadata of the log")
 
+    class RetrieverResourceMessage(BaseModel):
+        class RetrieverResource(BaseModel):
+            """
+            Model class for retriever resource.
+            """
+
+            position: Optional[int] = None
+            dataset_id: Optional[str] = None
+            dataset_name: Optional[str] = None
+            document_id: Optional[str] = None
+            document_name: Optional[str] = None
+            data_source_type: Optional[str] = None
+            segment_id: Optional[str] = None
+            retriever_from: Optional[str] = None
+            score: Optional[float] = None
+            hit_count: Optional[int] = None
+            word_count: Optional[int] = None
+            segment_position: Optional[int] = None
+            index_node_hash: Optional[str] = None
+            content: Optional[str] = None
+            page: Optional[int] = None
+            doc_metadata: Optional[dict] = None
+
+        retriever_resources: list[RetrieverResource] = Field(..., description="retriever resources")
+        context: str = Field(..., description="context")
+
     class MessageType(Enum):
         TEXT = "text"
         FILE = "file"
@@ -140,11 +167,21 @@ class ToolInvokeMessage(BaseModel):
         VARIABLE = "variable"
         BLOB_CHUNK = "blob_chunk"
         LOG = "log"
+        RETRIEVER_RESOURCES = "retriever_resources"
 
     type: MessageType
     # TODO: pydantic will validate and construct the message one by one, until it encounters a correct type
     # we need to optimize the construction process
-    message: TextMessage | JsonMessage | VariableMessage | BlobMessage | BlobChunkMessage | LogMessage | None
+    message: (
+        TextMessage
+        | JsonMessage
+        | VariableMessage
+        | BlobMessage
+        | BlobChunkMessage
+        | LogMessage
+        | RetrieverResourceMessage
+        | None
+    )
     meta: Optional[dict] = None
 
     @field_validator("message", mode="before")
@@ -212,6 +249,7 @@ class ToolParameter(BaseModel):
         MODEL_SELECTOR = CommonParameterType.MODEL_SELECTOR.value
         APP_SELECTOR = CommonParameterType.APP_SELECTOR.value
         # TOOL_SELECTOR = CommonParameterType.TOOL_SELECTOR.value
+        ANY = CommonParameterType.ANY.value
 
     class ToolParameterForm(Enum):
         SCHEMA = "schema"  # should be set while adding tool
