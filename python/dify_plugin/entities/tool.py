@@ -17,33 +17,8 @@ from dify_plugin.core.documentation.schema_doc import docs
 from dify_plugin.core.utils.yaml_loader import load_yaml_file
 from dify_plugin.entities import I18nObject
 from dify_plugin.entities.model.message import PromptMessageTool
-from dify_plugin.entities.provider_config import ProviderConfig
-
-
-class LogMetadata(str, Enum):
-    STARTED_AT = "started_at"
-    FINISHED_AT = "finished_at"
-    ELAPSED_TIME = "elapsed_time"
-    TOTAL_PRICE = "total_price"
-    TOTAL_TOKENS = "total_tokens"
-    PROVIDER = "provider"
-    CURRENCY = "currency"
-
-
-class CommonParameterType(Enum):
-    SECRET_INPUT = "secret-input"
-    TEXT_INPUT = "text-input"
-    SELECT = "select"
-    STRING = "string"
-    NUMBER = "number"
-    FILE = "file"
-    FILES = "files"
-    BOOLEAN = "boolean"
-    APP_SELECTOR = "app-selector"
-    MODEL_SELECTOR = "model-selector"
-    # TOOL_SELECTOR = "tool-selector"
-    TOOLS_SELECTOR = "array[tools]"
-    ANY = "any"
+from dify_plugin.entities.oauth import OAuthSchema
+from dify_plugin.entities.provider_config import CommonParameterType, LogMetadata, ProviderConfig
 
 
 class ToolRuntime(BaseModel):
@@ -359,6 +334,10 @@ class ToolProviderConfiguration(BaseModel):
         default_factory=list,
         alias="credentials_for_provider",
         description="The credentials schema of the tool provider",
+    )
+    oauth_schema: Optional[OAuthSchema] = Field(
+        default=None,
+        description="The OAuth schema of the tool provider if OAuth is supported",
     )
     tools: list[ToolConfiguration] = Field(default=[], description="The tools of the tool provider")
     extra: ToolProviderConfigurationExtra
