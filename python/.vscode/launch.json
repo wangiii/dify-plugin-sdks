@@ -10,7 +10,11 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
-                "GEVENT_SUPPORT": "True"
+                "GEVENT_SUPPORT": "True",
+                "INSTALL_METHOD": "remote",
+                "REMOTE_INSTALL_HOST": "localhost",
+                "REMOTE_INSTALL_PORT": "5003",
+                "REMOTE_INSTALL_KEY": "87c2e090-2355-4c05-a1b5-5bdf5c4da832"
             },
         },
         {
