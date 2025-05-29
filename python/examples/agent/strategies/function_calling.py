@@ -23,7 +23,12 @@ from dify_plugin.entities.model.message import (
     UserPromptMessage,
 )
 from dify_plugin.entities.tool import LogMetadata, ToolInvokeMessage, ToolProviderType
-from dify_plugin.interfaces.agent import AgentModelConfig, AgentStrategy, ToolEntity, ToolInvokeMeta
+from dify_plugin.interfaces.agent import (
+    AgentModelConfig,
+    AgentStrategy,
+    ToolEntity,
+    ToolInvokeMeta,
+)
 
 
 class FunctionCallingParams(BaseModel):
@@ -35,8 +40,8 @@ class FunctionCallingParams(BaseModel):
 
 
 class FunctionCallingAgentStrategy(AgentStrategy):
-    def __init__(self, session):
-        super().__init__(session)
+    def __init__(self, runtime, session):
+        super().__init__(runtime, session)
         self.query = ""
         self.instruction = ""
 
@@ -59,6 +64,8 @@ class FunctionCallingAgentStrategy(AgentStrategy):
         self.query = query
         self.instruction = fc_params.instruction
         history_prompt_messages = fc_params.model.history_prompt_messages
+        history_prompt_messages.insert(0, self._system_prompt_message)
+        history_prompt_messages.append(self._user_prompt_message)
 
         # convert tool messages
         tools = fc_params.tools
@@ -96,7 +103,8 @@ class FunctionCallingAgentStrategy(AgentStrategy):
             )
             yield round_log
 
-            if iteration_step == max_iteration_steps:
+            # If max_iteration_steps=1, need to execute tool calls
+            if iteration_step == max_iteration_steps and max_iteration_steps > 1:
                 # the last iteration, remove all tools
                 prompt_messages_tools = []
 
@@ -195,7 +203,7 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                 data={
                     "output": response,
                     "tool_name": tool_call_names,
-                    "tool_input": {tool_call[1]: tool_call[2] for tool_call in tool_calls},
+                    "tool_input": [{"name": tool_call[1], "args": tool_call[2]} for tool_call in tool_calls],
                 },
                 metadata={
                     LogMetadata.STARTED_AT: model_started_at,
@@ -208,28 +216,30 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                 },
             )
             assistant_message = AssistantPromptMessage(content="", tool_calls=[])
-            if tool_calls:
-                assistant_message.tool_calls = [
-                    AssistantPromptMessage.ToolCall(
-                        id=tool_call[0],
-                        type="function",
-                        function=AssistantPromptMessage.ToolCall.ToolCallFunction(
-                            name=tool_call[1],
-                            arguments=json.dumps(tool_call[2], ensure_ascii=False),
-                        ),
-                    )
-                    for tool_call in tool_calls
-                ]
-            else:
+            if not tool_calls:
                 assistant_message.content = response
-
-            current_thoughts.append(assistant_message)
+                current_thoughts.append(assistant_message)
 
             final_answer += response + "\n"
 
             # call tools
             tool_responses = []
             for tool_call_id, tool_call_name, tool_call_args in tool_calls:
+                current_thoughts.append(
+                    AssistantPromptMessage(
+                        content="",
+                        tool_calls=[
+                            AssistantPromptMessage.ToolCall(
+                                id=tool_call_id,
+                                type="function",
+                                function=AssistantPromptMessage.ToolCall.ToolCallFunction(
+                                    name=tool_call_name,
+                                    arguments=json.dumps(tool_call_args, ensure_ascii=False),
+                                ),
+                            )
+                        ],
+                    )
+                )
                 tool_instance = tool_instances[tool_call_name]
                 tool_call_started_at = time.perf_counter()
                 tool_call_log = self.create_log_message(
@@ -341,8 +351,11 @@ class FunctionCallingAgentStrategy(AgentStrategy):
                     LogMetadata.TOTAL_TOKENS: current_llm_usage.total_tokens if current_llm_usage else 0,
                 },
             )
+            # If max_iteration_steps=1, need to return tool responses
+            if tool_responses and max_iteration_steps == 1:
+                for resp in tool_responses:
+                    yield self.create_text_message(resp["tool_response"])
             iteration_step += 1
-
         yield self.create_json_message(
             {
                 "execution_metadata": {
@@ -452,8 +465,6 @@ class FunctionCallingAgentStrategy(AgentStrategy):
         current_thoughts: list[PromptMessage],
         history_prompt_messages: list[PromptMessage],
     ) -> list[PromptMessage]:
-        history_prompt_messages.insert(0, self._system_prompt_message)
-        history_prompt_messages.append(self._user_prompt_message)
         prompt_messages = [
             *history_prompt_messages,
             *current_thoughts,
